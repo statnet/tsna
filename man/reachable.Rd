@@ -25,27 +25,25 @@ numeric vector giving the set of initial vertex.ids to start from
 End of the time range to search to
 }
   \item{per.step.depth}{
- How many steps (default=1) to search per timestep
+ How many steps (default=1) to search per unit of time.
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+The default value of \code{per.step.depth=Inf} is equivilent to assuming that the `process' takes no time to travel along vertices
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+A numeric vector of vertex.ids reachable from the initial set of vertex.id by `traveling' forward in time along active vertices and edges subject to bounding paramters.
 }
-\references{
-This is a pure R implementation, probably very slow. 
-}
+
 \author{
 skyebend
 }
 \note{
-%%  ~~further notes~~
+This is a pure R implementation, probably very slow.
+
+This function could be ill-defined when using non-Inf \code{per.step.depth} with networks with instantaneous (onset=terminus) spells as it will treat elements active at time t as active until the next change in the network. 
+
+TODO:  should be able to specifiy edge weight attribute to be included in time calcualtions. 
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
