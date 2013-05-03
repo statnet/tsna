@@ -1,0 +1,14 @@
+Package: tsna
+Version: 0.1.0
+Date: 2013-03-05
+Title: Tools for Temporal Social Network Analysis
+Type: Package
+Authors@R: c(
+           person("Skye", "Bender-deMoll", role=c("aut","cre"), email="skyebend@uw.edu"))
+Depends: network (>= 1.7.2), networkDynamic,statnet.common
+Enhances: networkDynamic 
+Suggests: testthat
+Description: SNA tools for networks with vertex, edge, and attribute dynamics. "tsna" is a part of the "statnet" suite of packages for network analysis.
+License: GPL-3
+LazyLoad: yes
+URL: http://statnet.org
