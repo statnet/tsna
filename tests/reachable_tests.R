@@ -39,16 +39,33 @@ expect_equal(forward.reachable(test,v=5,per.step.depth=Inf),c(5,4,6,3,7,2,8,1,9,
 # test on network with bounded time
 test<-linegraph
 activate.edges(test,onset=0:10,terminus=1:11)
-expect_equal(forward.reachable(test,v=5,start=4,end=6),c(5,6,7,8))
-expect_equal(forward.reachable(test,v=1,end=6),c(5,6,7,8))
+expect_equal(forward.reachable(test,v=5,start=4,end=6),c(5,6,7))
+expect_equal(forward.reachable(test,v=1,end=6,per.step.depth=1),c(1,2,3,4,5,6,7))
 
 
 # test with finite depthtest<-linegraph
 test<-linegraph
 activate.edges(test,onset=0,terminus=10)
-expect_error(forward.reachable(test,v=1,per.step.depth=2,end=3),'currently only supports per.step.depth arguments of 1 and Inf')
+expect_equal(forward.reachable(test,v=1,per.step.depth=2,end=3),1:7)
+expect_equal(forward.reachable(test,v=1,per.step.depth=1.5,end=3),1:5)
 
-# test on network with two components
+test_that("test on network with two components",{
+  test<-network.initialize(10)
+  activate.vertices(test)
+  test[1:5,5:1]<-1
+  test[6:10,10:6]<-1
+  expect_equal(forward.reachable(test,v=1),1:5)
+  expect_equal(forward.reachable(test,v=6),6:10)
+})
+
+
+test_that("network with at spell durations",{
+  test<-linegraph
+  activate.edges(test,onset=0:10,terminus=0:10)
+  expect_equal(forward.reachable(test,v=5,per.step.depth=Inf),5:10)
+  expect_equal(forward.reachable(test,v=10,per.step.depth=Inf),10)
+  
+})
 
 
 # test on network with net.obs.period set

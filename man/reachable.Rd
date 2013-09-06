@@ -5,10 +5,10 @@
 Find the set of vertices reachable from a given set using only paths moving forward in time
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Does a breadth-first search from the specified set of vertices, respecting the direction and timing of edges. TODO: vertex activity.
 }
 \usage{
-forward.reachable(nd, v, start = NULL, end = NULL, per.step.depth = 1)
+forward.reachable(nd, v, start = NULL, end = NULL, per.step.depth = Inf)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
