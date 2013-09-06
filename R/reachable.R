@@ -18,30 +18,27 @@ forward.reachable<-function(nd,v,start=NULL,end=NULL,per.step.depth=Inf ){
     times <-c(0,Inf)
   }
   if(is.null(start)){
-    start<-min(times)
+    #start<-min(times)
+    start<--Inf
   }
   if(is.null(end)){
-    end<-max(times)
+    #end<-max(times)
+    end<-Inf
   }
-  # trim times to desired range
-  times<-times[times>=start]
-  times<-times[times<=end]
+  # trim times to desired range, making sure to include start and end
+  times<-unique(c(start,times[times>=start]))
+  times<-unique(c(times[times<=end],end))
   
-  
+  #TODO: could probably skip all times earlier that the active times in v?
   reached <-v
-  for(t in 1:length(times)){
+  for(t in 1:(length(times)-1)){
     # BFS to depth rate
-    # find out-connected vertices
-    ngs<-unlist(unique(sapply(reached,function(i){get.neighborhood.active(nd,v=i,at=times[t],type='out')})))
-    new<-setdiff(ngs,reached)
-    reached<-c(reached,new)
+    new<-reached
     # how long until next change?
-    duration<-0
-    if(t<length(times)){
-      duration<-times[t+1]-times[t]
-    }
+    duration<-times[t+1]-times[t]
+    
     # remove any in the set we've already visited
-    if (duration>0 &length(new)>0){
+    if (duration>0){
       d<-1 # we are assuming all geodesic steps count as 1, harder if we calc per edge..
       # keep searching until we reach bounds or run out of verts to find
       while(d <= per.step.depth*duration){
