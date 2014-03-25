@@ -123,6 +123,7 @@ forward.reachable2<-function(nd,v,start=NULL,end=NULL,interval='changes',per.ste
 # temporal search is bounded by 'start' and 'end' times. 
 
 # TODO: add param for a set of alters and option to stop when they have been reached?
+# TODO: add option to make direct of edge evaluation explicit?
 
 paths.fwd.earliest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0){
   
@@ -162,7 +163,7 @@ paths.fwd.earliest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=
     # have to translate index found back
     u<-which(toCheck)[minToCheck]
     toCheck[u]<-FALSE
-    if (dist[u]>= end){
+    if (dist[u]>= end){  #TODO: DANGER DISTANCE IS NOT ABSOLUTE TIME  should be end-start
       break;  # no more vertices are reachable from v within time range
     }
     
@@ -215,12 +216,10 @@ paths.bkwd.latest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0
     # TODO: use obs.period if it exists
     changes<-get.change.times(nd)
     if(length(changes)>0){
-      ned<-max(changes)
+      end<-max(changes)
       # message("'start' parameter was not specified, using value first network change '",start)
     } else {
-      # can't use inf, because all distances will be inf
-      start<-0
-      message("'end' time parameter for paths was not specified, no network changes found,  using end=",end)
+      stop("'end' time parameter for paths was not specified, no network changes found")
     }
   }
   if (missing(start)){
@@ -241,11 +240,12 @@ paths.bkwd.latest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0
     # have to translate index found back
     u<-which(toCheck)[minToCheck]
     toCheck[u]<-FALSE
-    if (dist[u]>= end){
+    if (dist[u]>= end-start){
       break;  # no more vertices are reachable from v within time range
     }
     
-    nghE<-get.edgeIDs(nd,v=u,neighborhood='out') # check neighbors of u
+    # we are going backwards, so use 'in' edges instead of 'out'
+    nghE<-get.edgeIDs(nd,v=u,neighborhood='in') # check neighbors of u
     for (e in nghE){
       w <- ifelse(nd$mel[[e]]$inl==u,nd$mel[[e]]$outl,nd$mel[[e]]$inl)   
       # we ignore graph hop time
@@ -261,9 +261,11 @@ paths.bkwd.latest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0
       } else {
         # can't use spells.hit because it returns earliest spell, not latest
         splIndex<- -1
-        for (s in nrow(haystack):1) {
-          if (spells.overlap(c(start+dist[u],end), spls[s, ])) {
-            return(s)
+        # loop backwards over spells so we find latest first
+        for (s in nrow(spls):1) {
+          if (spells.overlap(c(start,end-dist[u]), spls[s, ])) {
+            splIndex<-s
+            break
           }
         }
         
@@ -271,7 +273,7 @@ paths.bkwd.latest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0
           dist_u_w<- Inf  # vertex is never reachable in the future / within time bound
         } else {
           # otherwise distance is the later of dist[u] or the terminus of the edge
-          dist_u_w<-max(0,(spls[splIndex,2]-end)-dist[u]+graph.step.time)
+          dist_u_w<-max(0,(spls[splIndex,2]-end)*-1-dist[u]+graph.step.time)
         }
       }
       dist_v_w <-dist[u]+dist_u_w 
@@ -283,32 +285,23 @@ paths.bkwd.latest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0
   }
   
   # TODO: we are measuring distance backwards from the end
+  # so need to flip distance measure
   
   return(list(distance=dist,previous=previous))
 }
 
-create_tree<-function(results){
-  distance<-results$distance
-  previous<-results$previous
-  vids<-which(distance<Inf)
-  n<-length(vids)
-  tree<-network.initialize(n,directed=TRUE)
-  network.vertex.names(tree)<-vids
-  for(v in seq_along(vids)){
-    
-    if(previous[vids[v]]!=0){ # source vertex will have previous id of 0, so out of range
-      fromId<-match(previous[vids[v]],vids)
-      add.edges.active(tree,tail=fromId,head=v,onset=distance[vids[v]],terminus=Inf)
-    }
-  }
-  return(tree)
-}
 
 # compute the sets of vertices reachable from each vertex on the graph
-reachable_sets<-function(nd,direction='fwd'){
-  sizes<-sapply(seq_len(network.size(nd)),function(v){
+reachable_set_sizes<-function(nd,direction='fwd',sample=FALSE){
+  if (is.numeric(sample)){
+    seeds<-sample.int(network.size(nd),size=sample)
+  } else {
+    seeds<-seq_len(network.size(nd))
+  }
+  
+  sizes<-sapply(seeds,function(v){
     sum(paths.fwd.earliest(nd,v=v)$distance<Inf)
     })
-  return(size)
+  return(sizes)
 }
 

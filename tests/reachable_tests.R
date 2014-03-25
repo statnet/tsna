@@ -236,6 +236,18 @@ test_that("graph step time param works",{
   
 })
 
+# ----- tests for paths.bkwd.latest
 
+# reverse-ordered edge spells
+test<-network.initialize(10)
+add.edges(test,tail=1:9,head=2:10)
+activate.edges(test,onset=10:0,terminus=11:1)
+paths.bkwd.latest(test,v=5)
+
+# forward-ordred edge spells
+test<-network.initialize(10)
+add.edges(test,tail=1:9,head=2:10)
+activate.edges(test,onset=0:10,terminus=1:11)
+paths.bkwd.latest(test,v=10)
 
              

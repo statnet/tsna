@@ -4,6 +4,8 @@ export(
   forward.reachable,
   forward.reachable2,
   paths.fwd.earliest,
+  paths.bkwd.latest,
   create_tree,
-  reachable_sets
+  plotpath,
+  reachable_set_sizes
   )
