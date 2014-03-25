@@ -168,32 +168,13 @@ test_that("path in large base network matches",{
   expect_equal(sum(fwdDFS$distance<Inf),772) # should find 772 vertices, because that is what we found with BFS search
 })
 
-moodyTestNet<-network.initialize(16,directed=FALSE)
-tel<-matrix(c(674,701,1,9,
-              214,247,1,11,
-              621,651,1,12,
-              583,615,1,16,
-              749,793,11,8,
-              719,745,8,13,
-              712,739,13,5,
-              634,660,13,3,
-              769,795,13,7,
-              453,479,13,4,
-              494,524,13,2,
-              224,256,7,10,
-              40,72,10,4,
-              665,692,4,14,
-              709,740,2,15,
-              575,599,2,16,
-              748,782,4,16,
-              701,733,16,6),
-            ncol=4,byrow=TRUE)
-moodyTestNet<-networkDynamic(moodyTestNet,edge.spells=tel)
+data(moodyContactSim)
+
 
 # tests with moody's example network
 test_that("test of moody's example network",{
  
-  paths<-paths.fwd.earliest(moodyTestNet,v=10)
+  paths<-paths.fwd.earliest(moodyContactSim,v=10)
   
   expect_equal(paths$distance,c(543, 454, 594,   0, 672, 661, 184, 679, 634,   0, 709, 581, 413, 625, 669, 535))
   expect_equal(paths$previous,c(16,13,13,10,13,16,10,13,1,0,8,1,4,4,2,2))
@@ -202,8 +183,8 @@ test_that("test of moody's example network",{
   # tree<-create_tree(paths)
   # pdf(file="MoodyTestNetTree.pdf",width=10,height=5)
   # par(mfcol=c(1,2))
-  # plot(moodyTestNet,displaylabels=TRUE,
-  #      edge.label=lapply(get.edge.activity(moodyTestNet),
+  # plot(moodyContactSim,displaylabels=TRUE,
+  #      edge.label=lapply(get.edge.activity(moodyContactSim),
   #                         function(spl){
   #                           paste("(",spl[,1],"-",spl[,2],")",sep=
   #                                   ''
