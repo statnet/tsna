@@ -49,61 +49,6 @@ TODO:  should be able to specifiy edge weight attribute to be included in time c
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+See also \code{\link{paths.fwd.earliest}} for a dramatically faster implementation
 }
-\examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (nd, v, start = NULL, end = NULL, per.step.depth = 1) 
-{
-    if (!is.network(nd)) {
-        stop("the first argument to forward.reachble must be a network object")
-    }
-    if (!is.numeric(v)) {
-        stop("v argument must be vector of valid numeric vertex ids")
-    }
-    if (max(v) > network.size(nd) | min(v) < 1) {
-        stop("v argument must be vector of valid numeric vertex ids")
-    }
-    times <- get.change.times(nd, vertex.attribute.activity = FALSE, 
-        edge.attribute.activity = FALSE, network.attribute.activity = FALSE)
-    if (length(times) == 0) {
-        times <- 0
-    }
-    if (is.null(start)) {
-        start <- min(times)
-    }
-    if (is.null(end)) {
-        end <- max(times)
-    }
-    times <- times[times >= start]
-    times <- times[times <= end]
-    reached <- v
-    for (t in times) {
-        ngs <- get.neighborhood.active(nd, v = v, at = t, type = "out")
-        new <- setdiff(ngs, reached)
-        reached <- c(reached, new)
-        if (per.step.depth > 1 & length(new) > 0) {
-            d <- 1
-            while (d <= per.step.depth) {
-                ngs <- get.neighborhood.active(nd, v = new, at = t, 
-                  type = "out")
-                new <- setdiff(ngs, reached)
-                if (length(new) == 0) {
-                  break
-                }
-                reached <- c(reached, new)
-                d <- d + 1
-            }
-        }
-    }
-    return(v)
-  }
-}
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\examples{}

@@ -1,3 +1,9 @@
 #useDynLib(tsna)
-
-export(forward.reachable)
+import(statnet.common,network,networkDynamic)
+export(
+  forward.reachable,
+  forward.reachable2,
+  paths.fwd.earliest,
+  create_tree,
+  reachable_sets
+  )
