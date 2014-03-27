@@ -7,5 +7,8 @@ export(
   paths.bkwd.latest,
   create_tree,
   plotpath,
-  reachable_set_sizes
+  reachable_set_sizes,
+  edge_event_density,
+  dyad_duration_density,
+  edge_duration_density
   )
