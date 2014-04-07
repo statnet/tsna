@@ -10,5 +10,6 @@ export(
   reachable_set_sizes,
   edge_event_density,
   dyad_duration_density,
-  edge_duration_density
+  edge_duration_density,
+  durations
   )

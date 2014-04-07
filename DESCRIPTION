@@ -11,7 +11,7 @@ Authors@R: c(
 Depends: network (>= 1.9), networkDynamic (>= 0.6.3), R (>= 3.0)
 Imports: statnet.common
 Suggests: networkDynamicData, testthat
-Description: Temporal SNA tools for continuous- and discrete-time longitudinal networks having vertex, edge, and attribute dynamics stored in the networkDynamic format. 
+Description: Temporal SNA tools for continuous- and discrete-time longitudinal networks having vertex, edge, and attribute dynamics stored in the networkDynamic format. This work was supported by grant R01HD68395 from the National Institute of Health.
 License: GPL-3
 LazyLoad: yes
 URL: http://statnet.org
