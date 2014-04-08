@@ -2,8 +2,8 @@
 import(statnet.common,network,networkDynamic)
 export(
   forward.reachable,
-  forward.reachable2,
   paths.fwd.earliest,
+  paths.fwd.latest,
   paths.bkwd.latest,
   create_tree,
   plotpath,

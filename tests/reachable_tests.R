@@ -236,18 +236,102 @@ test_that("graph step time param works",{
   
 })
 
-# ----- tests for paths.bkwd.latest
+
+# test for a later-leaving path arriving earlier
+paths.fwd.earliest(test,v=1,start=0)
+
+# ----- tests for paths.bkwd.latest -----
+
+
 
 # reverse-ordered edge spells
 test<-network.initialize(10)
 add.edges(test,tail=1:9,head=2:10)
 activate.edges(test,onset=10:0,terminus=11:1)
-paths.bkwd.latest(test,v=5)
+results<-paths.bkwd.latest(test,v=5)
+expect_equal(results$distance,c(Inf, Inf, Inf,   3,   0, Inf, Inf, Inf, Inf, Inf))
+expect_equal(results$previous,c(0, 0, 0, 5, 0, 0, 0, 0, 0, 0))
 
 # forward-ordred edge spells
 test<-network.initialize(10)
 add.edges(test,tail=1:9,head=2:10)
 activate.edges(test,onset=0:10,terminus=1:11)
-paths.bkwd.latest(test,v=10)
+results<-paths.bkwd.latest(test,v=10)
+expect_equal(results$distance,c(8,7,6,5,4,3,2,1,0,0))
+expect_equal(results$previous,c(2,3,4,5,6,7,8,9,10,0))
 
+# moody sim
+results<-paths.bkwd.latest(moodyContactSim,v=10)
+expect_equal(results$distance,c(Inf, Inf, Inf, 723, Inf, Inf, 539, Inf, Inf,   0, Inf, Inf, Inf, Inf, Inf, Inf))
+expect_equal(results$previous,c(0,  0,  0, 10,  0,  0, 10,  0,  0,  0,  0,  0,  0,  0,  0,  0))
+
+results<-paths.bkwd.latest(moodyContactSim,v=16)
+expect_equal(results$distance,c(180, 196, Inf,  13, Inf,  62, Inf, Inf, Inf, 723, 548, Inf, 271, 103, Inf,   0))
+expect_equal(results$previous,c(16, 16,  0, 16,  0, 16,  0,  0,  0,  4,  1,  0,  2,  4,  0,  0))
+
+
+# --------- tests for paths.fwd.latest ---------
+# two paths, does it 
+test<-network.initialize(2)
+add.edges.active(test,tail=1,head=2,onset=0,terminus=1)
+activate.edges(test,onset=2,terminus=3)
+paths.fwd.earliest(test,v=2,start=0,end=3)
+paths.fwd.latest(test,v=2,start=0,end=3)
+
+
+# create a network in which the latest-starting path and
+# the latest ending path are not the same
+test<-network.initialize(5,direct=FALSE)
+add.edges(test,tail=c(1,1,2,4),head=c(3,2,4,3))
+activate.edges(test,at=c(1,2,3,4))
+plot(test,displaylabels=TRUE,edge.label=get.edge.activity(test))
+# latest starting path v1 to v4 should be at time 2 (via edge 2)
+# latest ending path v1 to v4 should be at time 4 (via edge 3)
+paths.fwd.latest(test,v=1,start=0,end=4)
+
+
+# create a network in which the latest-starting path and
+# the latest ending path are not the same
+test<-network.initialize(5,direct=FALSE)
+add.edges(test,tail=c(1,1,2,4),head=c(3,2,4,3))
+activate.edges(test,at=c(1,2,3,4))
+plot(test,displaylabels=TRUE,edge.label=get.edge.activity(test))
+paths.fwd.earliest(test,v=1,start=0)
+paths.fwd.latest(test,v=1,start=0)
+
+# create a network in which an early-leaving path arrives latest
+# the latest path from v1 to v3 should arrive at t4 via v4
+test<-network.initialize(4,directed=FALSE)
+add.edges(test,tail=c(1,1,2,4),head=c(3,2,4,3))
+activate.edges(test,at=c(2,1,3,4))
+plot(test,displaylabels=TRUE,edge.label=get.edge.activity(test))
+
+
+
+# the network below illustrates the various possible paths
+# tests ability to distinguish paths
+# howver, it is not a great complex test case since there are no
+# indirect paths 
+paths5<-network.initialize(7)
+network.vertex.names(paths5)<-LETTERS[1:7]
+add.edges.active(paths5,tail=c(1,2),head=c(2,7),onset=c(1,4),terminus=c(2,5))
+add.edges.active(paths5,tail=c(1,3),head=c(3,7),onset=c(0,6),terminus=c(2,7))
+add.edges.active(paths5,tail=c(1,4),head=c(4,7),onset=c(4,5),terminus=c(5,6))
+add.edges.active(paths5,tail=c(1,5),head=c(5,7),onset=c(6,9),terminus=c(7,10))
+add.edges.active(paths5,tail=c(1,6),head=c(6,7),onset=c(4,10),terminus=c(5,11))
+plot(paths5, mode='circle',displaylabels=TRUE,edge.label=get.edge.activity(paths5),edge.label.col='blue',edge.label.cex=0.6)
+as.data.frame(paths5)
+# FORWARDS
+# earliest leaving ACG @ 6
+# earliest arriving ABG @ 4
+res2<-paths.fwd.earliest(paths5,v=1)
+expect_equal(res2$distance[7],4)
+# latest leaving AEG @ 10
+
+
+# quickest ADG @ 5
+# latest ariving  AFG @ 11
+
+#BACKWARDS
+paths.bkwd.latest(paths5,v=7)
              
