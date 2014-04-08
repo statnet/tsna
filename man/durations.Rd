@@ -8,7 +8,7 @@ compute observed activity durations or event counts for edges
 Computes observed activity durations or event counts for edges, aggregating at the edges, spell, or dyads level.  
 }
 \usage{
-durations(nd, mode = c("duration", "counts"), subject = c("spells", "edges", "dyads"),
+durations(nd, mode = c("duration", "counts"), subject = c("edges", "spells", "dyads"),
           e = seq_along(nd$mel), start = NULL, end = NULL, active.default = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
