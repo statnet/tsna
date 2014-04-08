@@ -1,7 +1,7 @@
 # utility methods for tsna stuff
 
 # create a tree network from the results of a path search
-create_tree<-function(path.results){
+createPaths<-function(path.results){
   distance<-path.results$distance
   previous<-path.results$previous
   vids<-which(distance<Inf)
@@ -20,11 +20,11 @@ create_tree<-function(path.results){
 
 # plot a network with a hilited path
 # and some sensible defaults
-plotpath<-function(nd,path.results,path.col="#FF000055",...){
+plotPaths<-function(nd,path.results,path.col="#FF000055",...){
   # plot the network normally and save coords
   coords<-plot.network(nd,...)
   # create another network that is the tree
-  tree<-create_tree(path.results)
+  tree<-createPaths(path.results)
   # get an appropriate coordinate subset
   treeCoords<-coords[which(path.results$distance<Inf),]
   # get a set of onset times as edge labels
@@ -39,4 +39,21 @@ plotpath<-function(nd,path.results,path.col="#FF000055",...){
                new=FALSE,vertex.cex=0,
                jitter=FALSE)
   invisible(coords)
+}
+
+# helper function to determine an appropriate finite start and
+# end range for the network using net.obs.period if it exists
+get_bounds<-function(nd){
+  bounds<-c(0,1)
+  obs<-nd%n%'net.obs.period'
+  if (!is.null(obs)){
+    bounds<-range(unlist(obs$observations))
+  } else {
+    times<-get.change.times(nd)
+    # its possible that network has only INFs
+    if(length(times)>0){
+      bounds<-range(times)
+    }
+  }
+  return(bounds)
 }

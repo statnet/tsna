@@ -5,25 +5,55 @@
 # OR  fraction of time existing ties are active?
 
 
+# general wrapper function
+tEdgeDensity<-function(nd,mode=c('duration','event'),agg.unit=c('edge','dyad'),active.default=TRUE){
+  if (!is.networkDynamic(nd)){
+    stop('tEdgeDensity requires that its first argument is a networkDynamic object')
+  }
+  mode<-match.arg(mode)
+  agg.unit<-match.arg(agg.unit)
+  bounds<-get_bounds(nd)
+  # trap some edge cases
+  if (network.edgecount(nd)==0 | network.size(nd)==0){
+    return(0)
+  }
+  
+  # if we are doing durations..
+  if (mode=='duration'){
+    spls<-as.data.frame.networkDynamic(nd,start=bounds[1],end=bounds[2],active.default=active.default)
+    total_dur<-sum(spls$duration)
+    if (agg.unit=='edge'){ # at the edge level
+      return(total_dur/(network.edgecount(nd)*(bounds[2]-bounds[1])))
+    }
+    if (agg.unit=='dyad'){ # at the dyad level
+      # total number of possible dyads
+      num_dyads<-network.dyadcount(nd)
+      # correct for self loops
+      if (has.loops(nd)){
+        num_dyads<-num_dyads+network.size(nd)
+      }
+      return(total_dur/(num_dyads*(bounds[2]-bounds[1])))
+    }
+    
+  } else if (mode=='event') {  # we are doing event counts
+      if (agg.unit=='edge'){
+      spls<-get.edge.activity(nd)
+      nulls<-sapply(spls, is.null)
+      counts<-sapply(spls[!nulls], nrow)
+      numSpells<-sum(counts)
+      # TODO: don't count always active or always inactive because they don't change
+      return(numSpells/(network.edgecount(nd)*bounds[2]-bounds[1]))
+    } 
+  }
+  # if we get here, something is wrong
+  stop('tEdgeDensity is not yet implemented for ',agg.unit,' ',mode,'.')
+}
+
+
 # TODO: should self-loops be counted? Only if loops=TRUE?
 # TODO: what about multiplex networks?
 
-# helper function to determine an appropriate finite start and
-# end range for the network using net.obs.period if it exists
-get_bounds<-function(nd){
-  bounds<-c(0,1)
-  obs<-nd%n%'net.obs.period'
-  if (!is.null(obs)){
-    bounds<-range(unlist(obs$observations))
-  } else {
-    times<-get.change.times(nd)
-    # its possible that network has only INFs
-    if(length(times)>0){
-      bounds<-range(times)
-    }
-  }
-  return(bounds)
-}
+
 
 
 # how many events are there per time step within the graph time period

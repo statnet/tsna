@@ -1,8 +1,5 @@
-\name{edge_event_density}
-\alias{density}
-\alias{edge_event_density}
-\alias{dyad_duration_density}
-\alias{edge_duration_density}
+\name{temporal density}
+\alias{tEdgeDensity}
 
 \title{
 Functions to compute temporal density-related measures on dynamic networks
@@ -11,14 +8,19 @@ Functions to compute temporal density-related measures on dynamic networks
 These functions provide various generalizations of the concept of "network density" from traditional SNA to \code{networkDynamic} objects
 }
 \usage{
-edge_event_density(nd)
-dyad_duration_density(nd,active.default=TRUE)
-edge_duration_density(nd,active.default=TRUE)
+tEdgeDensity(nd,mode=c('duration','event'),
+              agg.unit=c('edge','dyad'),active.default=TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{nd}{
  a \code{\link{networkDynamic}} object to evaluate density on
+  }
+  \item{mode}{
+  option indicating if \code{'duration'} of edge spells should be considered or only the \code{'event'} count (for networks in which events have zero-durations)
+  }
+  \item{agg.unit}{
+  option indicating how to calculate the possible observable time: \code{'edge'} only counts existing edges \code{'dyad'} counts all possible dyads. 
   }
   \item{active.default}{
   logical, default TRUE.  should edges without explicit timing information be considered active by default?
@@ -58,6 +60,6 @@ These are experimental functions, names and arguments still subject to change.  
 \examples{
 require(networkDynamicData)
 data(hospital_contact)
-dyad_duration_density(hospital)
+tEdgeDensity(hospital)
 }
 

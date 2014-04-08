@@ -1,5 +1,5 @@
-\name{reachable_set_sizes}
-\alias{reachable_set_sizes}
+\name{tReachableSetSizes}
+\alias{tReachableSetSizes}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 computes sizes of temporally reachable sets in a dynamicNetwork
@@ -8,7 +8,7 @@ computes sizes of temporally reachable sets in a dynamicNetwork
 computes sizes of temporally reachable sets in a dynamicNetwork, using either a full census or sample of starting vertices of the specified size
 }
 \usage{
-reachable_set_sizes(nd, direction = "fwd", sample = FALSE)
+tReachableSetSizes(nd, direction = "fwd", sample = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -23,7 +23,7 @@ reachable_set_sizes(nd, direction = "fwd", sample = FALSE)
 }
 }
 \details{
-Calls \code{link{paths.fwd.earliest}} on with each starting vertex to determine the sizes of the sets of vertices that are reachable. If sample is set to a numeric value, it will only sample that many vertices instead of doing the (expensive) full census
+Calls \code{link{tPathDistance}} on with each starting vertex to determine the sizes of the sets of vertices that are reachable. If sample is set to a numeric value, it will only sample that many vertices instead of doing the (expensive) full census
 }
 \value{
 a vector giving the sizes of the set of vertices reachable from each seed vertex. 
@@ -39,12 +39,12 @@ Needs additional options for time range specification, implementation of backwar
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-See also as \code{\link{paths.fwd.earliest}}
+See also as \code{\link{tPathDistance}}
 }
 \examples{
 data(moodyContactSim)
-reachable_set_sizes(moodyContactSim)
+tReachableSetSizes(moodyContactSim)
 
 # only sample 3 paths
-reachable_set_sizes(moodyContactSim,sample=3)
+tReachableSetSizes(moodyContactSim,sample=3)
 }
