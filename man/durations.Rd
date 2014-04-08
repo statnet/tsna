@@ -1,5 +1,6 @@
-\name{durations}
-\alias{durations}
+\name{duration}
+\alias{duration}
+\alias{tEdgeDuration}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 compute observed activity durations or event counts for edges
@@ -8,7 +9,7 @@ compute observed activity durations or event counts for edges
 Computes observed activity durations or event counts for edges, aggregating at the edges, spell, or dyads level.  
 }
 \usage{
-durations(nd, mode = c("duration", "counts"), subject = c("edges", "spells", "dyads"),
+tEdgeDuration(nd, mode = c("duration", "counts"), subject = c("edges", "spells", "dyads"),
           e = seq_along(nd$mel), start = NULL, end = NULL, active.default = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -61,7 +62,7 @@ See also \code{\link{as.data.frame.networkDynamic}}
 \examples{
 require(networkDynamicData)
 data(hospital_contact)
-summary(durations(hospital,subject='edges'))
-summary(durations(hospital,mode='counts',subject='edges'))
+summary(tEdgeDuration(hospital,subject='edges'))
+summary(tEdgeDuration(hospital,mode='counts',subject='edges'))
 }
 

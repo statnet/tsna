@@ -1,15 +1,11 @@
 #useDynLib(tsna)
 import(statnet.common,network,networkDynamic)
 export(
-  forward.reachable,
-  paths.fwd.earliest,
-  paths.fwd.latest,
-  paths.bkwd.latest,
-  create_tree,
-  plotpath,
-  reachable_set_sizes,
-  edge_event_density,
-  dyad_duration_density,
-  edge_duration_density,
-  durations
+  tPathDistance,
+  tEdgeDensity,
+  tEdgeDuration,
+  tReachableSetSizes,
+  createPaths,
+  plotPaths,
+  forward.reachable
   )

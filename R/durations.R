@@ -1,6 +1,6 @@
 # functions for calculating and estimating edge durations
 
-durations<-function(nd,mode=c('duration','counts'),subject=c('edges','spells','dyads'),e=seq_along(nd$mel), start=NULL, end=NULL,active.default=TRUE){
+tEdgeDuration<-function(nd,mode=c('duration','counts'),subject=c('edges','spells','dyads'),e=seq_along(nd$mel), start=NULL, end=NULL,active.default=TRUE){
   del<-as.data.frame.networkDynamic(nd,e=e,start=start,end=end,active.default=active.default)
   # if looking per edge, group by edge id
   subject<-match.arg(subject)
