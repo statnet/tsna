@@ -114,4 +114,12 @@ expect_equal(length(setdiff(fwdFound,epiFound)),0)
 # library(microbenchmark)
 # timing<-microbenchmark(fiveRuns1(),fiveRuns2(),times=1)
 
+# ------ tests for the reachable set sizes ----
+
+data(moodyContactSim)
+expect_equal(tReachableSetSizes(moodyContactSim),c(10, 14, 6, 16, 5, 3, 3, 5, 2, 16, 10, 3, 15, 3, 2, 8))
+
+expect_equal(tReachableSetSizes(moodyContactSim,direction='bkwd'),c(9, 8, 5, 9, 7, 8, 8, 9, 9, 3, 9, 8, 8, 4, 8, 9))
+
+
 

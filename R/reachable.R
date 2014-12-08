@@ -1,4 +1,11 @@
-
+#  Part of the statnet package, http://statnetproject.org
+#
+#  This software is distributed under the GPL-3 license.  It is free,
+#  open source, and has the attribution requirements (GPL Section 7) in
+#    http://statnetproject.org/attribution
+#
+#  Copyright 2014 the statnet development team
+######################################################################
 
 # find the set of vertices reachable from seed vertex within time range
 
@@ -121,20 +128,33 @@ forward.reachable2<-function(nd,v,start=NULL,end=NULL,interval='changes',per.ste
 }
 
 
-
+# compute fraction of vertices in a network than can be reached by each vertex
+tReach<-function(nd,direction=c('fwd','bkwd')){
+  sizes<-tReachableSetSizes(nd,direction=direction)
+  return(sizes/network.size(nd))
+}
 
 
 # compute the sets of vertices reachable from each vertex on the graph
-tReachableSetSizes<-function(nd,direction='fwd',sample=FALSE){
+tReachableSetSizes<-function(nd,direction=c('fwd','bkwd'),sample=FALSE){
   if (is.numeric(sample)){
     seeds<-sample.int(network.size(nd),size=sample)
   } else {
     seeds<-seq_len(network.size(nd))
   }
-  
+  if (!is.networkDynamic(nd)){
+    stop("the first argument must be a networkDynamic object in order to calculate reachable set sizes")
+  }
+  direction<-match.arg(direction)
+  constraint<-'earliest.arrive'
+  if (direction=='bkwd'){
+    constraint<-'latest.depart'
+  }
   sizes<-sapply(seeds,function(v){
-    sum(paths.fwd.earliest(nd,v=v)$distance<Inf)
+    sum(tPathDistance(nd,v=v,direction=direction,constraint=constraint,)$distance<Inf)
     })
   return(sizes)
 }
+
+
 

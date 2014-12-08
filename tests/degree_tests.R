@@ -1,6 +1,7 @@
 # tests for temporal degree functions
 library(tsna)
 library(testthat)
+library(sna)
 
 data(windsurfers)
 tDegree(windsurfers)
@@ -55,29 +56,29 @@ tSnaDegree<-function(nd,start, end, time.interval=1,cmode=c('freeman','indegree'
 }
 
 # comparison with vertex dynamics
-expect_equal(tDegree(windsurfers),tSnaDegree(windsurfers))
+expect_equal(tDegree(windsurfers),tSnaDegree(windsurfers),check.attributes=FALSE)
 
 # comparison with directed network
-expect_equal(tDegree(cls33_10_16_96),tSnaDegree(cls33_10_16_96))
+expect_equal(tDegree(cls33_10_16_96),tSnaDegree(cls33_10_16_96),check.attributes=FALSE)
 
-expect_equal(tDegree(cls33_10_16_96,cmode='indegree'),tSnaDegree(cls33_10_16_96,cmode='indegree'))
-expect_equal(tDegree(cls33_10_16_96,cmode='outdegree'),tSnaDegree(cls33_10_16_96,cmode='outdegree'))
+expect_equal(tDegree(cls33_10_16_96,cmode='indegree'),tSnaDegree(cls33_10_16_96,cmode='indegree'),check.attributes=FALSE)
+expect_equal(tDegree(cls33_10_16_96,cmode='outdegree'),tSnaDegree(cls33_10_16_96,cmode='outdegree'),check.attributes=FALSE)
 
 # comparison with subset of undirected network
-expect_equal(tDegree(base,start=0,end=103,time.interval = 10),tSnaDegree(base,start=0,end=103,time.interval = 10))
+expect_equal(tDegree(base,start=0,end=103,time.interval = 10),tSnaDegree(base,start=0,end=103,time.interval = 10),check.attributes=FALSE)
 
 # comparison with loops
 loopy<-network.initialize(5,loops = TRUE)
 add.edges.active(loopy,1,1,onset=0,terminus=1)
 add.edges.active(loopy,2,3,onset=0,terminus=1)
-expect_equal(tDegree(loopy),tSnaDegree(loopy))
+expect_equal(tDegree(loopy),tSnaDegree(loopy),check.attributes=FALSE)
 
 # comparison with undeclared loops
 loopy2<-network.initialize(5,loops = FALSE)
 add.edges.active(loopy2,1,1,onset=0,terminus=1)
 add.edges.active(loopy2,2,3,onset=0,terminus=1)
 # this gives error because sna version doesn't know to calculate the diagonal
-#expect_equal(tDegree(loopy2),tSnaDegree(loopy2),info = 'network with undeclared loops')
+#expect_equal(tDegree(loopy2),tSnaDegree(loopy2),info = 'network with undeclared loops',check.attributes=FALSE)
 
 
 # evaluation on a resonably sized network using start end and time interval

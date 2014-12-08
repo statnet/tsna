@@ -67,7 +67,11 @@ test_that('tPathDistance basic tests',{
 test_that("path in large base network matches",{
   fwdDFS<-tPathDistance(base,v=24)
   expect_equal(sum(fwdDFS$distance<Inf),772) # should find 772 vertices, because that is what we found with BFS search
-})
+  
+  # check if we can find the same set as the 'infected'
+  infset<-which(get.vertex.attribute.active(base,'status',at=102)>0)
+  pathset<-which(tPathDistance(base,v=24,graph.step.time=1)$distance<Inf)
+}
 
 data(moodyContactSim)
 
@@ -234,4 +238,43 @@ expect_equal(res2$distance[7],4)
 # latest ariving  AFG @ 11
 
 #BACKWARDS
+
+
+# ----- tests for paths.fwd.approx ---
+data(moodyContactSim)
+# hard to test because random algorithm
+
+split<-network.initialize(2)
+add.edges.active(split,tail=1,head=2,onset=0,terminus=1)
+arrivePercent<-paths.fwd.approx(split,v=1,tries=1000)
+# would expect 1/2,1/2
+
+split<-network.initialize(2,directed=FALSE)
+add.edges.active(split,tail=1,head=2,onset=0,terminus=1)
+arrivePercent<-paths.fwd.approx(split,v=1,tries=1000)
+# would expect 1/2,1/2
+
+split<-network.initialize(3)
+add.edges.active(split,tail=c(1,1),head=2:3,onset=0,terminus=1)
+arrivePercent<-paths.fwd.approx(split,v=1,tries=1000)
+# would expect 1/3,1/3,1/3
+
+split<-network.initialize(5)
+add.edges.active(split,tail=c(1,1),head=2:3,onset=c(0,0.5),terminus=c(1,1))
+add.edges.active(split,tail=3,head=4,onset=0.5,terminus=1)
+# 
+plot(split,displaylabels=TRUE,edge.label=get.edge.activity(split))
+# 1/4 paths should remain on v1
+# 1/2 paths remain v2
+# 1/8 paths remain v3
+# 1/8 paths remain v4
+# 0 paths reach v5
+paths.fwd.approx(split,v=1,tries=100)
+
+# for these values, set a rng seed
+set.seed(123)
+fwdProbs<-paths.fwd.approx(moodyContactSim,v=1)
+expect_equal(fwdProbs,c(0.858750, 0.000000, 0.000000, 0.000625, 0.000000, 0.001250, 0.000000, 0.001875, 0.036250, 0.000000, 0.023125, 0.038750, 0.000000, 0.000000, 0.000000, 0.039375))
+fwdProbs<-paths.fwd.approx(moodyContactSim,v=10,tries=100)
+expect_equal(fwdProbs,c(0, 0, 0, 0.01, 0, 0, 0.01, 0, 0, 0.98))
 

@@ -1,5 +1,13 @@
-# functions for evaluating temporal paths in networks
+#  Part of the statnet package, http://statnetproject.org
+#
+#  This software is distributed under the GPL-3 license.  It is free,
+#  open source, and has the attribution requirements (GPL Section 7) in
+#    http://statnetproject.org/attribution
+#
+#  Copyright 2014 the statnet development team
+######################################################################
 
+# functions for evaluating temporal paths in networks
 
 # this is a wrapper function to check args and call the appropriate paths method
 tPathDistance<-function(nd,v, 
@@ -13,6 +21,12 @@ tPathDistance<-function(nd,v,
   }
   if (missing(v) || !is.numeric(v)){
     stop("a 'v' argument with valid vertex ids was not given to specify starting vertex")
+  }
+  
+  if (!missing(start)&!missing(end)){
+    if(start>end){
+      stop("the time value for the 'start' parameter may not be greater than the 'end' parameter")
+    }
   }
   
   direction<-match.arg(direction)
@@ -67,7 +81,6 @@ paths.fwd.earliest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=
     end<-Inf
   }
   
-  
   # TODO: self-loop behavior?
   # TODO: multiplex behavior?
   
@@ -121,17 +134,11 @@ paths.fwd.earliest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=
   return(list(distance=dist,previous=previous))
 }
 
-# I think to avoid getting into "longest path problem" territory, 
+# compute reverse paths 
 # need to start at the end and minimize backwards
 
 paths.bkwd.latest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0){
-  warning("paths.bkwd.latest has not be fully tested and may not be correct")
-  if (!is.networkDynamic(nd)){
-    stop('to be able to calculate forward paths, the first argument must be a networkDynamic object')
-  }
-  if (missing(v) || !is.numeric(v)){
-    stop("a 'v' argument with valid vertex ids was not given to specify starting vertex")
-  }
+
   if (missing(end)){
     # TODO: use obs.period if it exists
     changes<-get.change.times(nd)
@@ -347,5 +354,51 @@ paths.fwd.latest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0)
   # because distances are from the end, need to reverse by subtracting the end time
   latest[fwdReachable]<-end-latest[fwdReachable]
   return(list(distance=latest,previous=previous))
+}
+
+
+
+# testing an approximate / stochastic method for computing arrival probabilities
+# works by randomly sampling fwd paths from vertex v
+paths.fwd.approx<-function(nd,v,tries=network.size(nd)*100,mean.hop.dur=1, start,end){
+  if (missing(start) | missing(end)){
+    bounds<-range(get.change.times(nd,vertex.activity=FALSE,vertex.attribute.activity=FALSE,edge.attribute.activity=FALSE,network.attribute.activity=FALSE))
+  }
+  if(missing(start)){
+    start<-bounds[1]
+  }
+  if(missing(end)){
+    end<-bounds[2]
+  }
+  if (is.infinite(start)){
+    stop("Can not evaluate paths over a time interval with an infinite start value")
+  }
+  if (is.infinite(end)){
+    stop("Can not evaluate paths over a time interval with an infinite end value")
+  }
+  if (is.infinite(mean.hop.dur)){
+    stop("Can not evaluate paths over a time interval with an infinite mean.hop.dur")
+  }
+  
+  # TODO: this could be parallelized
+  arrivals<-replicate(tries,{
+    # start at v at time start
+    currentV<-v
+    currentTime<-start+rexp(1,1/mean.hop.dur)
+    # repeat until run out of time
+    while (currentTime<end){
+      # find reachable neighbors at that time
+      ngs<-get.neighborhood.active(nd,v=currentV,at=currentTime,type='out')
+      ngs<-c(currentV,ngs) # include 0 for no-branch option
+      # randomly pick a neighbor or self to hop again
+      currentV<-sample(ngs,1,replace=TRUE)
+      # hop a random amount forward in time 
+      #TODO: how to correctly hop randomly
+      currentTime<-currentTime+rexp(1,1/mean.hop.dur)
+    }
+    return(currentV)
+  })
+  arrivalCounts<-tabulate(arrivals,nbins=network.size(nd))
+  return(arrivalCounts/tries)
 }
 
