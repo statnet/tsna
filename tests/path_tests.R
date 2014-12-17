@@ -71,7 +71,7 @@ test_that("path in large base network matches",{
   # check if we can find the same set as the 'infected'
   infset<-which(get.vertex.attribute.active(base,'status',at=102)>0)
   pathset<-which(tPathDistance(base,v=24,graph.step.time=1)$distance<Inf)
-}
+})
 
 data(moodyContactSim)
 
