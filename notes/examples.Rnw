@@ -84,6 +84,42 @@ legend(800,50,legend=c('base','monog','middle'),
 
 Q/TODO: are these distributions different from what we get from just plotting momentary degree distributions?
 
+\section{Evaluate concurrency comparison nets}
+
+Do the measuers recapture the values used in estimating?
+
+"... a cross-sectional mean degree that varies stochastically around 0.75 ..."
+<<crossSect>>=
+mean(tDegree(base,start = 0,end=102,time.interval = 10))
+mean(tDegree(middle,start = 0,end=102,time.interval = 10))
+mean(tDegree(monog,start = 0,end=102,time.interval = 10))
+@
+
+"... an exponential relationship duration distribution with a mean of 25 timesteps (due to censoring effects, the naive mean duration calculation using all observed partnerships will be around 20)..."
+<<durationDist,fig=TRUE>>=
+mean(tEdgeDuration(base))
+mean(tEdgeDuration(middle))
+mean(tEdgeDuration(monog))
+hist(tEdgeDuration(base),ylim=c(0,800))
+hist(tEdgeDuration(middle),ylim=c(0,800))
+hist(tEdgeDuration(monog),ylim=c(0,800))
+@
+
+"... cross-sectional degree distribution, varying from Bernoulli (monog) to Poisson (base) ..."
+ 
+<<crossSectDist>>=
+table(tDegree(base,start = 0,end=102,time.interval = 10))
+table(tDegree(middle,start = 0,end=102,time.interval = 10))
+table(tDegree(monog,start = 0,end=102,time.interval = 10))
+@
+
+'middle is' "a dynamic network with half the fraction of persons with degree > 1 (having concurrent partners), compared to the base network"
+<<middleDeg>>=
+sum(tDegree(base,start = 0,end=102,time.interval = 10)>1)
+sum(tDegree(middle,start = 0,end=102,time.interval = 10)>1)
+@
+
+Note that tDegree based measures above are counting each person multiple times.
 
 \section{Hospital contacts}
 What does it look like for a realworld transmission network?  Hospital contact is several days of RFID badge proximities in a French hospital ward. 
