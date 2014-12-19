@@ -10,5 +10,6 @@ export(
   forward.reachable,
   tReach,
   paths.fwd.approx,
-  tDegree
+  tDegree,
+  tSummaryStats
   )
