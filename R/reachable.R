@@ -72,60 +72,60 @@ forward.reachable<-function(nd,v,start=NULL,end=NULL,per.step.depth=Inf ){
 # this was implemented with when.next.edge.change with the idea of reducing the
 # search space at each time step, but it is currently slower than the implementation above
 # and paths.fwd.earliest is dramatically faster than both
-forward.reachable2<-function(nd,v,start=NULL,end=NULL,interval='changes',per.step.depth=Inf ){
-  if(!is.networkDynamic(nd)){
-    stop('the first argument to forward.reachble must be a networkDynamic object')
-  }
-  if(missing(v) || !is.numeric(v)){
-    stop('v argument to forward.reachable must be a vector of valid numeric vertex ids')
-  }
-  if(max(v)>network.size(nd) | min(v)<1){
-    stop('v argument to forward.reachable must be a vector of numeric vertex ids within the range of the network size')
-  }
-  
-  # if start or end is missing set the interval to be whatever the observed changes are
-  if (is.null(start)){
-    start <-min(get.change.times(nd,vertex.attribute.activity=FALSE,edge.attribute.activity=FALSE,network.attribute.activity=FALSE))
-  }
-  if (is.null(end)){
-    end <-max(get.change.times(nd,vertex.attribute.activity=FALSE,edge.attribute.activity=FALSE,network.attribute.activity=FALSE))
-  }
-    
-  # lets not loop for ever!
-  if (is.infinite(start) | is.infinite(end)){
-    stop("start and end values cannot be infinite because search will not terminate")
-  }
-  
-  #TODO: could probably skip all times earlier that the active times in v?
-  reached <-v
-  now<-start
-  while(now<end){
-    # BFS to depth rate
-    new<-reached
-    # how long until next change?
-    nextTime<-when.next.edge.change(nd,at=now,v=reached)
-    duration<-nextTime-now
-    
-    # remove any in the set we've already visited
-    if (duration>0){
-      d<-1 # we are assuming all geodesic steps count as 1, harder if we calc per edge..
-      # keep searching until we reach bounds or run out of verts to find
-      # also stop if we find all the vertices
-      while(d <= per.step.depth*duration & length(reached)<network.size(nd)){
-        ngs<-unlist(unique(sapply(new,function(i){get.neighborhood.active(nd,v=i,at=now,type='out')})))
-        new<-setdiff(ngs,reached)
-        if(length(new)==0){
-          break # no more verts to find
-        }
-        reached<-c(reached,new)
-        d<-d+1
-      }
-    }
-    # update time
-    now<-nextTime
-  }
-  return(reached)
-}
+# forward.reachable2<-function(nd,v,start=NULL,end=NULL,interval='changes',per.step.depth=Inf ){
+#   if(!is.networkDynamic(nd)){
+#     stop('the first argument to forward.reachble must be a networkDynamic object')
+#   }
+#   if(missing(v) || !is.numeric(v)){
+#     stop('v argument to forward.reachable must be a vector of valid numeric vertex ids')
+#   }
+#   if(max(v)>network.size(nd) | min(v)<1){
+#     stop('v argument to forward.reachable must be a vector of numeric vertex ids within the range of the network size')
+#   }
+#   
+#   # if start or end is missing set the interval to be whatever the observed changes are
+#   if (is.null(start)){
+#     start <-min(get.change.times(nd,vertex.attribute.activity=FALSE,edge.attribute.activity=FALSE,network.attribute.activity=FALSE))
+#   }
+#   if (is.null(end)){
+#     end <-max(get.change.times(nd,vertex.attribute.activity=FALSE,edge.attribute.activity=FALSE,network.attribute.activity=FALSE))
+#   }
+#     
+#   # lets not loop for ever!
+#   if (is.infinite(start) | is.infinite(end)){
+#     stop("start and end values cannot be infinite because search will not terminate")
+#   }
+#   
+#   #TODO: could probably skip all times earlier that the active times in v?
+#   reached <-v
+#   now<-start
+#   while(now<end){
+#     # BFS to depth rate
+#     new<-reached
+#     # how long until next change?
+#     nextTime<-when.next.edge.change(nd,at=now,v=reached)
+#     duration<-nextTime-now
+#     
+#     # remove any in the set we've already visited
+#     if (duration>0){
+#       d<-1 # we are assuming all geodesic steps count as 1, harder if we calc per edge..
+#       # keep searching until we reach bounds or run out of verts to find
+#       # also stop if we find all the vertices
+#       while(d <= per.step.depth*duration & length(reached)<network.size(nd)){
+#         ngs<-unlist(unique(sapply(new,function(i){get.neighborhood.active(nd,v=i,at=now,type='out')})))
+#         new<-setdiff(ngs,reached)
+#         if(length(new)==0){
+#           break # no more verts to find
+#         }
+#         reached<-c(reached,new)
+#         d<-d+1
+#       }
+#     }
+#     # update time
+#     now<-nextTime
+#   }
+#   return(reached)
+# }
 
 
 # compute fraction of vertices in a network than can be reached by each vertex

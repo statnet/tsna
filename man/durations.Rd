@@ -53,9 +53,7 @@ Note that the 'observed' durations may not match the 'true' (statistically estim
 \value{
 A vector of values corresponding to the selected subjects with the count or duration of events.
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
+
 \author{
 skyebend
 }
@@ -63,7 +61,6 @@ skyebend
 This is an early implementation of the function and its name and arguments are subject to change
 }
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
 See also \code{\link{as.data.frame.networkDynamic}}
