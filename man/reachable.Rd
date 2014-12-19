@@ -59,4 +59,4 @@ TODO:  should be able to specifiy edge weight attribute to be included in time c
 \seealso{
 See also \code{\link{tPathDistance}} for a dramatically faster implementation
 }
-\examples{}
+

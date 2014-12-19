@@ -29,7 +29,7 @@ optional numeric value giving time interval between evaluations (default is 1)
 }
 }
 \details{
- Constructs a set of times to evaluate based on \code{start},\code{end} and \code{time.interval}. Extracts a static network at each time point and uses it to construct a formula with \code{f}. The formula is passed to ergm's \code{\link{summary.statistics.formula}} function to calculate the net value of the change statistics for each term in the formula.  The values of the statistics are arranged into a matrix so that each row is a term and each column is the time point at which the statistics were evaluated. See \code{\link{ergm-terms}} for a list of available term statistics.
+ Constructs a set of times to evaluate based on \code{start},\code{end} and \code{time.interval}. Extracts a static network at each time point and uses it to construct a formula with \code{f}. The formula is passed to ergm's \code{\link[ergm]{summary.statistics.formula}} function to calculate the net value of the change statistics for each term in the formula.  The values of the statistics are arranged into a matrix so that each row is a term and each column is the time point at which the statistics were evaluated. See \code{\link[ergm]{ergm-terms}} for a list of available term statistics.
  
 Be aware that if the network's vertex activity dynamics imply cross-sectional networks of different sizes, the interpretation of the statistic at each time point may not be the same.  
 }
@@ -44,7 +44,7 @@ skyebend@uw.edu
 
 
 \seealso{
-See also \code{\link{summary.statistics.formula}} and \code{\link{ergm-terms}}.
+See also \code{\link[ergm]{summary.statistics.formula}} and \code{\link[ergm]{ergm-terms}}.
 }
 \examples{
  library(networkDynamicData)
