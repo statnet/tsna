@@ -39,3 +39,59 @@ tEdgeDuration<-function(nd,mode=c('duration','counts'),subject=c('edges','spells
   
 }
 
+tEdgeIncidence<-function(nd, start, end, time.interval=1){
+    
+    if(missing(start) | missing(end)){
+      times <- get.change.times(nd)
+      if (length(times) == 0) {
+        warning("network does not appear to have any dynamic information. Using start=0 end=1")
+        start = 0
+        end = 0
+      }
+      times[times == Inf] <- NA
+      times[times == -Inf] <- NA
+      start = min(times, na.rm = T)
+      end = max(times, na.rm = T)
+    }
+    
+    # figure out the times where we will do evaluations
+    times<-seq(from = start, to=end,by = time.interval)
+    
+    tel<-as.data.frame.networkDynamic(nd)
+    incidence<-sapply(times,function(t){sum(tel$onset==t)})
+    return(as.ts(incidence,start=start,end=end,frequency=time.interval))
+}
+
+tEdgeDissolution<-function(nd, start, end, time.interval=1){
+  
+  if(missing(start) | missing(end)){
+    times <- get.change.times(nd)
+    if (length(times) == 0) {
+      warning("network does not appear to have any dynamic information. Using start=0 end=1")
+      start = 0
+      end = 0
+    }
+    times[times == Inf] <- NA
+    times[times == -Inf] <- NA
+    start = min(times, na.rm = T)
+    end = max(times, na.rm = T)
+  }
+  
+  # figure out the times where we will do evaluations
+  times<-seq(from = start, to=end,by = time.interval)
+  
+  tel<-as.data.frame.networkDynamic(nd)
+  incidence<-sapply(times,function(t){sum(tel$terminus==t)})
+  return(as.ts(incidence,start=start,end=end,frequency=time.interval))
+}
+
+edgeIncidenceAt<-function(nd,at){
+  tel<-as.data.frame.networkDynamic(nd)
+  return(sum(tel$onset==at))
+}
+
+edgeDissolutionAt<-function(nd,at){
+  tel<-as.data.frame.networkDynamic(nd)
+  return(sum(tel$terminus==at))
+}
+

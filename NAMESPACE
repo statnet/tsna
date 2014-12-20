@@ -11,5 +11,9 @@ export(
   tReach,
   paths.fwd.approx,
   tDegree,
-  tSummaryStats
+  tSummaryStats,
+  tEdgeDissolution,
+  tEdgeIncidence,
+  edgeIncidenceAt,
+  edgeDissolutionAt
   )
