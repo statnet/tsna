@@ -59,7 +59,7 @@ tEdgeIncidence<-function(nd, start, end, time.interval=1){
     
     tel<-as.data.frame.networkDynamic(nd)
     incidence<-sapply(times,function(t){sum(tel$onset==t)})
-    return(as.ts(incidence,start=start,end=end,frequency=time.interval))
+    return(ts(incidence,start=start,end=times[length(times)],deltat=time.interval))
 }
 
 tEdgeDissolution<-function(nd, start, end, time.interval=1){
@@ -82,7 +82,7 @@ tEdgeDissolution<-function(nd, start, end, time.interval=1){
   
   tel<-as.data.frame.networkDynamic(nd)
   incidence<-sapply(times,function(t){sum(tel$terminus==t)})
-  return(as.ts(incidence,start=start,end=end,frequency=time.interval))
+  return(ts(incidence,start=start,end=times[length(times)],deltat=time.interval))
 }
 
 edgeIncidenceAt<-function(nd,at){
