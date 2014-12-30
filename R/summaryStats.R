@@ -28,7 +28,6 @@ tSummaryStats<-function(nd, f,start, end, time.interval=1){
       stop(" the ergm package could not be loaded to provide summary functions and terms")
     }
     # rearrange list into matrix
-    stats<-do.call(cbind,stats)
-    colnames(stats)<-times
-    return(stats)
+    stats<-do.call(rbind,stats)
+    return(ts(stats,start=start,end=times[length(times)],deltat=time.interval))
 }
