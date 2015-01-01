@@ -32,10 +32,10 @@ tPathDistance(nd, v, direction=c('fwd','bkwd'),
  integer id of the starting vertex
 }
  \item{direction}{
-  option indicating the direction in which the network should be searched: \code{'fwd'} means search fowards in time and forward along edge directions, \code{'bkwd'} means search backwards in time and backwards along edge directions.
+  option indicating the direction in which the network should be searched: \code{'fwd'} means search forwards in time and forward along edge directions, \code{'bkwd'} means search backwards in time and backwards along edge directions.
  }
  \item{constraint}{
- option indicating the temporal constraint or the type of path to be searched for: \code{'earliest.arrive'} will find the paths that arrive first at the target vertices, \code{'latest.depart'} will find the paths that leave the source vertex at the latest possible time.  Additonal options will be added as implemented. 
+ option indicating the temporal constraint or the type of path to be searched for: \code{'earliest.arrive'} will find the paths that arrive first at the target vertices, \code{'latest.depart'} will find the paths that leave the source vertex at the latest possible time.  Additional options will be added as implemented. 
  }
   \item{start}{
  time at which to begin searching. Edges that terminate before this time will not be considered. If not specified, defaults to earliest time observed on the network according to \code{get.change.times}.
@@ -47,15 +47,15 @@ tPathDistance(nd, v, direction=c('fwd','bkwd'),
   Boolean, default TRUE. Should edges with no timing information be considered active by default?
 }
   \item{graph.step.time}{
-numeric.  How much time should be added for each edge traversal (graph hop)? Default is 0, meaning that path distances returned will be purely temporal and will not incorporate geodesic graph path distances.  A value of 1 would correspond to counting path distances like a traditional centrality score or discrete time simulation.   NAME AND FUNCTION OF THIS ARG LIKELY TO CHANGE 
+numeric.  How much time should be added for each edge traversal (graph hop)? Default is 0, meaning that path distances returned will be purely temporal and will not incorporate geodesic graph path distances.  A value of 1 would correspond to counting path distances like a traditional centrality score or discrete time simulation.   NAME AND FUNCTION OF THIS ARG LIKELY TO CHANGE.  Note that if \code{graph.step.time} < the duration of an edge's activity spell, it would imply that the edge is not traverse able, but this is not actually checked.  
 }
 }
 \details{
-When set to use \code{'fwd'} , \code{'earliest.arrive'} it uses a Dijkstra's style Depth First Search to find the set of vertices reachable on a path from the initial seed vertex while respecting the constraints of edge timing.  The path found is the \emph{earliest arriving} (but not necessarily the \emph{earliset leaving} or \emph{quickest} or \emph{most sustained} path). When there are multiple equivalent paths only a single one will be arbitrarily returned.   Vertex activity is currently ignored, and it is assumed that once a path reaches a vertex, all future edges from the vertex are accessible.  The path search can be constrained in time using the \code{start} and \code{end} parameters. Distance values represent the earliest elapsed time (from the \code{start} parameter) at which vertices can be reached from \code{v}.
+When set to use \code{'fwd'} , \code{'earliest.arrive'} it uses a Dijkstra's style Depth First Search to find the set of vertices reachable on a path from the initial seed vertex while respecting the constraints of edge timing.  The path found is the \emph{earliest arriving} (but not necessarily the \emph{earliest leaving} or \emph{quickest} or \emph{most sustained} path). When there are multiple equivalent paths only a single one will be arbitrarily returned.   Vertex activity is currently ignored, and it is assumed that once a path reaches a vertex, all future edges from the vertex are accessible.  The path search can be constrained in time using the \code{start} and \code{end} parameters. Distance values represent the earliest elapsed time (from the \code{start} parameter) at which vertices can be reached from \code{v}.
 
 THESE ARE NOT CORRECTLY IMPLEMENTED YET:
 
-\code{'bwkd'} \code{'latest.depart'} is essentially the inverse of fwd earliest arrive.  It finds the latest time paths backwards from the initial seed vertex. This is the \emph{latest-leaving} time. Note that the distance returned are positive, but represent the latest distance back in time from the \code{end} paramter time at which a vertex can reach \code{v}. 
+\code{'bwkd'} \code{'latest.depart'} is essentially the inverse of fwd earliest arrive.  It finds the latest time paths backwards from the initial seed vertex. This is the \emph{latest-leaving} time. Note that the distance returned are positive, but represent the latest distance back in time from the \code{end} parameter time at which a vertex can reach \code{v}. 
 
 Because we don't have an efficient algorithm for maximizing path length, \code{paths.fwd.latest} first finds the set of reachable vertices using the earliest path, and the finds the latest time those vertices can be reached by calling \code{paths.bwkd.latest} on each. Distances represent the latest time a path could leave \code{v} and still reach the corresponding vertex
 

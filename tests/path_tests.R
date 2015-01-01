@@ -133,11 +133,32 @@ test_that("test on network with two components",{
 # test path distance
 test_that("graph step time param works",{
   test<-network.initialize(4)
+  # in this graph, incoming edges break just as outgoing edges form, so transmission
+  # is not possible under a discrete time model with unit time steps
   add.edges.active(test,tail=1:3,head=2:4,onset=0:2,terminus=1:3)
+  # count each geodesic step as something less than 1
+  expect_equal(tPathDistance(test,v=1,graph.step.time=0.5)$distance,c(0, 0.5, 1.5, 2.5))
+  # count each geodesic step as 1
+  expect_equal(tPathDistance(test,v=1,graph.step.time=1)$distance,c(0, Inf, Inf, Inf))
+  # count each geodesic step as 2
+  expect_equal(tPathDistance(test,v=1,graph.step.time=2)$distance,c(0, Inf, Inf, Inf))
+  
+  # test with always active edges
+  test<-network.initialize(4)
+  add.edges.active(test,tail=1:3,head=2:4,onset=0,terminus=10)
   # count each geodesic step as 1
   expect_equal(tPathDistance(test,v=1,graph.step.time=1)$distance,c(0, 1, 2, 3))
   # count each geodesic step as 2
-  expect_equal(tPathDistance(test,v=1,graph.step.time=2)$distance,c(0, 2, Inf, Inf))
+  expect_equal(tPathDistance(test,v=1,graph.step.time=2)$distance,c(0, 2, 4, 6))
+  # count each geodesic step as 0
+  expect_equal(tPathDistance(test,v=1,graph.step.time=0)$distance,c(0, 0, 0, 0))
+  
+  test<-as.networkDynamic(network.initialize(4))
+  add.edges(test,tail=1:3,head=2:4)
+  # count each geodesic step as 1
+  expect_equal(tPathDistance(test,v=1,graph.step.time=1)$distance,c(0, 1, 2, 3))
+  # count each geodesic step as 2
+  expect_equal(tPathDistance(test,v=1,graph.step.time=2)$distance,c(0, 2, 4, 6))
   
 })
 
