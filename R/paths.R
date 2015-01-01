@@ -81,47 +81,51 @@ paths.fwd.earliest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=
     end<-Inf
   }
   
+  if (graph.step.time<0){
+    stop("'graph.step.time' paramter must be a positive value")
+  }
+  
   # TODO: self-loop behavior?
   # TODO: multiplex behavior?
   
-  dist<-rep(Inf,network.size(nd))
+  dist<-rep(Inf,network.size(nd))     # default all vertices to un-reachable (Inf)
   previous<-numeric(network.size(nd)) # array used for reconstructing the path
-  dist[v]<-0
-  toCheck<-rep(TRUE,network.size(nd))
+  dist[v]<-0                          # set distance to self to 0
+  toCheck<-rep(TRUE,network.size(nd)) # make a list of unchecked vertices
+  # begin depth first search loop
   while(sum(toCheck)>0){
-    minToCheck<-which.min(dist[toCheck])
-    # have to translate index found back
+    minToCheck<-which.min(dist[toCheck])  # select 'closest' vertex to check
+    # have to translate index found back to network index
     u<-which(toCheck)[minToCheck]
     toCheck[u]<-FALSE
-    # TODO: max distance needs a factor for graph.step.time
     if (dist[u]>= end-start){  #NOTICE:  DISTANCE IS NOT ABSOLUTE TIME  should be end-start
       break;  # no more vertices are reachable from v within time range
     }
     
     nghE<-get.edgeIDs(nd,v=u,neighborhood='out') # check neighbors of u
     for (e in nghE){
+      # get vertex index of u's neighbor
       w <- ifelse(nd$mel[[e]]$inl==u,nd$mel[[e]]$outl,nd$mel[[e]]$inl)   
       # we ignore graph hop time
       # so "distance" is how long we have to wait from 'now' until onset of edge
       spls<-nd$mel[[e]]$atl$active
       if (is.null(spls)){ # handle possibly missing activity value, assume always active
         if (active.default){
-          dist_u_w<-0 
+          dist_u_w<-0+graph.step.time 
         } else {
           dist_u_w<-Inf
         }
         
-      } else {
-        # need to include
+      } else { # since edge activities are defined ..
+        # find the index of the active spell
         splIndex<-spells.hit(needle=c(start+dist[u],end),haystack=spls)
-        
-        if (splIndex<0){
+        if (splIndex<0){ # no active spell so
           dist_u_w<-Inf  # vertex is never reachable in the future / within time bound
         } else {
           # otherwise additional distance is the later of 0 or the difference between the 
           # 'current' time and the onset of the edge
-          # if we are counting graph steps as part of the distance, add that in here also
-          dist_u_w<-max(0,(spls[splIndex,1]-start)-dist[u]+graph.step.time)
+          # if we are counting graph steps as part of the distance, distance can't be less than graph step
+          dist_u_w<-max(0,(spls[splIndex,1]-start)-dist[u])+graph.step.time #
         }
       }
       dist_v_w <-dist[u]+dist_u_w 
