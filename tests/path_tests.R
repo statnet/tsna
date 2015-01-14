@@ -133,13 +133,13 @@ test_that("test on network with two components",{
 # test path distance
 test_that("graph step time param works",{
   test<-network.initialize(4)
-  # in this graph, incoming edges break just as outgoing edges form, so transmission
-  # is not possible under a discrete time model with unit time steps
   add.edges.active(test,tail=1:3,head=2:4,onset=0:2,terminus=1:3)
+  # count each geodesic step as instantaneous
+  expect_equal(tPathDistance(test,v=1,graph.step.time=0)$distance,c(0, 0, 1, 2))
   # count each geodesic step as something less than 1
   expect_equal(tPathDistance(test,v=1,graph.step.time=0.5)$distance,c(0, 0.5, 1.5, 2.5))
   # count each geodesic step as 1
-  expect_equal(tPathDistance(test,v=1,graph.step.time=1)$distance,c(0, Inf, Inf, Inf))
+  expect_equal(tPathDistance(test,v=1,graph.step.time=1)$distance,c(0, 1, 2, 3))
   # count each geodesic step as 2
   expect_equal(tPathDistance(test,v=1,graph.step.time=2)$distance,c(0, Inf, Inf, Inf))
   
@@ -159,6 +159,12 @@ test_that("graph step time param works",{
   expect_equal(tPathDistance(test,v=1,graph.step.time=1)$distance,c(0, 1, 2, 3))
   # count each geodesic step as 2
   expect_equal(tPathDistance(test,v=1,graph.step.time=2)$distance,c(0, 2, 4, 6))
+  
+  # test with an edge with multiple activity spells, some later
+  test<-network.initialize(4)
+  add.edges.active(test,tail=1:3,head=2:4,onset=0:2,terminus=1:3)
+  activate.edges(test,e=1,onset=5,terminus=10)
+  expect_equal(tPathDistance(test,v=1,graph.step.time=2)$distance,c(0, 7, Inf, Inf))
   
 })
 
