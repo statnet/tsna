@@ -47,7 +47,7 @@ tPathDistance(nd, v, direction=c('fwd','bkwd'),
   Boolean, default TRUE. Should edges with no timing information be considered active by default?
 }
   \item{graph.step.time}{
-numeric.  How much time should be added for each edge traversal (graph hop)? Default is 0, meaning that path distances returned will be purely temporal and will not incorporate geodesic graph path distances.  A value of 1 would correspond to counting path distances like a traditional centrality score or discrete time simulation.   NAME AND FUNCTION OF THIS ARG LIKELY TO CHANGE.  Note that if \code{graph.step.time} < the duration of an edge's activity spell, it would imply that the edge is not traverse able, but this is not actually checked.  
+numeric.  How much time should be added for each edge traversal (graph hop)? Default is 0, meaning that path distances returned will be purely temporal and will not incorporate geodesic graph path distances.  A value of 1 would correspond to counting path distances like a traditional centrality score or discrete time simulation.   NAME AND FUNCTION OF THIS ARG LIKELY TO CHANGE.  Note that if \code{graph.step.time} > the remaining duration of an edge's activity spell, the edge is considered non-traverseable. 
 }
 }
 \details{

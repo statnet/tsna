@@ -119,8 +119,19 @@ paths.fwd.earliest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=
       } else { # since edge activities are defined ..
         # find the index of the active spell
         splIndex<-spells.hit(needle=c(start+dist[u],end),haystack=spls)
-        if (splIndex<0){ # no active spell so
+        # if we are using graph.step.time > 0, may need to search for a later spells
+        while (splIndex>0){
+          #check remaining duration of edge spell is long enough for transmission to occur
+          if (max(0,(spls[splIndex,1]-start)-dist[u])+graph.step.time > spls[splIndex,2]){
+            #query again to see if there are any spells active after selected spell
+            splIndex<-spells.hit(needle=c(spls[splIndex,2],end),haystack=spls)
+          } else {
+            break() # this spell duration is ok, so keep on going with it
+          }
+        }
+        if (splIndex<0){ # no active spells found so
           dist_u_w<-Inf  # vertex is never reachable in the future / within time bound
+        
         } else {
           # otherwise additional distance is the later of 0 or the difference between the 
           # 'current' time and the onset of the edge
