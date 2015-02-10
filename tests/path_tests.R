@@ -268,35 +268,35 @@ expect_equal(res2$distance[7],4)
 
 
 # ----- tests for paths.fwd.approx ---
-data(moodyContactSim)
-# hard to test because random algorithm
-
-split<-network.initialize(2)
-add.edges.active(split,tail=1,head=2,onset=0,terminus=1)
-arrivePercent<-paths.fwd.approx(split,v=1,tries=1000)
-# would expect 1/2,1/2
-
-split<-network.initialize(2,directed=FALSE)
-add.edges.active(split,tail=1,head=2,onset=0,terminus=1)
-arrivePercent<-paths.fwd.approx(split,v=1,tries=1000)
-# would expect 1/2,1/2
-
-split<-network.initialize(3)
-add.edges.active(split,tail=c(1,1),head=2:3,onset=0,terminus=1)
-arrivePercent<-paths.fwd.approx(split,v=1,tries=1000)
-# would expect 1/3,1/3,1/3
-
-split<-network.initialize(5)
-add.edges.active(split,tail=c(1,1),head=2:3,onset=c(0,0.5),terminus=c(1,1))
-add.edges.active(split,tail=3,head=4,onset=0.5,terminus=1)
+# data(moodyContactSim)
+# # hard to test because random algorithm
 # 
-plot(split,displaylabels=TRUE,edge.label=get.edge.activity(split))
-# 1/4 paths should remain on v1
-# 1/2 paths remain v2
-# 1/8 paths remain v3
-# 1/8 paths remain v4
-# 0 paths reach v5
-paths.fwd.approx(split,v=1,tries=100)
+# split<-network.initialize(2)
+# add.edges.active(split,tail=1,head=2,onset=0,terminus=1)
+# arrivePercent<-paths.fwd.approx(split,v=1,tries=1000)
+# # would expect 1/2,1/2
+# 
+# split<-network.initialize(2,directed=FALSE)
+# add.edges.active(split,tail=1,head=2,onset=0,terminus=1)
+# arrivePercent<-paths.fwd.approx(split,v=1,tries=1000)
+# # would expect 1/2,1/2
+# 
+# split<-network.initialize(3)
+# add.edges.active(split,tail=c(1,1),head=2:3,onset=0,terminus=1)
+# arrivePercent<-paths.fwd.approx(split,v=1,tries=1000)
+# # would expect 1/3,1/3,1/3
+# 
+# split<-network.initialize(5)
+# add.edges.active(split,tail=c(1,1),head=2:3,onset=c(0,0.5),terminus=c(1,1))
+# add.edges.active(split,tail=3,head=4,onset=0.5,terminus=1)
+# # 
+# plot(split,displaylabels=TRUE,edge.label=get.edge.activity(split))
+# # 1/4 paths should remain on v1
+# # 1/2 paths remain v2
+# # 1/8 paths remain v3
+# # 1/8 paths remain v4
+# # 0 paths reach v5
+# paths.fwd.approx(split,v=1,tries=100)
 
 # for these values, set a rng seed
 #set.seed(123)

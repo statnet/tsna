@@ -27,4 +27,72 @@ reachableRate<-function(nD, start, end, seeds){
 }
 
 
-# martina points out that this measure may suffer from the boundry condition created by network size: As time goes on, there are fewer and fewer unreached vertices for the path to discover, so its rate will slow.  Perhaps a solution is to measure the paths from sets of random start times? 
+# martina points out that this measure above may suffer from the boundry condition created by network size: As time goes on, there are fewer and fewer unreached vertices for the path to discover, so its rate will slow.  Perhaps a solution is to measure the paths from sets of random start times? 
+
+
+
+
+# for a set of seeds, compute forward reachable path and times when reach occurs
+# return a vector of 10 times in which each element is the mean number of vertices reached 
+# (from seeds) at that time point
+meanReachTimes<-function(nD, start, end, seeds){
+  if (missing(start) | missing(end)) {
+    times <- get.change.times(nD)
+    if (length(times) == 0) {
+      warning("network does not appear to have any dynamic information. Using start=0 end=1")
+      start = 0
+      end = 0
+    }
+    times[times == Inf] <- NA
+    times[times == -Inf] <- NA
+    start = min(times, na.rm = T)
+    end = max(times, na.rm = T)
+  }
+  distances<-lapply(seeds, function(s){
+    tPathDistance(nD,v =s,start = start,end=end,graph.step.time = 1 )$distance
+    })
+  times<-seq(from=start,to=end,length.out = 10)
+  means<-sapply(times,function(t){
+    # compute the
+    dAtT<-sapply(distances,function(d){
+      sum(d<=t)
+    })
+    mean(dAtT)
+  })
+  names(means)<-times
+  return(means)
+  
+}
+
+# for a set of seets, compute forward reachable path and times when reach occurs
+# return the times at which each seed reached at least num.targets vertices.
+
+# TODO: should be able to do this faster with a customized tPathDistance function 
+# that stops when the required number of vertices are found
+timeToReach<-function(nD, num.targets=round(network.size(nD)/2), start, end, seeds){
+  if (missing(start) | missing(end)) {
+    times <- get.change.times(nD)
+    if (length(times) == 0) {
+      warning("network does not appear to have any dynamic information. Using start=0 end=1")
+      start = 0
+      end = 0
+    }
+    times[times == Inf] <- NA
+    times[times == -Inf] <- NA
+    start = min(times, na.rm = T)
+    end = max(times, na.rm = T)
+  }
+  distances<-lapply(seeds, function(s){
+    tPathDistance(nD,v =s,start = start,end=end,graph.step.time = 1 )$distance
+  })
+
+  reachTimes<-sapply(distances,function(d){
+    d<-sort(d) # put reachable times in temporal order
+    # find the time value at num.targets
+    # (will be Inf if never reached that many)
+    d[num.targets]
+  })
+  return(reachTimes)
+}
+
+
