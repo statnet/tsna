@@ -111,3 +111,5 @@ edge_duration_density<-function(nd,active.default=TRUE){
   total_dur<-sum(spls$duration)
   return(total_dur/(network.edgecount(nd)*(bounds[2]-bounds[1])))
 }
+
+

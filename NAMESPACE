@@ -9,11 +9,15 @@ export(
   plotPaths,
   forward.reachable,
   tReach,
-  paths.fwd.approx,
   tDegree,
   tSummaryStats,
   tEdgeDissolution,
-  tEdgeIncidence,
-  edgeIncidenceAt,
+  tEdgeFormation,
+  edgeFormationAt,
   edgeDissolutionAt
+  #connectedDuration,
+  #meanTimeToChange,
+  #reachableRate,
+  #meanReachTimes,
+  #timeToReach
   )

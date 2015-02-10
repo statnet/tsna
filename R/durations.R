@@ -39,7 +39,8 @@ tEdgeDuration<-function(nd,mode=c('duration','counts'),subject=c('edges','spells
   
 }
 
-tEdgeIncidence<-function(nd, start, end, time.interval=1){
+
+tEdgeFormation<-function(nd, start, end, time.interval=1){
     
     if(missing(start) | missing(end)){
       times <- get.change.times(nd)
@@ -58,8 +59,8 @@ tEdgeIncidence<-function(nd, start, end, time.interval=1){
     times<-seq(from = start, to=end,by = time.interval)
     
     tel<-as.data.frame.networkDynamic(nd)
-    incidence<-sapply(times,function(t){sum(tel$onset==t)})
-    return(ts(incidence,start=start,end=times[length(times)],deltat=time.interval))
+    formation<-sapply(times,function(t){sum(tel$onset==t)})
+    return(ts(formation,start=start,end=times[length(times)],deltat=time.interval))
 }
 
 tEdgeDissolution<-function(nd, start, end, time.interval=1){
@@ -81,11 +82,11 @@ tEdgeDissolution<-function(nd, start, end, time.interval=1){
   times<-seq(from = start, to=end,by = time.interval)
   
   tel<-as.data.frame.networkDynamic(nd)
-  incidence<-sapply(times,function(t){sum(tel$terminus==t)})
-  return(ts(incidence,start=start,end=times[length(times)],deltat=time.interval))
+  dissolution<-sapply(times,function(t){sum(tel$terminus==t)})
+  return(ts(dissolution,start=start,end=times[length(times)],deltat=time.interval))
 }
 
-edgeIncidenceAt<-function(nd,at){
+edgeFormationAt<-function(nd,at){
   tel<-as.data.frame.networkDynamic(nd)
   return(sum(tel$onset==at))
 }
@@ -93,5 +94,41 @@ edgeIncidenceAt<-function(nd,at){
 edgeDissolutionAt<-function(nd,at){
   tel<-as.data.frame.networkDynamic(nd)
   return(sum(tel$terminus==at))
+}
+
+# return the total amount of time that each vertex was connected via active edges
+connectedDuration<-function(nd, active.default=TRUE,neighborhood=c('out','in','combined')){
+  neighborhood<-match.arg(neighborhood)
+  if(!is.directed(nd)){
+    neighborhood<-'combined'
+  }
+  bounds<-get_bounds(nd)
+  durations<-rep(0,network.size(nd))
+  if(neighborhood=='out'){
+    spls<-as.data.frame.networkDynamic(nd,start=bounds[1],end=bounds[2],active.default=active.default)
+    connectDur<-aggregate(spls['duration'],list(spls$tail),sum)
+    durations[connectDur[,1]]<-connectDur[,2]
+  } else if (neighborhood=='in'){
+    spls<-as.data.frame.networkDynamic(nd,start=bounds[1],end=bounds[2],active.default=active.default)
+    connectDur<-aggregate(spls['duration'],list(spls$head),sum)
+    durations[connectDur[,1]]<-connectDur[,2]
+  } else {  # ngh is combined
+    spls<-as.data.frame.networkDynamic(nd,start=bounds[1],end=bounds[2],active.default=active.default)
+    connectDurHead<-aggregate(spls['duration'],list(spls$head),sum)
+    connectDurTail<-aggregate(spls['duration'],list(spls$tail),sum)
+    durations[connectDurHead[,1]]<-connectDurHead[,2]
+    durations[connectDurTail[,1]]<-durations[connectDurTail[,1]]+connectDurTail[,2]
+  }
+  return(durations)
+}
+
+
+# how much model clock time does it take on average for a single edge to change?
+# divide the duration by count the number of non-censored toggles in the network
+meanTimeToChange<-function(nD){
+  tel<-as.data.frame.networkDynamic(nD)
+  bounds<-get_bounds(nD)
+  changeCount<-sum(!tel$onset.censored)+sum(!tel$terminus.censored)
+  return((bounds[2]-bounds[1])/changeCount  )
 }
 
