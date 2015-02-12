@@ -33,7 +33,7 @@ tSummaryStats<-function(nd, f,start, end, time.interval=1){
 }
 
 # function to provide a wrapper for calling sna measures
-tSnaStats<-function(nd, fun,start, end, time.interval=1,...){
+tSnaStats<-function(nd, snafun,start, end, time.interval=1,...){
   
   # table of supported sna functions and key terms 
   # (i.e is directedness arg named 'mode' or 'gmode' )
@@ -42,19 +42,30 @@ tSnaStats<-function(nd, fun,start, end, time.interval=1,...){
                       'betweenness','gmode','VLI','diag',
                       'bonpow',    'gmode','VLI','diag',
                       'components', '', 'GLI', '',
+                      'degree','gmode','VLI','diag',
                       'triad.census','mode','other','',
                       'connectedness','','GLI','',
                       'dyad.census','','other','',
                       'efficiency','','GLI','diag',
                       'evcent','gmode','VLI','diag',
                       'flowbet','gmode','VLI','diag',
-                      'gden'     ,'mode',  'GLI', 'diag'
+                      'gden'     ,'mode',  'GLI', 'diag',
+                      'graphcent', 'gmode','VLI','diag',
+                      'grecip','','GLI','',
+                      'gtrans','mode','GLI','diag',
+                      'infocent','gmode','VLI','diag',
+                      'hierarchy','','GLI','',
+                      'loadcent','gmode','VLI','diag',
+                      'lubness','','GLI','',
+                      'mutuality','','GLI','',
+                      'prestige','gmode','VLI','diag',
+                      'centralization','mode','GLI','diag'
                      ),ncol=4,byrow=TRUE)
   
-  if (!is.character(fun)){
+  if (!is.character(snafun)){
     stop('the "fun" argument must be a character string giving the name of one of the supported sna package descriptive statistics')
   }
-  if (!fun%in%funTerms[,1]){
+  if (!snafun%in%funTerms[,1]){
     stop('the function "', fun,'" is not one of the sna package descriptive statistics currently supported')
   }
   
@@ -81,10 +92,14 @@ tSnaStats<-function(nd, fun,start, end, time.interval=1,...){
     stats<-lapply(times,function(t){
       # extract the network for the time
       net<-network.collapse(nd,at=t)
+      # sna functions can't handle zero-order networks
+      if(network.size(net)==0){
+        return(NA)
+      }
       args<-c(dat=list(net),args)
       # construct appropriate args list
       # a bit messy because sometimes named mode, sometimes gmode
-      directTerm<-funTerms[which(funTerms[,1]==fun),2]
+      directTerm<-funTerms[which(funTerms[,1]==snafun),2]
       if(!directTerm%in%names(args)){
         if(directTerm=='mode'){
           if(is.directed(net)){
@@ -101,7 +116,7 @@ tSnaStats<-function(nd, fun,start, end, time.interval=1,...){
         }
         # otherwise don't add a derm for directedness 
       }
-      diagTerm<-funTerms[which(funTerms[,1]==fun),4]
+      diagTerm<-funTerms[which(funTerms[,1]==snafun),4]
       if(diagTerm=='diag' && !'diag'%in%names(args)){
         if(has.loops(net)){
           args<-c(args,diag=TRUE)
@@ -110,7 +125,7 @@ tSnaStats<-function(nd, fun,start, end, time.interval=1,...){
         }
       }
       
-      do.call(fun,args = args)
+      do.call(snafun,args = args)
 
     })
     
@@ -120,8 +135,8 @@ tSnaStats<-function(nd, fun,start, end, time.interval=1,...){
   # rearrange list into matrix
   # TODO: this may not work if the sizesof networks vary
   stats<-do.call(rbind,stats)
-  # if it is producing one statistic per vertex, name columsn appropriately
-  if (funTerms[which(funTerms[,1]==fun),3]=='VLI'){
+  # if it is producing one statistic per vertex, name columns appropriately
+  if (funTerms[which(funTerms[,1]==snafun),3]=='VLI'){
     stats<-ts(stats,start=start,end=times[length(times)],deltat=time.interval,names=network.vertex.names(nd))
   } else {
     stats<-ts(stats,start=start,end=times[length(times)],deltat=time.interval)
