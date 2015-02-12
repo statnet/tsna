@@ -51,7 +51,7 @@ logial, should edges with no timing information be considered always active by d
 Note that the 'observed' durations may not match the 'true' (statistically estimated) durations for a network due to the censoring of edges.
 }
 \value{
-A vector of values corresponding to the selected subjects with the count or duration of events.
+A vector of values corresponding to the selected subjects with the count or duration of events. If the network contains no edges, \code{numeric(0)} will be returned. 
 }
 
 \author{
