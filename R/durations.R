@@ -15,6 +15,11 @@ tEdgeDuration<-function(nd,mode=c('duration','counts'),subject=c('edges','spells
   subject<-match.arg(subject)
   mode<-match.arg(mode)
   
+  # if network has no edges, return nothing
+  if (nrow(del)==0){
+    return(numeric(0))
+  }
+  
   # determine function type for aggregation
   aggFun<-'sum' # function to use for aggregation sum = 'duration'
   if (mode=='counts'){
