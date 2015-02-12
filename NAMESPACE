@@ -11,6 +11,7 @@ export(
   tReach,
   tDegree,
   tSummaryStats,
+  tSnaStats,
   tEdgeDissolution,
   tEdgeFormation,
   edgeFormationAt,
