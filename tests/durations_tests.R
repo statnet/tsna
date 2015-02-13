@@ -3,7 +3,7 @@ require(tsna)
 require(testthat)
 require(networkDynamicData)
 
-
+# ------ tEdgeDuration tests -------
 
 data(moodyContactSim)
 expect_equal(tEdgeDuration(moodyContactSim),c(32, 33, 32, 26, 30, 24, 32, 30, 26, 27, 27, 32, 31, 27, 26, 34, 44, 26))
@@ -35,4 +35,28 @@ expect_equal(tEdgeDuration(test,mode='count',subject='edges',start=0,end=2),c(1,
 expect_equal(tEdgeDuration(test,mode='count',subject='dyads',start=0,end=2),3)
 
 
+# ------ tVertexDuration  tests ------
 
+test<-network.initialize(3)
+activate.vertices(test,onset = c(0,1),terminus=c(1,2),v=1:2)
+tVertexDuration(test) # this returns 1,1,Inf,  inf should be truncated by default
+
+# mode option switch to counts?
+expect_equal(tVertexDuration(test,mode='counts'),c(1,1,1))
+
+# does it trucate to net obs period appropriately?
+test%n%'net.obs.period'<-list(observations=list(c(0,3)),mode="discrete", time.increment=1,time.unit="step")
+expect_equal(tVertexDuration(test),c(1,1,3))
+
+# does it do spell level appropriately?
+activate.vertices(test,v=1,onset=2,terminus=3)
+expect_equal(tVertexDuration(test,subject='spells'),c(1,1,1,3))
+expect_equal(tVertexDuration(test,subject='vertices'),c(2,1,3))
+
+# test v argument
+expect_equal(tVertexDuration(test,v=2),1)
+
+# does output for real example stay consistant?
+data(windsurfers)
+expect_equal(tVertexDuration(windsurfers),c(27, 13, 19, 22, 5, 8, 5, 2, 1, 4, 5, 9, 7, 8, 7, 18, 9, 4, 2, 1, 5, 3, 6, 6, 4, 6, 7, 6, 14, 5, 4, 1, 1, 2, 4, 1, 8, 3, 14, 8, 8, 3, 3, 7,3, 3, 1, 8, 2, 3, 6, 4, 3, 1, 2, 3, 2, 4, 7, 7, 2, 3, 3, 2, 5, 6, 5, 3, 6, 7, 2, 1, 1, 14, 2, 2, 2, 5, 3, 2, 2, 2, 2, 4, 3, 1, 3, 2, 3, 2, 1, 2, 1, 1, 1))
+expect_equal(tVertexDuration(windsurfers,mode='counts'),c(4, 6, 8, 7, 4, 5, 3, 2, 1, 3, 4, 4, 6, 5, 6, 9, 7, 3, 2, 1, 4, 2, 3, 4, 3, 3, 5, 4, 5, 4, 3, 1, 1, 1, 3, 1, 5, 3, 8, 7, 6, 2, 3, 5, 2, 3, 1, 6, 2, 2, 4, 4, 3, 1, 1, 3, 1, 3, 6, 4, 1, 3, 3, 2, 4, 5, 3, 2, 5, 4, 2, 1, 1, 7, 2, 2, 2, 4, 3, 2, 2, 1, 2, 2, 2, 1, 3, 1, 3, 2, 1, 2, 1, 1, 1))

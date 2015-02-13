@@ -32,7 +32,7 @@ optional numeric value giving time interval between evaluations (default is 1)
   Evaluates the momentary degrees of a network at multiple time points and returns results in a form suitable for sumarizing the distributions. If a vertex is not active at a time point, its degree will be recorded as \code{NA}.
 }
 \value{
-A numeric matrix with giving the momentary degree of each vertex at each time point. Rows coresponding to each vertex in the input network and columns corresponding to each time point at which degree was evaluated.
+A \code{\link{ts}} (time series) object, a numeric matrix with giving the momentary degree of each vertex at each time point. Columns coresponding to each vertex in the input network and row corresponding to each time point at which degree was evaluated.
 }
 
 \author{

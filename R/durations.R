@@ -101,26 +101,64 @@ edgeDissolutionAt<-function(nd,at){
   return(sum(tel$terminus==at))
 }
 
+
+# functions for calculating durations of verticse
+tVertexDuration<-function(nd,mode=c('duration','counts'),subject=c('vertices','spells'), v=seq_len(network.size(nd)), active.default=TRUE){
+  # if network has no vertices, return nothing
+  if (network.size(nd)==0){
+    return(numeric(0))
+  }
+  
+  del<-get.vertex.activity(nd,v=v,as.spellList = TRUE,active.default=active.default)
+  # if looking per edge, group by edge id
+  mode<-match.arg(mode)
+  subject<-match.arg(subject)
+  
+  
+  # determine function type for aggregation
+  aggFun<-'sum' # function to use for aggregation sum = 'duration'
+  if (mode=='counts'){
+    aggFun<-'length'  # function to use to count events
+  }
+  
+  # determine unit of aggragation
+  if (subject=='vertices'){
+    del<-aggregate.data.frame(del[,c('duration','vertex.id')],by=list(vertices=del$vertex.id),FUN=aggFun)
+  }  else {
+    # if looking at spells, just use the raw frame
+    del<-aggregate.data.frame(del[,'duration',drop=FALSE],by=list(seq_len(nrow(del))),FUN=aggFun) 
+  }
+  
+  return(del$duration)
+  
+}
+
 # return the total amount of time that each vertex was connected via active edges
-connectedDuration<-function(nd, active.default=TRUE,neighborhood=c('out','in','combined')){
+connectedDuration<-function(nd, mode=c('duration','counts'),active.default=TRUE,neighborhood=c('out','in','combined')){
   neighborhood<-match.arg(neighborhood)
+  mode<-match.arg(mode)
   if(!is.directed(nd)){
     neighborhood<-'combined'
+  }
+  # determine function type for aggregation
+  aggFun<-'sum' # function to use for aggregation sum = 'duration'
+  if (mode=='counts'){
+    aggFun<-'length'  # function to use to count events
   }
   bounds<-get_bounds(nd)
   durations<-rep(0,network.size(nd))
   if(neighborhood=='out'){
     spls<-as.data.frame.networkDynamic(nd,start=bounds[1],end=bounds[2],active.default=active.default)
-    connectDur<-aggregate(spls['duration'],list(spls$tail),sum)
+    connectDur<-aggregate(spls['duration'],list(spls$tail),aggFun)
     durations[connectDur[,1]]<-connectDur[,2]
   } else if (neighborhood=='in'){
     spls<-as.data.frame.networkDynamic(nd,start=bounds[1],end=bounds[2],active.default=active.default)
-    connectDur<-aggregate(spls['duration'],list(spls$head),sum)
+    connectDur<-aggregate(spls['duration'],list(spls$head),aggFun)
     durations[connectDur[,1]]<-connectDur[,2]
   } else {  # ngh is combined
     spls<-as.data.frame.networkDynamic(nd,start=bounds[1],end=bounds[2],active.default=active.default)
-    connectDurHead<-aggregate(spls['duration'],list(spls$head),sum)
-    connectDurTail<-aggregate(spls['duration'],list(spls$tail),sum)
+    connectDurHead<-aggregate(spls['duration'],list(spls$head),aggFun)
+    connectDurTail<-aggregate(spls['duration'],list(spls$tail),aggFun)
     durations[connectDurHead[,1]]<-connectDurHead[,2]
     durations[connectDurTail[,1]]<-durations[connectDurTail[,1]]+connectDurTail[,2]
   }
@@ -130,6 +168,7 @@ connectedDuration<-function(nd, active.default=TRUE,neighborhood=c('out','in','c
 
 # how much model clock time does it take on average for a single edge to change?
 # divide the duration by count the number of non-censored toggles in the network
+# TODO: martina points out we need a correction for network size, to make in change per capita?
 meanTimeToChange<-function(nD){
   tel<-as.data.frame.networkDynamic(nD)
   bounds<-get_bounds(nD)

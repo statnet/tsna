@@ -38,18 +38,82 @@ This document assumes familiarity with general concpets of Social Network Analys
 library(tsna)
 ```
 
-This vignette also makes use of various example datasets provided by the `networkDynamicData` package.
+This vignette also makes use of various example datasets provided by the `networkDynamicData` package, and various static Social Network Analysis measures provided by the \code{\link{sna}} package. 
 
 ```{r}
 library(networkDynamicData)
+library(sna)
 ```
 
 ## Overview
 
+Many of the measures included in this package may be formaly idental to measures allready published in literature of various research fields with different names.   We will attept to find and cite such previous work, but if you encounter any omissions, please let us know. 
+
 ## Durations and densities
 
 `tEdgeDuration`
-`tDegree` `tEdgeDensity` 
+`tDegree` `tEdgeDensity` `connectedDuration`
+
+### Distributions of edge durations
+
+We would expect that since the concurrency sims all had the same dissolution paramter, they should all have similarly shaped distrubtions of edge durations
+
+```{r}
+data(concurrencyComparisonNets)
+par(mfcol=c(3,1))
+hist(tEdgeDuration(base),ylim=c(0,800))
+hist(tEdgeDuration(middle),ylim=c(0,800))
+hist(tEdgeDuration(monog),ylim=c(0,800))
+par(mfcol=c(1,1))
+```
+
+How often do edges re-occur in these networks? i.e. which edges have more than one spell?
+```{r}
+which(tEdgeDuration(monog,mode='counts')>1)
+```
+
+
+### Finding connected times of vertices
+
+The McFarland classroom interaction dataset is a collection of time-stamped speach acts among teachers and students duringa 40 minutes of classroom time.  How much total talking does each person in the room do?
+
+```{r}
+data(McFarland_cls33_10_16_96)
+connectedDuration(cls33_10_16_96, mode='counts')
+```
+
+Notice that since the edges in this network have no duration, we actually asked it to consider counts instead of durations. So there is one person (7) who talks a lot more, and two people who don't talk at all (2 and 19).  Could this be related to their roles?
+
+```{r}
+cls33_10_16_96%v%'type'
+```
+
+Well, at least the talker is one of the teachers.  Since this is a directed network, it might also be interesting to look at it in terms of who people talk to
+
+```{r}
+connectedDuration(cls33_10_16_96, mode='counts',neighborhood = 'in')
+```
+
+Or perhaps a ratio of speaking vs. being spoken to.
+
+```{r}
+plot(connectedDuration(cls33_10_16_96, mode='counts',neighborhood = 'out'),
+     connectedDuration(cls33_10_16_96, mode='counts',neighborhood = 'in'),
+     xlab='# speaking events',ylab='# spoken to events',main='McFarland classroom network, speaking vs. spoken to' )
+text(connectedDuration(cls33_10_16_96, mode='counts',neighborhood = 'out'),
+     connectedDuration(cls33_10_16_96, mode='counts',neighborhood = 'in'),
+     label=cls33_10_16_96%v%'type',cex=0.8,pos=4)
+```
+
+Would expect a strong relationship between the number of people contacted and the total contact time
+
+```{r}
+data(hospital_contact)
+plot(degree(as.network(hospital),gmode = 'graph'),connectedDuration(hospital),
+     xlab='aggregate degree (total number of contacts)',
+     ylab='total contact duration',
+     main='Vertices in hospital RFID proximity contact network')
+```
 
 ### compare duration measures on various example networks
 
@@ -324,7 +388,7 @@ ndtv
 
 ## Next steps
 
-Package is far from complete.  Most functions do not yet include ability to bin times necessary for working with certain types of continuous time networks. 
+Package is far from complete.  Most functions do not yet include ability to bin times necessary for working with certain types of continuous time networks.  Include vertex activity functions, and correctly account for vertex activity in edge funcitons. 
 
 
 ## Citation

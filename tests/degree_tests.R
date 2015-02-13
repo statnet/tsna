@@ -52,8 +52,14 @@ tSnaDegree<-function(nd,start, end, time.interval=1,cmode=c('freeman','indegree'
     }
     
   }
+  # transpose to match new orientation and change class to ts
+  degrees<- ts(t(degrees), start = start, end = times[length(times)], 
+     deltat = time.interval)
   return(degrees)
 }
+
+# check class of returned object
+expect_true(is.ts(tDegree(windsurfers)))
 
 # comparison with vertex dynamics
 expect_equal(tDegree(windsurfers),tSnaDegree(windsurfers),check.attributes=FALSE)
@@ -83,10 +89,11 @@ add.edges.active(loopy2,2,3,onset=0,terminus=1)
 
 # evaluation on a resonably sized network using start end and time interval
 degs<-tDegree(base,start = 0,end=102,time.interval = 10)
-expect_equal(ncol(degs),11)
+expect_equal(nrow(degs),11)
+expect_equal(ncol(degs),network.size(base))
 
 # check labeling
-expect_equal(dimnames(degs),list(as.character(1:1000),as.character(seq(0,102,by = 10))))
+expect_equal(colnames(degs),as.character(1:1000))
 
 # check results close to expected value for the network
 expect_equal(mean(colMeans(degs)),0.7609091)
