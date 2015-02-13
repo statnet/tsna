@@ -63,10 +63,10 @@ tSnaStats<-function(nd, snafun,start, end, time.interval=1,...){
                      ),ncol=4,byrow=TRUE)
   
   if (!is.character(snafun)){
-    stop('the "fun" argument must be a character string giving the name of one of the supported sna package descriptive statistics')
+    stop('the "snafun" argument must be a character string giving the name of one of the supported sna package descriptive statistics')
   }
   if (!snafun%in%funTerms[,1]){
-    stop('the function "', fun,'" is not one of the sna package descriptive statistics currently supported')
+    stop('the function "', snafun,'" is not one of the sna package descriptive statistics currently supported')
   }
   
   if(missing(start) | missing(end)){
