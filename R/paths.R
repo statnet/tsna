@@ -387,7 +387,7 @@ paths.fwd.approx<-function(nd,v,tries=network.size(nd)*100,mean.hop.dur=1, start
   if(missing(end)){
     end<-bounds[2]
   }
-  if (is.infinite(start)){
+  if (is.infinite(start)){ 
     stop("Can not evaluate paths over a time interval with an infinite start value")
   }
   if (is.infinite(end)){

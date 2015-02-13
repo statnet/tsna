@@ -28,8 +28,8 @@ tDegree<-function(nd, start, end, time.interval=1,cmode=c('freeman','indegree','
          outdegree='out')
   
   # allocate a matrix to hold the degrees of each vertex at each evaluation time
-  degrees<-matrix(NA,nrow = network.size(nd),ncol=length(times),dimnames = list(paste('v',seq_len(network.size(nd)),sep='')),times)
-  dimnames(degrees)<-list(seq_len(network.size(nd)),times)
+  degrees<-matrix(NA,ncol = network.size(nd),nrow=length(times))
+  colnames(degrees) <- network.vertex.names(nd)
   
   # loop over times and compute degree of each vertex
   # TODO: would it be more efficient to stay on a single vertex and loop over time?
@@ -47,10 +47,12 @@ tDegree<-function(nd, start, end, time.interval=1,cmode=c('freeman','indegree','
     })
     # deal with case of no active vertices where sapply returns list()
     if (!is.list(degreesAt)){
-      degrees[vids,i]<-degreesAt
+      degrees[i,vids]<-degreesAt
     }
     
   }
+  # convert time timeseries object
+  degrees<-ts(degrees,start=start,end=times[length(times)],deltat=time.interval)
   return(degrees)
 }
 

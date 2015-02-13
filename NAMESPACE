@@ -4,6 +4,7 @@ export(
   tPathDistance,
   tEdgeDensity,
   tEdgeDuration,
+  tVertexDuration,
   tReachableSetSizes,
   createPaths,
   plotPaths,
@@ -15,8 +16,8 @@ export(
   tEdgeDissolution,
   tEdgeFormation,
   edgeFormationAt,
-  edgeDissolutionAt
-  #connectedDuration,
+  edgeDissolutionAt,
+  connectedDuration
   #meanTimeToChange,
   #reachableRate,
   #meanReachTimes,
