@@ -375,6 +375,8 @@ paths.fwd.latest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0)
 
 # testing an approximate / stochastic method for computing arrival probabilities
 # works by randomly sampling fwd paths from vertex v
+#Currently a number of \code{tries} are made from the starting vertex. For each try, a random hop forward in time #is made, neighbors at that time are discovered, a random choice is made between each neighbor and remaining on #the vertex, a new random hop is made, etc.  Counts are are made of the number of times each vertex is reached, and this value is returned, divided by the number of trials  Due to the stochastic nature of the algorithm, it 
+# WILL NOT necessarily find paths to all reachable vertices. 
 paths.fwd.approx<-function(nd,v,tries=network.size(nd)*100,mean.hop.dur=1, start,end){
   if (missing(start) | missing(end)){
     bounds<-range(get.change.times(nd,vertex.activity=FALSE,vertex.attribute.activity=FALSE,edge.attribute.activity=FALSE,network.attribute.activity=FALSE))
