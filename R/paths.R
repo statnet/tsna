@@ -89,7 +89,7 @@ paths.fwd.earliest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=
   # TODO: multiplex behavior?
   
   dist<-rep(Inf,network.size(nd))     # default all vertices to un-reachable (Inf)
-  previous<-numeric(network.size(nd)) # array used for reconstructing the path
+  previous<-rep(0,network.size(nd)) # array used for reconstructing the path
   dist[v]<-0                          # set distance to self to 0
   toCheck<-rep(TRUE,network.size(nd)) # make a list of unchecked vertices
   # begin depth first search loop
@@ -146,7 +146,22 @@ paths.fwd.earliest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=
       }
     }
   }
-  return(list(distance=dist,previous=previous))
+  
+  # construct the vector of geodeisc graph steps from previous
+  geodist<-rep(Inf,length(previous))
+  curDist<-0
+  preV<-v
+  # loop down the tree path and mark the distances
+  # until all reachable vertices are updated
+  while(length(preV)>0){
+    geodist[preV]<-curDist
+    preV<-unlist(sapply(preV,function(v){
+      which(previous==v)
+    }))
+    curDist<-curDist+1
+  }
+
+  return(list(distance=dist,previous=previous,geodist=geodist))
 }
 
 # compute reverse paths 

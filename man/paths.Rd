@@ -61,13 +61,14 @@ Because we don't have an efficient algorithm for maximizing path length, \code{p
 
 }
 \value{
-Currently (THIS MAY CHANGE) a list with two elements providing information on the path found. 
- \item{distance}{A numeric vector with length equal to network size in which each element contains the earliest/latest (usually temporal) \emph{distance} at which the corresponding vertex could reach / be reached from the seed vertex}
- \item{previous}{A numeric vector with length equal to network size in which each element indicates the previous vertex along (a possible)  reachable path. Can be used to reconstruct the path tree.  }
+Currently (THIS MAY CHANGE) a list with three elements providing information on the path found. 
+ \item{distance}{A numeric vector with length equal to network size in which each element contains the earliest/latest (usually temporal) \emph{distance} at which the corresponding vertex could reach / be reached from the seed vertex. Unreachable vertices are marked with \code{Inf}}
+ \item{previous}{A numeric vector with length equal to network size in which each element indicates the previous vertex along (a possible)  reachable path. Can be used to reconstruct the path tree. The initial vertex and unreachable vertices are marked with \code{0}}
+ \item{geodist}{A numeric vector with length equal to network size in which each element indicates the geodesic distances (number of hops) of the vertex along the temporal path starting at the seed vertex.}
 
 }
 \references{
-Unpublished discussions with James Moody and Martina Morris
+Unpublished discussions with James Moody and Martina Morris and the statnet team
 }
 \author{
 Skye Bender-deMoll
