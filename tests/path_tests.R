@@ -18,7 +18,7 @@ test_that('tPathDistance basic tests',{
   line<-network.initialize(4)
   add.edges.active(line,tail=1:3,head=2:4,onset=0:2,terminus=1:3)
   # check return format
-  expect_equal(names(tPathDistance(line,v=1)),c('distance','previous'))
+  expect_equal(names(tPathDistance(line,v=1)),c('distance','previous','geodist'))
   
   # check args
   expect_error(tPathDistance(line,v=1,constraint='foo'))
@@ -83,6 +83,7 @@ test_that("test of moody's example network",{
   
   expect_equal(paths$distance,c(543, 454, 594,   0, 672, 661, 184, 679, 634,   0, 709, 581, 413, 625, 669, 535))
   expect_equal(paths$previous,c(16,13,13,10,13,16,10,13,1,0,8,1,4,4,2,2))
+  expect_equal(paths$geodist,c(5, 3, 3, 1, 3, 5, 1, 3, 6, 0, 4, 6, 2, 2, 4, 4))
   
   # render a pdf for visual inspection of correctness
   # tree<-create_tree(paths)
