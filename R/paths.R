@@ -24,8 +24,10 @@ tPath<-function(nd,v,
   }
   
   if (!missing(start)&!missing(end)){
-    if(start>end){
-      stop("the time value for the 'start' parameter may not be greater than the 'end' parameter")
+    if (!is.null(start)&!is.null(end)){
+      if(start>end){
+        stop("the time value for the 'start' parameter may not be greater than the 'end' parameter")
+      }
     }
   }
   
@@ -68,7 +70,7 @@ tPath<-function(nd,v,
 # this finds an earliest-ending path
 paths.fwd.earliest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0){
   
-  if (missing(start)){
+  if (missing(start) || is.null(start)){
     # TODO: use obs.period if it exists
     changes<-get.change.times(nd)
     if(length(changes)>0){
@@ -80,7 +82,7 @@ paths.fwd.earliest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=
       message("'start' time parameter for paths was not specified, no network changes found,  using start=",start)
     }
   }
-  if (missing(end)){
+  if (missing(end) || is.null(end)){
     # TODO: use obs.period if it exists
     end<-Inf
   }
@@ -173,7 +175,7 @@ paths.fwd.earliest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=
 
 paths.bkwd.latest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0){
 
-  if (missing(end)){
+  if (missing(end) || is.null(end)){
     # TODO: use obs.period if it exists
     changes<-get.change.times(nd)
     if(length(changes)>0){
@@ -183,7 +185,7 @@ paths.bkwd.latest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0
       stop("'end' time parameter for paths was not specified, no network changes found")
     }
   }
-  if (missing(start)){
+  if (missing(start) || is.null(start)){
     # TODO: use obs.period if it exists
     start<- -Inf
   }

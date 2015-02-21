@@ -47,6 +47,8 @@ library(sna)
 
 ## Overview
 
+Most of the `tsna` package function assume that their input is formated as a `networkDynamic` data structure.  The `networkDynamic` class provides utilities for converting data from various formats (such as timed edgelists, or lists of matrices) as well as utilities for manipulating the data structures. 
+
 Many of the measures included in this package may be formaly idental to measures allready published in literature of various research fields with different names.   We will attept to find and cite such previous work, but if you encounter any omissions, please let us know. 
 
 ## Durations and densities
@@ -200,7 +202,7 @@ The `tDegree` function report momentary degree of each vertex in networkDynamic 
 
 ## Temporal Paths and metrics
 
-`tPath` `tReach` `tReachableSetSizes`
+`tPath` `tReach` 
 
 ### Explanation of paths in network
 
@@ -283,9 +285,9 @@ When loaded, this gives of three discrete time networks, simulated via a tergm p
 Since this are good sized networks (1000 vertices), we will only calculate the paths from a sample of 25 seed vertices
 
 ```{r}
-baseTrees<-tReachableSetSizes(base,sample=25)
-monogTrees<-tReachableSetSizes(monog,sample=25)
-middleTrees<-tReachableSetSizes(middle,sample=25)
+baseTrees<-tReach(base,sample=25)
+monogTrees<-tReach(monog,sample=25)
+middleTrees<-tReach(middle,sample=25)
 
 boxplot(cbind(baseTrees,monogTrees,middleTrees),
         main='fwd-reachable set size distributions for nets of varying concurrency')

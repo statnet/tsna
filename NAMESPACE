@@ -7,7 +7,6 @@ export(
   tEdgeDensity,
   edgeDuration,
   vertexDuration,
-  tReachableSetSizes,
   plotPaths,
   forward.reachable,
   tReach,

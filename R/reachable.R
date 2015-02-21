@@ -128,30 +128,37 @@ forward.reachable<-function(nd,v,start=NULL,end=NULL,per.step.depth=Inf ){
 # }
 
 
-# compute fraction of vertices in a network than can be reached by each vertex
-tReach<-function(nd,direction=c('fwd','bkwd')){
-  sizes<-tReachableSetSizes(nd,direction=direction)
-  return(sizes/network.size(nd))
-}
-
 
 # compute the sets of vertices reachable from each vertex on the graph
-tReachableSetSizes<-function(nd,direction=c('fwd','bkwd'),sample=FALSE){
-  if (is.numeric(sample)){
-    seeds<-sample.int(network.size(nd),size=sample)
-  } else {
-    seeds<-seq_len(network.size(nd))
-  }
+tReach<-function(nd,direction=c('fwd','bkwd'),sample=network.size(nd), 
+                 start, end, graph.step.time=0){
+  
   if (!is.networkDynamic(nd)){
     stop("the first argument must be a networkDynamic object in order to calculate reachable set sizes")
   }
+  
+  # if sample equals network size, choose seeds so they will be in order
+  if(sample==network.size(nd)){
+    seeds<-seq_len(network.size(nd))
+  } else {
+    # otherwise, sample (with replacement)
+    seeds<-sample.int(network.size(nd),size=sample)
+  }
+  
+  if (missing(start)) {
+    start=NULL
+  }
+  if (missing(end)) {
+    end <- NULL
+  }
+  
   direction<-match.arg(direction)
   type<-'earliest.arrive'
   if (direction=='bkwd'){
     type<-'latest.depart'
   }
   sizes<-sapply(seeds,function(v){
-    sum(tPath(nd,v=v,direction=direction,type=type,)$distance<Inf)
+    sum(tPath(nd,v=v,direction=direction,type=type,start=start,end=end,graph.step.time=graph.step.time)$distance<Inf)
     })
   return(sizes)
 }
