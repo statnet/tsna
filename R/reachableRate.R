@@ -19,7 +19,7 @@ reachableRate<-function(nD, start, end, seeds){
   }
   
   reachableRates<-sapply(seeds,function(s){
-    reachableN<-sum(tPathDistance(nD,v=s,start=start,end=end)$distance<Inf)
+    reachableN<-sum(tPath(nD,v=s,start=start,end=end)$distance<Inf)
     reachableN/(end-start)
   })
   #average over all the seeds
@@ -49,7 +49,7 @@ meanReachTimes<-function(nD, start, end, seeds){
     end = max(times, na.rm = T)
   }
   distances<-lapply(seeds, function(s){
-    tPathDistance(nD,v =s,start = start,end=end,graph.step.time = 1 )$distance
+    tPath(nD,v =s,start = start,end=end,graph.step.time = 1 )$distance
     })
   times<-seq(from=start,to=end,length.out = 10)
   means<-sapply(times,function(t){
@@ -67,7 +67,7 @@ meanReachTimes<-function(nD, start, end, seeds){
 # for a set of seets, compute forward reachable path and times when reach occurs
 # return the times at which each seed reached at least num.targets vertices.
 
-# TODO: should be able to do this faster with a customized tPathDistance function 
+# TODO: should be able to do this faster with a customized tPath function 
 # that stops when the required number of vertices are found
 timeToReach<-function(nD, num.targets=round(network.size(nD)/2), start, end, seeds){
   if (missing(start) | missing(end)) {
@@ -83,7 +83,7 @@ timeToReach<-function(nD, num.targets=round(network.size(nD)/2), start, end, see
     end = max(times, na.rm = T)
   }
   distances<-lapply(seeds, function(s){
-    tPathDistance(nD,v =s,start = start,end=end,graph.step.time = 1 )$distance
+    tPath(nD,v =s,start = start,end=end,graph.step.time = 1 )$distance
   })
 
   reachTimes<-sapply(distances,function(d){

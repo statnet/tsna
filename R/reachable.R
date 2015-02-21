@@ -146,12 +146,12 @@ tReachableSetSizes<-function(nd,direction=c('fwd','bkwd'),sample=FALSE){
     stop("the first argument must be a networkDynamic object in order to calculate reachable set sizes")
   }
   direction<-match.arg(direction)
-  constraint<-'earliest.arrive'
+  type<-'earliest.arrive'
   if (direction=='bkwd'){
-    constraint<-'latest.depart'
+    type<-'latest.depart'
   }
   sizes<-sapply(seeds,function(v){
-    sum(tPathDistance(nd,v=v,direction=direction,constraint=constraint,)$distance<Inf)
+    sum(tPath(nd,v=v,direction=direction,type=type,)$distance<Inf)
     })
   return(sizes)
 }

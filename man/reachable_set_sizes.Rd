@@ -33,7 +33,7 @@ tReach(nd, direction = c("fwd","bkwd"))
 }
 }
 \details{
-Calls \code{link{tPathDistance}} on with each starting vertex to determine the sizes of the sets of vertices that are reachable. If sample is set to a numeric value, it will only sample that many vertices instead of doing the (expensive) full census.
+Calls \code{link{tPath}} on with each starting vertex to determine the sizes of the sets of vertices that are reachable. If sample is set to a numeric value, it will only sample that many vertices instead of doing the (expensive) full census.
 
 \code{tReach} calculates the fraction of the vertices in the network than each vertex can reach (or be reached by if \code{direction='bkwd'}) assuming a start at the beginning of the network. 
 }
@@ -51,7 +51,7 @@ Needs additional options for time range specification, implementation of backwar
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-See also as \code{\link{tPathDistance}}
+See also as \code{\link{tPath}}
 }
 \examples{
 data(moodyContactSim)

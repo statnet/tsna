@@ -9,7 +9,7 @@
 
 # functions for calculating and estimating edge durations
 
-tEdgeDuration<-function(nd,mode=c('duration','counts'),subject=c('edges','spells','dyads'),e=seq_along(nd$mel), start=NULL, end=NULL,active.default=TRUE){
+edgeDuration<-function(nd,mode=c('duration','counts'),subject=c('edges','spells','dyads'),e=seq_along(nd$mel), start=NULL, end=NULL,active.default=TRUE){
   del<-as.data.frame.networkDynamic(nd,e=e,start=start,end=end,active.default=active.default)
   # if looking per edge, group by edge id
   subject<-match.arg(subject)
@@ -103,7 +103,7 @@ edgeDissolutionAt<-function(nd,at){
 
 
 # functions for calculating durations of verticse
-tVertexDuration<-function(nd,mode=c('duration','counts'),subject=c('vertices','spells'), v=seq_len(network.size(nd)), active.default=TRUE){
+vertexDuration<-function(nd,mode=c('duration','counts'),subject=c('vertices','spells'), v=seq_len(network.size(nd)), active.default=TRUE){
   # if network has no vertices, return nothing
   if (network.size(nd)==0){
     return(numeric(0))

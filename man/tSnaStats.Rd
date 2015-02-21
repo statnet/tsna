@@ -34,36 +34,41 @@ additional arguments to be passed on to the sna function. See docs for each func
 \details{
 This wrapper directly calls functions in the \code{\link[sna]{sna}} package, so it will only work if that package is installed. Below is a list of supported functions:
 
+Graph-Level statistics:
 \itemize{
-  \item \code{\link[sna]{closeness}} Vertex Closeness Centrality Scores
-  \item \code{\link[sna]{betweenness}} Vertex Betweenness Centrality Scores
-  \item \code{\link[sna]{bonpow}} Vertex Bonacich Power Centrality Scores
   \item \code{\link[sna]{components}} Number of (Maximal) Components Within a Given Graph
-  \item \code{\link[sna]{degree}} Vertex Degree Centrality Scores
   \item \code{\link[sna]{triad.census}} Davis and Leinhardt Triad Census
   \item \code{\link[sna]{connectedness}} Graph Connectedness Scores
   \item \code{\link[sna]{dyad.census}} Holland and Leinhardt MAN Dyad Census
   \item \code{\link[sna]{efficiency}} Graph Efficiency Scores
-  \item \code{\link[sna]{evcent}} Vertex Eigenvector Centrality Scores
-  \item \code{\link[sna]{flowbet}} Vertex Flow Betweenness Scores
   \item \code{\link[sna]{gden}} Graph Density
-  \item \code{\link[sna]{graphcent}} Vertex (Harary) Graph Centrality Scores
   \item \code{\link[sna]{grecip}} Graph Reciprocity
   \item \code{\link[sna]{gtrans}} Graph Transitivity
-  \item \code{\link[sna]{infocent}} Vertex Information Centrality Scores 
   \item \code{\link[sna]{hierarchy}} Graph Hierarchy Scores
-  \item \code{\link[sna]{loadcent}} Vertex Load Centrality Scores
   \item \code{\link[sna]{lubness}} Graph LUBness Scores
   \item \code{\link[sna]{mutuality}} Graph Mutuality
-  \item \code{\link[sna]{prestige}} Vertex Prestige Scores
   \item \code{\link[sna]{centralization}} Graph Centralization (must provide centrality measure)
+}
+
+Vertex-level statistics:
+\itemize{
+  \item \code{\link[sna]{closeness}} Vertex Closeness Centrality Scores
+  \item \code{\link[sna]{betweenness}} Vertex Betweenness Centrality Scores
+  \item \code{\link[sna]{bonpow}} Vertex Bonacich Power Centrality Scores
+  \item \code{\link[sna]{degree}} Vertex Degree Centrality Scores
+  \item \code{\link[sna]{evcent}} Vertex Eigenvector Centrality Scores
+  \item \code{\link[sna]{flowbet}} Vertex Flow Betweenness Scores
+  \item \code{\link[sna]{graphcent}} Vertex (Harary) Graph Centrality Scores
+  \item \code{\link[sna]{infocent}} Vertex Information Centrality Scores 
+  \item \code{\link[sna]{loadcent}} Vertex Load Centrality Scores
+  \item \code{\link[sna]{prestige}} Vertex Prestige Scores
 }
 
 Most of the sna functions involve converting the network to a matrix and can be quite expensive to calculate for a single time point, so use care when applying to large or long-duration networks.
 
 The sna functions generally cannot handle networks with no vertices, so stats will be replaced with NA when they are encountered. 
 
-There may be some overlap with ergm terms available through \code{\link{tSummaryStats}} and the ergm version will generally be faster
+There may be some overlap with ergm terms available through \code{\link{tErgmStats}} and the ergm version will generally be faster
 }
 \value{
 a \code{\link{ts}} (time series) object. A matrix in which rows correspond to the time points evaluated and columns correspond to values of statistics produced.  In the case of vertex-level indices, there will be one column per vertex. For the census measures, each column will correspond to a census element.
@@ -82,7 +87,7 @@ Note that this is an early DRAFT implementation.  Does not yet include binning o
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-See also \code{\link{tSummaryStats}},
+See also \code{\link{tErgmStats}},
 }
 \examples{
 library(networkDynamicData)

@@ -1,5 +1,5 @@
 # function to apply ergm's summary formula at multiple time points
-tSummaryStats<-function(nd, f,start, end, time.interval=1){
+tErgmStats<-function(nd, formula,start, end, time.interval=1){
     
     if(missing(start) | missing(end)){
       times <- get.change.times(nd)
@@ -21,7 +21,7 @@ tSummaryStats<-function(nd, f,start, end, time.interval=1){
     if(require(ergm,quietly=TRUE)){
       stats<-lapply(times,function(t){
         net<-network.collapse(nd,at=t)
-        summary(as.formula(paste('net',f)))
+        summary(as.formula(paste('net',formula)))
       })
       
     } else {
