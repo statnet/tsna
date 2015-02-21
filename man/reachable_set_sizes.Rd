@@ -6,8 +6,7 @@
 %
 %  Copyright 2014 the statnet development team
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\name{tReachableSetSizes}
-\alias{tReachableSetSizes}
+\name{tReach}
 \alias{tReach}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
@@ -17,8 +16,8 @@ computes sizes of temporally reachable sets in a dynamicNetwork
 computes sizes of temporally reachable sets in a dynamicNetwork, using either a full census or sample of starting vertices of the specified size
 }
 \usage{
-tReachableSetSizes(nd, direction = c("fwd","bkwd"), sample = FALSE)
-tReach(nd, direction = c("fwd","bkwd"))
+tReach(nd, direction = c("fwd","bkwd"), sample=network.size(nd),
+      start, end,  graph.step.time=0)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -29,23 +28,26 @@ tReach(nd, direction = c("fwd","bkwd"))
  currently only \code{'fwd'} works, to calculate the sizes forward-reachable sets (as opposed to backwards-reachable)
 }
   \item{sample}{
- default is \code{FALSE}, if numeric, indicates the size of the sample of vertices to use to calculate the reachable sets
+  numeric, indicates the size of the sample of vertices to use to calculate the reachable sets
 }
+\item{start}{optional numeric start time to begin path search}
+\item{end}{optional numeric time to end path search }
+\item{graph.step.time}{How much time should be added for each edge traversal (graph hop)? See \code{\link{tPath}} for details.} 
 }
 \details{
-Calls \code{link{tPath}} on with each starting vertex to determine the sizes of the sets of vertices that are reachable. If sample is set to a numeric value, it will only sample that many vertices instead of doing the (expensive) full census.
-
-\code{tReach} calculates the fraction of the vertices in the network than each vertex can reach (or be reached by if \code{direction='bkwd'}) assuming a start at the beginning of the network. 
+\code{tReach} calls \code{link{tPath}} on with each starting vertex to determine the sizes of the sets of vertices that are reachable. If \code{sample} is set to something less than the size of the network, it will sample that many vertices instead of doing the (expensive) full census.  Note that when the vertices are chosen as a sample, results may vary between calls to this function
 }
+
+ 
 \value{
-For \code{tReachableSetSizes},a vector giving the sizes of the set of vertices reachable from each seed vertex. For \code{tReach}, the same vector divided by the number of vertices in the network. 
+a vector of length equal to \code{sample} giving the sizes of the set of vertices reachable from each seed vertex within the specified time bounds
 }
 
 \author{
 skyebend
 }
 \note{
-Needs additional options for time range specification, implementation of backwards sets
+Needs implementation of backwards sets
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
@@ -55,14 +57,14 @@ See also as \code{\link{tPath}}
 }
 \examples{
 data(moodyContactSim)
-tReachableSetSizes(moodyContactSim)
-
-# only sample 3 paths
-tReachableSetSizes(moodyContactSim,sample=3)
-
-# what fraction of the network could each vertex reach?
 tReach(moodyContactSim)
 
+# only sample 3 paths
+tReach(moodyContactSim,sample=3)
+
+# what fraction of the network could each vertex reach?
+tReach(moodyContactSim)/network.size(moodyContactSim)
+
 # what fraction of the network could each vertex be reached by?
-tReach(moodyContactSim,direction='bkwd')
+tReach(moodyContactSim,direction='bkwd')/network.size(moodyContactSim)
 }

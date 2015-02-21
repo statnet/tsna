@@ -117,9 +117,9 @@ expect_equal(length(setdiff(fwdFound,epiFound)),0)
 # ------ tests for the reachable set sizes ----
 
 data(moodyContactSim)
-expect_equal(tReachableSetSizes(moodyContactSim),c(10, 14, 6, 16, 5, 3, 3, 5, 2, 16, 10, 3, 15, 3, 2, 8))
+expect_equal(sort(tReach(moodyContactSim)),c(2,  2,  3,  3,  3,  3,  5,  5,  6,  8, 10, 10, 14, 15, 16, 16))
 
-expect_equal(tReachableSetSizes(moodyContactSim,direction='bkwd'),c(9, 8, 5, 9, 7, 8, 8, 9, 9, 3, 9, 8, 8, 4, 8, 9))
+expect_equal(sort(tReach(moodyContactSim,direction='bkwd')),c(3, 4, 5, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9))
 
 
 
