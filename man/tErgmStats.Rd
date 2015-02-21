@@ -1,5 +1,5 @@
-\name{tSummaryStats}
-\alias{tSummaryStats}
+\name{tErgmStats}
+\alias{tErgmStats}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Calculate network summary statistics at multiple time points
@@ -8,14 +8,14 @@ Calculate network summary statistics at multiple time points
 Applies a ergm-style formula of network statistics to cross-sectional networks collapsed from a networkDynamic at multiple time points to construct a matrix of values describing the change in statistics over time. 
 }
 \usage{
-tSummaryStats(nd, f, start, end, time.interval = 1)
+tErgmStats(nd, formula, start, end, time.interval = 1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{nd}{
 \code{\link{networkDynamic}} object to be evaluated
 }
-  \item{f}{
+  \item{formula}{
 a character string providing the 'right hand side' of an ergm formula. For example \code{'~ edges + concurrent'}
 }
   \item{start}{
@@ -49,15 +49,15 @@ See also \code{\link[ergm]{summary.statistics.formula}} and \code{\link[ergm]{er
 \examples{
  library(networkDynamicData)
  data(concurrencyComparisonNets)
- tSummaryStats(base,'~edges+concurrent',
+ tErgmStats(base,'~edges+concurrent',
                start=0,end=100,time.interval = 10)
  # show as multiple plots
  plot(
-   tSummaryStats(base,'~edges+concurrent',
+   tErgmStats(base,'~edges+concurrent',
                 start=0,end=100,time.interval = 10),
                 
                 )
  data(windsurfers)
- tSummaryStats(windsurfers,'~edges+degree(c(1,2))')
+ tErgmStats(windsurfers,'~edges+degree(c(1,2))')
  
 }

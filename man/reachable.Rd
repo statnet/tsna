@@ -57,6 +57,6 @@ TODO:  should be able to specifiy edge weight attribute to be included in time c
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-See also \code{\link{tPathDistance}} for a dramatically faster implementation
+See also \code{\link{tPath}} for a dramatically faster implementation
 }
 

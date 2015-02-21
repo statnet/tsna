@@ -38,7 +38,7 @@ This document assumes familiarity with general concpets of Social Network Analys
 library(tsna)
 ```
 
-This vignette also makes use of various example datasets provided by the `networkDynamicData` package, and various static Social Network Analysis measures provided by the \code{\link{sna}} package. 
+This vignette also makes use of various example datasets provided by the `networkDynamicData` package, and various static Social Network Analysis measures provided by the `sna` package. 
 
 ```{r}
 library(networkDynamicData)
@@ -51,25 +51,25 @@ Many of the measures included in this package may be formaly idental to measures
 
 ## Durations and densities
 
-`tEdgeDuration`
+`edgeDuration`
 `tDegree` `tEdgeDensity` `connectedDuration`
 
 ### Distributions of edge durations
 
-We would expect that since the concurrency sims all had the same dissolution paramter, they should all have similarly shaped distrubtions of edge durations
+We would expect that since the concurrency sims all had the same dissolution parameter, they should all have similarly shaped distrubtions of edge durations
 
 ```{r}
 data(concurrencyComparisonNets)
 par(mfcol=c(3,1))
-hist(tEdgeDuration(base),ylim=c(0,800))
-hist(tEdgeDuration(middle),ylim=c(0,800))
-hist(tEdgeDuration(monog),ylim=c(0,800))
+hist(edgeDuration(base),ylim=c(0,800))
+hist(edgeDuration(middle),ylim=c(0,800))
+hist(edgeDuration(monog),ylim=c(0,800))
 par(mfcol=c(1,1))
 ```
 
 How often do edges re-occur in these networks? i.e. which edges have more than one spell?
 ```{r}
-which(tEdgeDuration(monog,mode='counts')>1)
+which(edgeDuration(monog,mode='counts')>1)
 ```
 
 
@@ -105,7 +105,7 @@ text(connectedDuration(cls33_10_16_96, mode='counts',neighborhood = 'out'),
      label=cls33_10_16_96%v%'type',cex=0.8,pos=4)
 ```
 
-Would expect a strong relationship between the number of people contacted and the total contact time
+Would expect a strong relationship between the number of people contacted and the total contact time.
 
 ```{r}
 data(hospital_contact)
@@ -145,7 +145,7 @@ Plot histograms for the tie durations for 9 example networks
 ```{r}
 par(mfcol=c(3,3))
 for (n in seq_along(nets)){
-  hist(tEdgeDuration(nets[[n]]),main=names(nets)[n],xlab='duration')
+  hist(edgeDuration(nets[[n]]),main=names(nets)[n],xlab='duration')
 }
 par(mfcol=c(1,1))
 ```
@@ -157,7 +157,7 @@ If we look at it by event counts per edge instead of durations, the momentary ev
 ```{r}
 par(mfcol=c(3,3))
 for (n in seq_along(nets)){
-  hist(tEdgeDuration(nets[[n]],mode = 'counts'),main=names(nets)[n],xlab='duration')
+  hist(edgeDuration(nets[[n]],mode = 'counts'),main=names(nets)[n],xlab='duration')
 }
 par(mfcol=c(1,1))
 ```
@@ -200,7 +200,7 @@ The `tDegree` function report momentary degree of each vertex in networkDynamic 
 
 ## Temporal Paths and metrics
 
-`tPathDistance` `tReach` `tReachableSetSizes`
+`tPath` `tReach` `tReachableSetSizes`
 
 ### Explanation of paths in network
 
@@ -232,7 +232,7 @@ coordinates<- plot(moodyContactSim,
 
 Extract a forward temporal path starting from vertex 10, 
 ```{r}
-v10path<-tPathDistance(moodyContactSim,v=10,start=0)
+v10path<-tPath(moodyContactSim,v=10,start=0)
 print(v10path)
 ```
 The `tPathDistaince` function returns a list with two components.  The `$distance` componet indicates the (elapsed) time at which each vertex is reached from the starting vertex v.  The `$previous` component gives, for each vertex, the vertex id of the previous vertex along path. This path information information can be used to construct a new network object containing only the path info.
@@ -240,14 +240,14 @@ The `tPathDistaince` function returns a list with two components.  The `$distanc
 Using the coordinates from previous plot to make it easier to follow
 
 ```{r}
-v10pathNet<-createPaths(v10path)
+v10pathNet<-as.network(v10path)
 plot(v10pathNet,coord=coordinates,displaylabels=TRUE)
 ```
 
 The `tsna` package provides a utility function plot the path on top of the static aggregate network, along with the distance (transmission time) for each edge. 
 ```{r}
 # extract an alternate path, starting from vertex 1
-v1path<-tPathDistance(moodyContactSim,v=1,start=0)
+v1path<-tPath(moodyContactSim,v=1,start=0)
 
 # set up side-by-side plot
 par(mfcol=c(01,2))
@@ -368,16 +368,16 @@ Each of the model terms provided by the ergm package (and its various add-ons) p
 The tsna package provides a wrapper to evaluate the statistics at multiple time points and return the result as a time series (ts) object. 
 
 ```{r}
- tSummaryStats(base,'~edges+concurrent',
+ tErgmStats(base,'~edges+concurrent',
                start=0,end=100,time.interval = 10)
  # show as multiple plots
  plot(
-   tSummaryStats(base,'~edges+concurrent',
+   tErgmStats(base,'~edges+concurrent',
                 start=0,end=100,time.interval = 10),
                 
                 )
  data(windsurfers)
- tSummaryStats(windsurfers,'~edges+degree(1:2)')
+ tErgmStats(windsurfers,'~edges+degree(1:2)')
 ```
 
 Note that some ergm terms (such as `degree`) produce multiple statistics in the output. 

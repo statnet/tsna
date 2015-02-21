@@ -9,20 +9,20 @@
 
 \name{duration}
 \alias{duration}
-\alias{tEdgeDuration}
-\alias{tVertexDuration}
+\alias{edgeDuration}
+\alias{vertexDuration}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-compute observed activity durations or event counts for edges or vertices
+Compute Observed Activity Durations or Event Counts for Edges or Vertices
 }
 \description{
 Computes observed activity durations or event counts for edges or vertices, aggregating at the edges, spell, or dyads level.  
 }
 \usage{
-tEdgeDuration(nd, mode = c("duration", "counts"), subject = c("edges", "spells", "dyads"),
+edgeDuration(nd, mode = c("duration", "counts"), subject = c("edges", "spells", "dyads"),
           e = seq_along(nd$mel), start = NULL, end = NULL, active.default = TRUE)
           
-tVertexDuration(nd, mode = c("duration", "counts"), subject = c("vertices", "spells"),
+vertexDuration(nd, mode = c("duration", "counts"), subject = c("vertices", "spells"),
      v = seq_len(network.size(nd)), active.default = TRUE)           
 }
 %- maybe also 'usage' for other objects documented here.
@@ -34,7 +34,7 @@ networkDynamic object to be evaluated
 option determining if the \code{'duration'} of the spells should be summed, or simply the \code{'counts'} of the number of spells.  The later option is useful when the network contains events of zero duration. 
 }
   \item{subject}{
-option describing the unit of analysis that the durations or counts should be aggregated at. \code{'spells'} considers each event independently. For \code{tVertexDuration}, \code{'vertices'} sums all the spells corresponding to a single vertex id.  For \code{tEdgeDuration}, \code{'edges'} sums all of the spells corresponding to a single edge id and \code{'dyads'} sums all of the spells coresponding to a single (directed) tail-head pair (this means spells from multiplex edges conecting the same vertices will be added together).
+option describing the unit of analysis that the durations or counts should be aggregated at. \code{'spells'} considers each event independently. For \code{tVertexDuration}, \code{'vertices'} sums all the spells corresponding to a single vertex id.  For \code{edgeDuration}, \code{'edges'} sums all of the spells corresponding to a single edge id and \code{'dyads'} sums all of the spells coresponding to a single (directed) tail-head pair (this means spells from multiplex edges conecting the same vertices will be added together).
 }
   \item{e}{
  numeric vector of edge ids to consider. 
@@ -79,13 +79,13 @@ See also \code{\link{as.data.frame.networkDynamic}}
 # a real-world contact network
 require(networkDynamicData)
 data(hospital_contact)
-summary(tEdgeDuration(hospital,subject='edges'))
-summary(tEdgeDuration(hospital,mode='counts',subject='edges'))
+summary(edgeDuration(hospital,subject='edges'))
+summary(edgeDuration(hospital,mode='counts',subject='edges'))
 
 # look at the vertex durations for a network were 
 # vertices are not present every day
 require(networkDynamic)
 data(windsurfers)
-tVertexDuration(windsurfers)
+vertexDuration(windsurfers)
 }
 

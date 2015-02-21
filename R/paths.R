@@ -10,9 +10,9 @@
 # functions for evaluating temporal paths in networks
 
 # this is a wrapper function to check args and call the appropriate paths method
-tPathDistance<-function(nd,v, 
+tPath<-function(nd,v, 
                  direction=c('fwd','bkwd'),
-                 constraint=c('earliest.arrive', 'latest.depart'),
+                 type=c('earliest.arrive', 'latest.depart'),
                  start,end,active.default=TRUE,
                  graph.step.time=0){
   
@@ -30,26 +30,30 @@ tPathDistance<-function(nd,v,
   }
   
   direction<-match.arg(direction)
-  constraint<-match.arg(constraint)
+  type<-match.arg(type)
   
   # check and determine starting and ending times
   
   # determine which version to call
   values<-NULL
   if (direction=='fwd'){
-    if (constraint=='earliest.arrive'){
+    if (type=='earliest.arrive'){
       values <- paths.fwd.earliest(nd=nd,v=v,start=start,end=end,active.default=active.default,graph.step.time=graph.step.time)
     } 
     
   } else {  # direction is backwards
-    if (constraint=='latest.depart'){
+    if (type=='latest.depart'){
       values <- paths.bkwd.latest(nd=nd,v=v,start=start,end=end,active.default=active.default,graph.step.time=graph.step.time)
     } 
   }
   if (is.null(values)){
-    stop('unable to calculate ',direction, ' ',constraint, ' paths because the method is not yet implemented')
+    stop('unable to calculate ',direction, ' ',type, ' paths because the method is not yet implemented')
   }
-  
+  # record meta information about path type
+  values$'direction'<-direction
+  values$'type'<-type
+  # prepent the 'tPath' class
+  class(values)<-c('tPath',class(values))
   return(values)
 }
 

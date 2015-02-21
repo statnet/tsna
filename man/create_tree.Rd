@@ -7,23 +7,24 @@
 %  Copyright 2014 the statnet development team
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\name{createPaths}
-\alias{createPaths}
+\name{as.network.tPath}
+\alias{as.network.tPath}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Create a network object from the results of a path search
+Create a network object from a \code{tPath} object -- the results of a path search
 }
 \description{
-Takes the results of a path search (\code{\link{paths}}) as input and creates a new network object representing the path tree which can be plotted for debugging, etc. 
+Takes the results of a temporal path search (a \code{\link{tPath}}) as input and creates a new network object representing the path tree which can be plotted for debugging, etc. 
 }
 \usage{
-createPaths(path.results)
+  \method{as.network}{tPath}(x, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{path.results}{
-A \code{list} with two elements, the output of a path search. The first, named 'distance' is a vector with length corresponding to the size of the network, each element of which is the distance for each vertex, the second, 'previous', is a vector of the ids of the previous vertex on the path. 
+  \item{x}{
+A \code{tPath} list with several elements, the output of a path search.
 }
+  \item{...}{possible additional arguments}
 }
 \details{
 Attributes of original network are not copied
@@ -46,8 +47,8 @@ See also \code{\link{paths}}.
 }
 \examples{
   data(moodyContactSim)
-  v1path<-tPathDistance(moodyContactSim,v=1)
-  v1tree<-createPaths(v1path)
+  v1path<-tPath(moodyContactSim,v=1)
+  v1tree<-as.network(v1path)
   plot(v1tree,displaylabels=TRUE)
 }
 

@@ -10,9 +10,12 @@
 # utility methods for tsna stuff
 
 # create a tree network from the results of a path search
-createPaths<-function(path.results){
-  distance<-path.results$distance
-  previous<-path.results$previous
+as.network.tPath<-function(x,...){
+  if(!is.tPath(x)){
+    stop("as.network.tPath requires an object of class 'tPath'")
+  }
+  distance<-x$distance
+  previous<-x$previous
   vids<-which(distance<Inf)
   n<-length(vids)
   tree<-network.initialize(n,directed=TRUE)
@@ -27,13 +30,21 @@ createPaths<-function(path.results){
   return(tree)
 }
 
+is.tPath<-function(x){
+  if('tPath'%in%class(x)){
+    return(TRUE)
+  } else {
+    return(FALSE)
+  }
+}
+
 # plot a network with a hilited path
 # and some sensible defaults
 plotPaths<-function(nd,path.results,path.col="#FF000055",...){
   # plot the network normally and save coords
   coords<-plot.network(nd,...)
   # create another network that is the tree
-  tree<-createPaths(path.results)
+  tree<-as.network(path.results)
   # get an appropriate coordinate subset
   treeCoords<-coords[which(path.results$distance<Inf),]
   # get a set of onset times as edge labels

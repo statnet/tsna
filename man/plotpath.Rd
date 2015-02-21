@@ -35,7 +35,7 @@ additional arguments to be passed to \code{plot.network}.
 }
 }
 \details{
-Plots the \code{networkDynamic} object using the normal \code{plot.network} function and \code{...} areguments.  Then uses \code{\link{createPaths}} to extract a tree using the \code{path.results}, and overplots the edges of the tree onto the network plot using the \code{path.col} color.  
+Plots the \code{networkDynamic} object using the normal \code{plot.network} function and \code{...} areguments.  Then uses \code{\link{as.network.tPath}} to extract a tree using the \code{path.results}, and overplots the edges of the tree onto the network plot using the \code{path.col} color.  
 }
 \value{
 Generates a network plot with a hilighted path, invisibly returns the plot coordinates. 
@@ -46,11 +46,11 @@ skyebend
 }
 
 \seealso{
-See also \code{\link{tPathDistance}}
+See also \code{\link{tPath}}
 }
 \examples{
 data(moodyContactSim)
-v10path<-tPathDistance(moodyContactSim,v=10,start=0)
+v10path<-tPath(moodyContactSim,v=10,start=0)
 plotPaths(moodyContactSim,v10path,displaylabels=TRUE)
 }
 
