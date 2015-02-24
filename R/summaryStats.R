@@ -18,10 +18,12 @@ tErgmStats<-function(nd, formula,start, end, time.interval=1){
     times<-seq(from = start, to=end,by = time.interval)
     
     # rquires that ergm is loaded
-    if(require(ergm,quietly=TRUE)){
+    # if(requireNamespace('ergm',quietly=TRUE)){
+    # requireNamespace line above is prefered by CRAN, but if ergm is not loaded the necessary terms are also not loaded
+    if(require('ergm',quietly=TRUE)){
       stats<-lapply(times,function(t){
         net<-network.collapse(nd,at=t)
-        summary(as.formula(paste('net',formula)))
+        ergm::summary.statistics.formula(as.formula(paste('net',formula)))
       })
       
     } else {
@@ -88,7 +90,7 @@ tSnaStats<-function(nd, snafun,start, end, time.interval=1,...){
   args<-list(...)
   
   # rquires that sna package is loaded
-  if(require(sna,quietly=TRUE)){
+  if(requireNamespace('sna',quietly=TRUE)){
     stats<-lapply(times,function(t){
       # extract the network for the time
       net<-network.collapse(nd,at=t)
@@ -114,7 +116,7 @@ tSnaStats<-function(nd, snafun,start, end, time.interval=1,...){
             args<-c(args,gmode='graph')
           }
         }
-        # otherwise don't add a derm for directedness 
+        # otherwise don't add a term for directedness 
       }
       diagTerm<-funTerms[which(funTerms[,1]==snafun),4]
       if(diagTerm=='diag' && !'diag'%in%names(args)){
@@ -124,8 +126,9 @@ tSnaStats<-function(nd, snafun,start, end, time.interval=1,...){
           args<-c(args,diag=FALSE)
         }
       }
-      
-      do.call(snafun,args = args)
+      # prepend the 'sna::' namespace in case the library is not actually loated
+      fun<-getExportedValue(ns = 'sna',name = snafun)
+      do.call(fun,args = args)
 
     })
     

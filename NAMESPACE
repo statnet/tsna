@@ -23,3 +23,5 @@ export(
   #meanReachTimes,
   #timeToReach
   )
+
+S3method(as.network,tPath)
