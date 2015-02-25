@@ -170,6 +170,36 @@ test_that("graph step time param works",{
   
 })
 
+# ----- tests for shortest geo fwd path ----
+# construct a network in which distinguishes paths (
+#
+tel<-matrix(c(2,3,1,2,
+              3,4,2,5,
+              4,5,5,3,
+              0,1,1,3,
+              5,6,1,4,
+              7,8,4,3),byrow=TRUE,ncol=4)
+# shortest path from 1 to 3 is the direct route, arriving at time
+test<-networkDynamic(edge.spells=tel)
+plot(test,displaylabels=TRUE,edge.label=paste(get.edge.attribute(test,'active',unlist=FALSE)),label.col='blue',edge.label.cex=0.7)
+
+#path starting at time 0
+
+path0<-tPath(test,v=1,type='fewest.steps')
+expect_equal(path0$distance,c(0, 2, 0, 5, 3))
+expect_equal(path0$previous,c(0, 1, 1, 1, 2))
+expect_equal(path0$geodist,c(0, 1, 1, 1, 2))
+
+# path starting at v1 time 1
+# (direct path to v3 eliminated because it is too early)
+#   shortest geodesic path to v3 is  1-3
+#   earliest temporal path to v3 is 1-2-5-3
+#   shortest geodesic temporal path to v3 is 1-4-3
+path1<-tPath(test,v=1,start=1,type='fewest.steps')
+expect_equal(path1$distance,c(0, 1, 6, 4, 2))
+expect_equal(path1$previous,c(0, 1, 4, 1, 2))
+expect_equal(path1$geodist,c(0, 1, 2, 1, 2))
+
 
 # test for a later-leaving path arriving earlier
 

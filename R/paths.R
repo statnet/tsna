@@ -12,7 +12,7 @@
 # this is a wrapper function to check args and call the appropriate paths method
 tPath<-function(nd,v, 
                  direction=c('fwd','bkwd'),
-                 type=c('earliest.arrive', 'latest.depart'),
+                 type=c('earliest.arrive', 'latest.depart','fewest.steps'),
                  start,end,active.default=TRUE,
                  graph.step.time=0){
   
@@ -41,7 +41,9 @@ tPath<-function(nd,v,
   if (direction=='fwd'){
     if (type=='earliest.arrive'){
       values <- paths.fwd.earliest(nd=nd,v=v,start=start,end=end,active.default=active.default,graph.step.time=graph.step.time)
-    } 
+    } else if (type=='fewest.steps'){
+      values <- paths.fwd.fewest.steps(nd=nd,v=v,start=start,end=end,active.default=active.default,graph.step.time=graph.step.time)
+    }
     
   } else {  # direction is backwards
     if (type=='latest.depart'){
@@ -168,6 +170,104 @@ paths.fwd.earliest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=
   }
 
   return(list(distance=dist,previous=previous,geodist=geodist))
+}
+
+# this finds the forward path with the fewest number of intermediate vertices
+paths.fwd.fewest.steps<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0){
+  
+  if (missing(start) || is.null(start)){
+    # TODO: use obs.period if it exists
+    changes<-get.change.times(nd)
+    if(length(changes)>0){
+      start<-min(changes)
+      # message("'start' parameter was not specified, using value first network change '",start)
+    } else {
+      # can't use inf, because all distances will be inf
+      start<-0
+      message("'start' time parameter for paths was not specified, no network changes found,  using start=",start)
+    }
+  }
+  if (missing(end) || is.null(end)){
+    # TODO: use obs.period if it exists
+    end<-Inf
+  }
+  
+  if (graph.step.time<0){
+    stop("'graph.step.time' paramter must be a positive value")
+  }
+  
+  # TODO: self-loop behavior?
+  # TODO: multiplex behavior?
+  
+  times<-rep(Inf,network.size(nd))     # default all vertices to un-reachable (Inf)
+  geodist<-rep(Inf,network.size(nd))
+  previous<-rep(0,network.size(nd)) # array used for reconstructing the path
+  times[v]<-0                          # set distance to self to 0
+  geodist[v]<-0
+  toCheck<-rep(TRUE,network.size(nd)) # make a list of unchecked vertices
+  # begin depth first search loop
+  while(sum(toCheck)>0){
+    minToCheck<-which.min(geodist[toCheck])  # select 'closest' vertex to check in terms of geodist
+    # have to translate index found back to network index
+    u<-which(toCheck)[minToCheck]
+    toCheck[u]<-FALSE
+    if (times[u]>= end-start){  #NOTICE:  DISTANCE IS NOT ABSOLUTE TIME  should be end-start
+      break;  # no more vertices are reachable from v within time range
+    }
+    
+    nghE<-get.edgeIDs(nd,v=u,neighborhood='out') # check neighbors of u
+    for (e in nghE){
+      # get vertex index of u's neighbor
+      w <- ifelse(nd$mel[[e]]$inl==u,nd$mel[[e]]$outl,nd$mel[[e]]$inl)   
+      # we ignore graph hop time
+      # so "distance" is how long we have to wait from 'now' until onset of edge
+      spls<-nd$mel[[e]]$atl$active
+      if (is.null(spls)){ # handle possibly missing activity value, assume always active
+        if (active.default){
+          time_u_w<-0+graph.step.time
+          geodist_u_w<-1 
+        } else {
+          time_u_w<-Inf
+          geodist_u_w<-Inf
+        }
+        
+      } else { # since edge activities are defined ..
+        # find the index of the active spell
+        splIndex<-spells.hit(needle=c(start+times[u],end),haystack=spls)
+        # if we are using graph.step.time > 0, may need to search for a later spells
+        while (splIndex>0){
+          #check remaining duration of edge spell is long enough for transmission to occur
+          if (max(0,(spls[splIndex,1]-start)-times[u])+graph.step.time > spls[splIndex,2]){
+            #query again to see if there are any spells active after selected spell
+            splIndex<-spells.hit(needle=c(spls[splIndex,2],end),haystack=spls)
+          } else {
+            break() # this spell duration is ok, so keep on going with it
+          }
+        }
+        if (splIndex<0){ # no active spells found so
+          geodist_u_w<-Inf
+          time_u_w<-Inf  # vertex is never reachable in the future / within time bound
+          
+        } else {
+          # otherwise additional distance is the later of 0 or the difference between the 
+          # 'current' time and the onset of the edge
+          # if we are counting graph steps as part of the distance, distance can't be less than graph step
+          time_u_w<-max(0,(spls[splIndex,1]-start)-times[u])+graph.step.time #
+          geodist_u_w <- 1 # graph step distances (unweighted)
+        }
+      }
+      geodist_v_w <-geodist[u]+geodist_u_w 
+      time_v_w <-times[u]+time_u_w
+      if (geodist_v_w < geodist[w]){ # if this new GEODESIC DISTANCE is shorter, update distance and times
+        geodist[w]<-geodist_v_w
+        times[w]<-time_v_w
+        previous[w]<-u
+      }
+    }
+  }
+  
+  
+  return(list(distance=times,previous=previous,geodist=geodist))
 }
 
 # compute reverse paths 
