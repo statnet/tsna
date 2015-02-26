@@ -242,8 +242,7 @@ The `tPathDistaince` function returns a list with two components.  The `$distanc
 Using the coordinates from previous plot to make it easier to follow
 
 ```{r}
-v10pathNet<-as.network(v10path)
-plot(v10pathNet,coord=coordinates,displaylabels=TRUE)
+plot(v10path,coord=coordinates,displaylabels=TRUE)
 ```
 
 The `tsna` package provides a utility function plot the path on top of the static aggregate network, along with the distance (transmission time) for each edge. 
@@ -255,10 +254,16 @@ v1path<-tPath(moodyContactSim,v=1,start=0)
 par(mfcol=c(01,2))
 
 # plot each path hilighted on network
-plotPaths(moodyContactSim,v10path,displaylabels=TRUE,coord=coordinates, main='fwd path from v10')
-plotPaths(moodyContactSim,v1path,displaylabels=TRUE,coord=coordinates, main = 'fwd path from v1')
-
+plotPaths(moodyContactSim,v10path,coord=coordinates, main='fwd path from v10')
+plotPaths(moodyContactSim,v1path,coord=coordinates, main = 'fwd path from v1')
 par(mfcol=c(1,1))
+```
+
+It is also possible to pass in a list of multiple paths and draw them on the same network.
+
+```{r}
+# or draw both plots on the  them both on the same network
+plotPaths(moodyContactSim,coord=coordinates,list(v10path,v1path))
 ```
 
 

@@ -16,17 +16,16 @@ as.network.tPath<-function(x,...){
   }
   distance<-x$distance
   previous<-x$previous
+  tree<-network.initialize(length(distance),directed=TRUE)
   vids<-which(distance<Inf)
-  n<-length(vids)
-  tree<-network.initialize(n,directed=TRUE)
-  network.vertex.names(tree)<-vids
   for(v in seq_along(vids)){
-    
     if(previous[vids[v]]!=0){ # source vertex will have previous id of 0, so out of range
-      fromId<-match(previous[vids[v]],vids)
-      add.edges.active(tree,tail=fromId,head=v,onset=distance[vids[v]],terminus=Inf)
+      fromId<-previous[vids[v]]
+      add.edges.active(tree,tail=fromId,head=vids[v],onset=distance[vids[v]],terminus=Inf)
     }
   }
+  tree%v%'distance'<-distance
+  tree%v%'geodist'<-x$geodist
   return(tree)
 }
 
@@ -38,26 +37,64 @@ is.tPath<-function(x){
   }
 }
 
-# plot a network with a hilited path
-# and some sensible defaults
-plotPaths<-function(nd,path.results,path.col="#FF000055",...){
-  # plot the network normally and save coords
-  coords<-plot.network(nd,...)
-  # create another network that is the tree
-  tree<-as.network(path.results)
-  # get an appropriate coordinate subset
-  treeCoords<-coords[which(path.results$distance<Inf),]
-  # get a set of onset times as edge labels
+plot.tPath<-function(x,edge.col="red",
+                     edge.label.col=edge.col,
+                     edge.lwd=10,
+                     edge.label.cex=0.7,
+                     displaylabels=TRUE,
+                     displayisolates=FALSE,
+                     jitter=FALSE,
+                     vertex.lwd=(x$distance==0)*4+1,
+                     vertex.cex=(x$distance==0)*1.5,
+                     vertex.col=NA,...){
+  tree<-as.network(x)
   edgeTimes<-sapply(get.edge.activity(tree),'[',1)
   # plot the tree as an overlay
-  plot.network(tree,coord=treeCoords,
-               edge.lwd=10,
-               edge.col=path.col,
+  plot.network(tree,
+               displaylabels=displaylabels,
+               displayisolates=displayisolates,
+               edge.lwd=edge.lwd,
+               edge.col=edge.col,
                edge.label=edgeTimes,
-               edge.label.col=path.col,
-               edge.label.cex=0.7,
-               new=FALSE,vertex.cex=0,
-               jitter=FALSE)
+               edge.label.col=edge.label.col,
+               edge.label.cex=edge.label.cex,
+               vertex.lwd=vertex.lwd,
+               vertex.cex=vertex.cex,
+               vertex.border=edge.col,
+               vertex.col=vertex.col,
+               jitter=jitter,...)
+ 
+}
+
+# plot a network with a hilited path
+# and some sensible defaults
+plotPaths<-function(nd,paths,
+                    path.col=rainbow(length(paths),alpha=0.5),
+                    displaylabels=TRUE, coord = NULL,...){
+  # plot the network normally and save coords (if not already passed in)
+  coords<-plot.network(nd,displaylabels=displaylabels,coord=coord,...)
+  # check if it is a single path or a list of paths
+  if (is.tPath(paths)){
+    plot(paths,
+         coord=coords,
+         edge.col=path.col[1],
+         new=FALSE, # to make sure it overplots on existing
+         displaylabels=FALSE,
+         displayisolates=TRUE, # need to include isolates or it messages up the line scaling becauses sizes to area of vertices actually drawn
+         ...)
+  } else {
+    path.col<-rep(path.col,length(paths))
+    for (p in 1:length(paths)){
+      # create another network that is the tree and overplot it
+      plot(paths[[p]],
+           coord=coords,
+           edge.col=path.col[p],
+           new=FALSE, # make sure it overplotts on existing
+           displaylabels=FALSE,
+           displayisolates=TRUE, # need to include isolates or it messages up the line scaling becauses sizes to area of vertices actually drawn
+           ...)
+    }
+  }
   invisible(coords)
 }
 

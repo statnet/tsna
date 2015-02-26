@@ -41,7 +41,7 @@ These functions compute and use temporal paths (network geodesics that are const
 }
 
 \section{Rates and Duration}{
-These functions can be used to compute distributions of (observed) activity durations in a data structure.  Note that due to censoring (edges that begin before or end after the time observation window for the network) the observed durations may be biased away from the 'real' values (or model parameters).  The duration estimate functions use various types of survival analysis to return estimates of these values.  
+These functions can be used to compute distributions of (observed) activity durations in a data structure. Note that due to censoring (edges that begin before or end after the time observation window for the network) the observed durations may be biased away from the 'real' values (or model parameters).  The duration estimate functions use various types of survival analysis to return estimates of these values.  
   \itemize{
     \item \code{\link{edgeDuration}}
     \item \code{\link{vertexDuration}}
