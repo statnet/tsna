@@ -53,7 +53,7 @@ is.tPath(x)
  time at which to begin searching. Edges that terminate before this time will not be considered. If not specified, defaults to earliest time observed on the network according to \code{get.change.times}.
 }
   \item{end}{
- time to end the path search.  Edges that onset on or after this time will not be considered.
+ time to end the path search.  Edges that onset on or after this time will not be considered in the path search.
 }
   \item{active.default}{
   Boolean, default TRUE. Should edges with no timing information be considered active by default?
@@ -70,7 +70,6 @@ THESE ARE NOT CORRECTLY IMPLEMENTED YET:
 
 \code{'bwkd'} \code{'latest.depart'} is essentially the inverse of fwd earliest arrive.  It finds the latest time paths backwards from the initial seed vertex. This is the \emph{latest-leaving} time. Note that the distance returned are positive, but represent the latest distance back in time from the \code{end} parameter time at which a vertex can reach \code{v}. 
 
-Because we don't have an efficient algorithm for maximizing path length, \code{paths.fwd.latest} first finds the set of reachable vertices using the earliest path, and the finds the latest time those vertices can be reached by calling \code{paths.bwkd.latest} on each. Distances represent the latest time a path could leave \code{v} and still reach the corresponding vertex
 
 The \code{is.tPath} function checks if an object has the class \code{tPath}.
 

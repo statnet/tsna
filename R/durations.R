@@ -176,3 +176,21 @@ meanTimeToChange<-function(nD){
   return((bounds[2]-bounds[1])/changeCount  )
 }
 
+
+nghOverlap<-function(nd, v, alter,neighborhood =c("out", "in", "combined"), type=c('bounds','total')){
+  neighborhood<-match.arg(neighborhood)
+  type<-match.arg(type)
+  # is alter a neighbor of v?
+  lapDur<-NA
+  eids<-get.edgeIDs(nd,v=v,alter=alter,neighborhood = neighborhood)
+  if (length(eids)>0){
+    if (type=='bounds'){
+      bounds<-range(get.edge.activity(nd,e = eids,as.spellList = TRUE)[c('onset','terminus')])
+      lapDur<-bounds[2]-bounds[1]
+    } else {
+      # sum up all the spells on the edges
+      lapDur<-sum(get.edge.activity(nd,e = eids,as.spellList = TRUE)$duration)
+    }
+  }
+  return(lapDur)
+}
