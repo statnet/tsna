@@ -3,6 +3,7 @@ import(statnet.common,network,networkDynamic)
 export(
   tPath,
   is.tPath,
+  plot.tPath,
   as.network.tPath,
   tEdgeDensity,
   edgeDuration,
@@ -25,3 +26,4 @@ export(
   )
 
 S3method(as.network,tPath)
+S3method(plot,tPath)
