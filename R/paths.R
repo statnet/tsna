@@ -70,7 +70,7 @@ tPath<-function(nd,v,
 # TODO: add option to make direct of edge evaluation explicit?
 
 # this finds an earliest-ending path
-paths.fwd.earliest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0){
+paths.fwd.earliest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0,alter){
   
   if (missing(start) || is.null(start)){
     # TODO: use obs.period if it exists
@@ -151,6 +151,12 @@ paths.fwd.earliest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=
       if (dist_v_w < dist[w]){ # if this new value is shorter, update
         dist[w]<-dist_v_w
         previous[w]<-u
+      }
+    }
+    # check if we have found the target alter, if so, stop searching
+    if (!missing(alter)){
+      if(all(toCheck[alter]==FALSE)){ # if all alters are checked
+        break;
       }
     }
   }

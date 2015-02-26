@@ -18,7 +18,7 @@ Currently the package consists of several groups of functions
   \item{basic tools for measuring durations of ties, rates of change, etc} 
   \item{utility functions for plotting, etc} 
 }
-The sections below provide some additional details
+The sections below provide some additional details.  The package vignette (\code{browseVignettes(package='tsna')}) gives additional examples and illustrations of key concepts.
 
 It is the intention that, like the \code{networkDynamic} package, tsna should support both continuous time and discrete time representations of networks.  However, we are prioritizing development of discrete time measures suitable for use with simulation data (i.e. \code{stergm} models) so many of the functions are still missing the necessary arguments to facilitate binning. 
 
