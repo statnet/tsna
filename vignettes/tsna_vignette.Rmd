@@ -266,14 +266,18 @@ It is also possible to pass in a list of multiple paths and draw them on the sam
 plotPaths(moodyContactSim,coord=coordinates,list(v10path,v1path))
 ```
 
+Notice that paths are directed (even if the underlying network is not) and not always symmetric.  For example v10 can reach v1, but 1 cannot reach 10.
 
+Also, the forward reachable set is not the same as the backwards reachable set
 
 ```{r}
-
+plotPaths(moodyContactSim, list(
+          tPath(moodyContactSim,v=10,direction='bkwd',type='latest.depart'),
+          tPath(moodyContactSim,v=10)))
 
 ```
 
-Notice that paths are directed (even if the underlying network is not) and not always symmetric.  For example v10 can reach v1, but 1 cannot reach 10.
+
 
 ### Compare earliest forward set sizes
 Characterize networks by looking at the distribution of sizes of fwd reachable sets. 

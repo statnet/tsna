@@ -23,6 +23,10 @@ tPath<-function(nd,v,
     stop("a 'v' argument with valid vertex ids was not given to specify starting vertex")
   }
   
+  if (network.size(nd)>0 && !v%in%seq_len(network.size(nd))){
+    stop(" the 'v' argument must be a vertex id in the appropriate range for the network size")
+  }
+  
   if (!missing(start)&!missing(end)){
     if (!is.null(start)&!is.null(end)){
       if(start>end){
@@ -72,9 +76,15 @@ tPath<-function(nd,v,
 # this finds an earliest-ending path
 paths.fwd.earliest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0,alter){
   
+  # check for negatively valued times to catch error condition in #1135
+  changes<-get.change.times(nd)
+  if(any(changes<0)){
+    warning("paths.fwd.earliest may give correct results if any of the edges have spells with time values less than zero.")
+  }
+  
   if (missing(start) || is.null(start)){
     # TODO: use obs.period if it exists
-    changes<-get.change.times(nd)
+    #changes<-get.change.times(nd)
     if(length(changes)>0){
       start<-min(changes)
       # message("'start' parameter was not specified, using value first network change '",start)
@@ -131,8 +141,19 @@ paths.fwd.earliest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=
         while (splIndex>0){
           #check remaining duration of edge spell is long enough for transmission to occur
           if (max(0,(spls[splIndex,1]-start)-dist[u])+graph.step.time > spls[splIndex,2]){
-            #query again to see if there are any spells active after selected spell
-            splIndex<-spells.hit(needle=c(spls[splIndex,2],end),haystack=spls)
+            # search forward to see if there are any more spells active after selected spell
+            if(splIndex<nrow(spls)){
+              s <- splIndex+1
+              splIndex <- -1
+              for (s in s:nrow(spls)) {
+                if (spells.overlap(c(start+dist[u],end), spls[s, ])) {
+                  splIndex<-s
+                  break()
+                }
+              }
+            } else {
+              splIndex<- -1 # we were already checking the last spell
+            }
           } else {
             break() # this spell duration is ok, so keep on going with it
           }
@@ -286,9 +307,14 @@ paths.bkwd.latest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0
     changes<-get.change.times(nd)
     if(length(changes)>0){
       end<-max(changes)
-      # message("'start' parameter was not specified, using value first network change '",start)
     } else {
-      stop("'end' time parameter for paths was not specified, no network changes found")
+      # this means that edges are either always active or never active
+      # if they are never active, it won't matter, because all distances other than v will be Inf
+      # if they are always active, the longest possible path would be equal to the size of the network
+      # times the graph.step.time
+      end<-network.size(nd)*graph.step.time
+      warning("'end' time parameter for paths was not specified, no network changes found, using 'end' value of ",end)
+      
     }
   }
   if (missing(start) || is.null(start)){
@@ -296,6 +322,9 @@ paths.bkwd.latest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0
     start<- -Inf
   }
   
+  if (graph.step.time<0){
+    stop("'graph.step.time' paramter must be a positive value")
+  }
   
   # TODO: self-loop behavior?
   # TODO: multiplex behavior?
@@ -322,7 +351,7 @@ paths.bkwd.latest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0
       spls<-nd$mel[[e]]$atl$active
       if (is.null(spls)){ # handle possibly missing activity value, assume always active
         if (active.default){
-          dist_u_w<-0 #TODO: need to check active default here to know if returning Inf or dist[w]
+          dist_u_w<-0+graph.step.time #TODO: need to check active default here to know if returning Inf or dist[w]
         } else {
           dist_u_w<- Inf
         }
@@ -338,11 +367,34 @@ paths.bkwd.latest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0
           }
         }
         
-        if (splIndex<0){
-          dist_u_w<- Inf  # vertex is never reachable in the future / within time bound
+        # if we are using graph.step.time > 0, may need to search for a later spells
+        while (splIndex>0){
+          #check remaining duration of edge spell is long enough for transmission to occur
+                     #now     # start of spell
+          if (  ((end-dist[u]) - spls[splIndex,1]) < graph.step.time ){
+            # spell was not long enough so query again to see if there were any other 
+            # spells active earlier than the one we just found
+            # (can't use spells.hit because it returns earliest spell, not latest)
+            splIndex<-splIndex-1
+            # loop backwards over spells so we find latest first
+            while (splIndex > 0) {
+              if (spells.overlap(c(start,end-dist[u]), spls[splIndex, ])) {
+                break
+              }
+              splIndex<-splIndex-1
+            }
+          } else {
+            break() # this spell duration is ok, so keep on going with it
+          }
+        }
+        
+        if (splIndex>0){
+          # distance is the later of dist[u] or the terminus of the edge,
+          # but distance can't be less than grap.step.time
+          dist_u_w<-max(0,(spls[splIndex,2]-end)*-1-dist[u])+graph.step.time
         } else {
-          # otherwise distance is the later of dist[u] or the terminus of the edge
-          dist_u_w<-max(0,(spls[splIndex,2]-end)*-1-dist[u]+graph.step.time)
+          # otherwise vertex is never reachable in the future / within time bound
+          dist_u_w<- Inf  
         }
       }
       dist_v_w <-dist[u]+dist_u_w 
@@ -353,10 +405,23 @@ paths.bkwd.latest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0
     }
   }
   
+  # construct the vector of geodeisc graph steps from previous
+  geodist<-rep(Inf,length(previous))
+  curDist<-0
+  preV<-v
+  # loop down the tree path and mark the distances
+  # until all reachable vertices are updated
+  while(length(preV)>0){
+    geodist[preV]<-curDist
+    preV<-unlist(sapply(preV,function(v){
+      which(previous==v)
+    }))
+    curDist<-curDist+1
+  }
   # TODO: we are measuring distance backwards from the end
   # so need to flip distance measure
   
-  return(list(distance=dist,previous=previous))
+  return(list(distance=dist,previous=previous, geodist=geodist))
 }
 
 # this version tries to minimize the distance of the latest time forward
