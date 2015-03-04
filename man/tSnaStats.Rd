@@ -66,6 +66,8 @@ Vertex-level statistics:
 
 Most of the sna functions involve converting the network to a matrix and can be quite expensive to calculate for a single time point, so use care when applying to large or long-duration networks.
 
+Some of the sna functions are undefined or produce numerical errors when applied to networks with certain configurations (such as zero edges).
+
 The sna functions generally cannot handle networks with no vertices, so stats will be replaced with NA when they are encountered. 
 
 There may be some overlap with ergm terms available through \code{\link{tErgmStats}} and the ergm version will generally be faster

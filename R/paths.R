@@ -139,7 +139,7 @@ paths.fwd.earliest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=
         splIndex<-spells.hit(needle=c(start+dist[u],end),haystack=spls)
         # if we are using graph.step.time > 0, may need to search for a later spells
         while (splIndex>0){
-          #check remaining duration of edge spell is long enough for transmission to occur
+          # check remaining duration of edge spell is not too short transmission to occur
           if (max(0,(spls[splIndex,1]-start)-dist[u])+graph.step.time > spls[splIndex,2]){
             # search forward to see if there are any more spells active after selected spell
             if(splIndex<nrow(spls)){

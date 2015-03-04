@@ -171,6 +171,11 @@ test_that("graph step time param works",{
   activate.edges(test,e=1,onset=5,terminus=10)
   expect_equal(tPath(test,v=1,graph.step.time=2)$distance,c(0, 7, Inf, Inf))
   
+  # test with combination of start and end values
+  test<-network.initialize(10)
+  add.edges.active(test,tail=1:9,head=2:10,onset=0:9,terminus=10)
+  tPath(test,v=1,start=5,graph.step.time=2)$distance
+  
 })
 
 # ----- tests for shortest geo fwd path ----

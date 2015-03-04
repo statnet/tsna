@@ -1,5 +1,17 @@
 # function to apply ergm's summary formula at multiple time points
 tErgmStats<-function(nd, formula,start, end, time.interval=1){
+  
+  if(!is.networkDynamic(nd)){
+    stop("the first argument to tErgmStats must be a object of class 'networkDynamic'")
+  }
+  
+  if(is.hyper(nd)){
+    stop("tErgmStats is not appropriate for hypergraphic networks")
+  }
+  
+  if(is.multiplex(nd)){
+    stop("tErgmStats is not appropriate for multiplex networks")
+  }
     
     if(missing(start) | missing(end)){
       times <- get.change.times(nd)
@@ -10,12 +22,21 @@ tErgmStats<-function(nd, formula,start, end, time.interval=1){
       }
       times[times == Inf] <- NA
       times[times == -Inf] <- NA
-      start = min(times, na.rm = T)
-      end = max(times, na.rm = T)
+      if(missing(start)){
+        start <- min(times, na.rm = T)
+      }
+      if(missing(end)){
+        end <- max(times, na.rm = T)
+      }
     }
     
     # figure out the times where we will do evaluations
     times<-seq(from = start, to=end,by = time.interval)
+    
+    # if the formula doesn't have a '~' in front, add it
+    if (!grepl('^~',formula)){
+      formula<-paste('~',formula,sep='')
+    }
     
     # rquires that ergm is loaded
     # if(requireNamespace('ergm',quietly=TRUE)){
@@ -36,6 +57,10 @@ tErgmStats<-function(nd, formula,start, end, time.interval=1){
 
 # function to provide a wrapper for calling sna measures
 tSnaStats<-function(nd, snafun,start, end, time.interval=1,...){
+  
+  if(!is.networkDynamic(nd)){
+    stop("the first argument to tSnaStats must be a object of class 'networkDynamic'")
+  }
   
   # table of supported sna functions and key terms 
   # (i.e is directedness arg named 'mode' or 'gmode' )
@@ -80,8 +105,13 @@ tSnaStats<-function(nd, snafun,start, end, time.interval=1,...){
     }
     times[times == Inf] <- NA
     times[times == -Inf] <- NA
-    start = min(times, na.rm = T)
-    end = max(times, na.rm = T)
+    if(missing(start)){
+      start <- min(times, na.rm = T)
+    }
+    if(missing(end)){
+      end <- max(times, na.rm = T)
+    }
+    
   }
   
   # figure out the times where we will do evaluations
