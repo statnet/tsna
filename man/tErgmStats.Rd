@@ -16,7 +16,7 @@ tErgmStats(nd, formula, start, end, time.interval = 1)
 \code{\link{networkDynamic}} object to be evaluated
 }
   \item{formula}{
-a character string providing the 'right hand side' of an ergm formula. For example \code{'~ edges + concurrent'}
+a character string providing an ergm term name or the 'right hand side' of an ergm formula. For example \code{'~ edges + concurrent'}
 }
   \item{start}{
 optional numeric time value at which evaluation should start (default is first observed time)
