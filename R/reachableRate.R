@@ -19,7 +19,7 @@ reachableRate<-function(nD, start, end, seeds){
   }
   
   reachableRates<-sapply(seeds,function(s){
-    reachableN<-sum(tPath(nD,v=s,start=start,end=end)$distance<Inf)
+    reachableN<-sum(tPath(nD,v=s,start=start,end=end)$tdist<Inf)
     reachableN/(end-start)
   })
   #average over all the seeds
@@ -49,7 +49,7 @@ meanReachTimes<-function(nD, start, end, seeds){
     end = max(times, na.rm = T)
   }
   distances<-lapply(seeds, function(s){
-    tPath(nD,v =s,start = start,end=end,graph.step.time = 1 )$distance
+    tPath(nD,v =s,start = start,end=end,graph.step.time = 1 )$tdist
     })
   times<-seq(from=start,to=end,length.out = 10)
   means<-sapply(times,function(t){
@@ -83,7 +83,7 @@ timeToReach<-function(nD, num.targets=round(network.size(nD)/2), start, end, see
     end = max(times, na.rm = T)
   }
   distances<-lapply(seeds, function(s){
-    tPath(nD,v =s,start = start,end=end,graph.step.time = 1 )$distance
+    tPath(nD,v =s,start = start,end=end,graph.step.time = 1 )$tdist
   })
 
   reachTimes<-sapply(distances,function(d){

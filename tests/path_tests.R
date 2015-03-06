@@ -18,7 +18,7 @@ test_that('tPath basic tests',{
   line<-network.initialize(4)
   add.edges.active(line,tail=1:3,head=2:4,onset=0:2,terminus=1:3)
   # check return format
-  expect_equal(names(tPath(line,v=1)),c('distance','previous','geodist','direction','type'))
+  expect_equal(names(tPath(line,v=1)),c('tdist','previous','geodist','start','end','direction','type'))
   expect_is(tPath(line,v=1),class = 'tPath')
   
   # check args
@@ -29,23 +29,23 @@ test_that('tPath basic tests',{
   expect_error(tPath(line,v=1,type='latest.depart'),regexp='method is not yet implemented')
   
   # check basic line with default earliest arriving fwd
-  expect_equal(tPath(line,v=1)$distance,c(0, 0, 1, 2))
-  expect_equal(tPath(line,v=2)$distance,c(Inf,0,1,2))
+  expect_equal(tPath(line,v=1)$tdist,c(0, 0, 1, 2))
+  expect_equal(tPath(line,v=2)$tdist,c(Inf,0,1,2))
   
   # test starting and ending flags
-  expect_equal(tPath(line,v=1,start=0.5)$distance, c(0,0,0.5,1.5))
-  expect_equal(tPath(line,v=1,start=2)$distance, c(0,Inf,Inf,Inf))
-  expect_equal(tPath(line,v=1,end=2)$distance, c(0,0,1,Inf))
+  expect_equal(tPath(line,v=1,start=0.5)$tdist, c(0,0,0.5,1.5))
+  expect_equal(tPath(line,v=1,start=2)$tdist, c(0,Inf,Inf,Inf))
+  expect_equal(tPath(line,v=1,end=2)$tdist, c(0,0,1,Inf))
   
   line<-network.initialize(4)
   add.edges.active(line,tail=1:3,head=2:4,onset=c(2,1,3),terminus=c(3,2,4))
-  expect_equal(tPath(line,v=1)$distance,c(0,1,Inf,Inf))
+  expect_equal(tPath(line,v=1)$tdist,c(0,1,Inf,Inf))
   
   # test active default
   test<-as.networkDynamic(network.initialize(4))
   add.edges(test,1:3,2:4)
-  expect_equal(tPath(test,v=1,start=0)$distance,c(0,0,0,0))
-  expect_equal(tPath(test,v=1,active.default=FALSE,start=0)$distance,c(0,Inf,Inf,Inf))
+  expect_equal(tPath(test,v=1,start=0)$tdist,c(0,0,0,0))
+  expect_equal(tPath(test,v=1,active.default=FALSE,start=0)$tdist,c(0,Inf,Inf,Inf))
   
   test<-network.initialize(4)
   add.edges(test,1:3,3:4)
@@ -62,7 +62,7 @@ test_that('tPath basic tests',{
   expect_error(tPath(as.networkDynamic(network.initialize(2)),regexp='argument with valid vertex ids was not given'))
   
   # test on network size 0
-  expect_equal(tPath(as.networkDynamic(network.initialize(0)),start=0,v=numeric(0))$distance,numeric(0))
+  expect_equal(tPath(as.networkDynamic(network.initialize(0)),start=0,v=numeric(0))$tdist,numeric(0))
 })
 
 
@@ -70,11 +70,11 @@ test_that('tPath basic tests',{
 
 test_that("path in large base network matches",{
   fwdDFS<-tPath(base,v=24)
-  expect_equal(sum(fwdDFS$distance<Inf),772) # should find 772 vertices, because that is what we found with BFS search
+  expect_equal(sum(fwdDFS$tdist<Inf),772) # should find 772 vertices, because that is what we found with BFS search
   
   # check if we can find the same set as the 'infected'
   infset<-which(get.vertex.attribute.active(base,'status',at=102)>0)
-  pathset<-which(tPath(base,v=24,graph.step.time=1)$distance<Inf)
+  pathset<-which(tPath(base,v=24,graph.step.time=1)$tdist<Inf)
 })
 
 data(moodyContactSim)
@@ -85,7 +85,7 @@ test_that("test of moody's example network",{
   
   paths<-tPath(moodyContactSim,v=10)
   
-  expect_equal(paths$distance,c(543, 454, 594,   0, 672, 661, 184, 679, 634,   0, 709, 581, 413, 625, 669, 535))
+  expect_equal(paths$tdist,c(543, 454, 594,   0, 672, 661, 184, 679, 634,   0, 709, 581, 413, 625, 669, 535))
   expect_equal(paths$previous,c(16,13,13,10,13,16,10,13,1,0,8,1,4,4,2,2))
   expect_equal(paths$geodist,c(5, 3, 3, 1, 3, 5, 1, 3, 6, 0, 4, 6, 2, 2, 4, 4))
   
@@ -129,8 +129,8 @@ test_that("test on network with two components",{
   activate.vertices(test)
   test[1:5,5:1]<-1
   test[6:10,10:6]<-1
-  expect_equal(which(tPath(test,v=1)$distance!=Inf),1:5)
-  expect_equal(which(tPath(test,v=6)$distance!=Inf),6:10)
+  expect_equal(which(tPath(test,v=1)$tdist!=Inf),1:5)
+  expect_equal(which(tPath(test,v=6)$tdist!=Inf),6:10)
 })
 
 
@@ -140,41 +140,41 @@ test_that("graph step time param works",{
   test<-network.initialize(4)
   add.edges.active(test,tail=1:3,head=2:4,onset=0:2,terminus=1:3)
   # count each geodesic step as instantaneous
-  expect_equal(tPath(test,v=1,graph.step.time=0)$distance,c(0, 0, 1, 2))
+  expect_equal(tPath(test,v=1,graph.step.time=0)$tdist,c(0, 0, 1, 2))
   # count each geodesic step as something less than 1
-  expect_equal(tPath(test,v=1,graph.step.time=0.5)$distance,c(0, 0.5, 1.5, 2.5))
+  expect_equal(tPath(test,v=1,graph.step.time=0.5)$tdist,c(0, 0.5, 1.5, 2.5))
   # count each geodesic step as 1
-  expect_equal(tPath(test,v=1,graph.step.time=1)$distance,c(0, 1, 2, 3))
+  expect_equal(tPath(test,v=1,graph.step.time=1)$tdist,c(0, 1, 2, 3))
   # count each geodesic step as 2
-  expect_equal(tPath(test,v=1,graph.step.time=2)$distance,c(0, Inf, Inf, Inf))
+  expect_equal(tPath(test,v=1,graph.step.time=2)$tdist,c(0, Inf, Inf, Inf))
   
   # test with always active edges
   test<-network.initialize(4)
   add.edges.active(test,tail=1:3,head=2:4,onset=0,terminus=10)
   # count each geodesic step as 1
-  expect_equal(tPath(test,v=1,graph.step.time=1)$distance,c(0, 1, 2, 3))
+  expect_equal(tPath(test,v=1,graph.step.time=1)$tdist,c(0, 1, 2, 3))
   # count each geodesic step as 2
-  expect_equal(tPath(test,v=1,graph.step.time=2)$distance,c(0, 2, 4, 6))
+  expect_equal(tPath(test,v=1,graph.step.time=2)$tdist,c(0, 2, 4, 6))
   # count each geodesic step as 0
-  expect_equal(tPath(test,v=1,graph.step.time=0)$distance,c(0, 0, 0, 0))
+  expect_equal(tPath(test,v=1,graph.step.time=0)$tdist,c(0, 0, 0, 0))
   
   test<-as.networkDynamic(network.initialize(4))
   add.edges(test,tail=1:3,head=2:4)
   # count each geodesic step as 1
-  expect_equal(tPath(test,v=1,graph.step.time=1)$distance,c(0, 1, 2, 3))
+  expect_equal(tPath(test,v=1,graph.step.time=1)$tdist,c(0, 1, 2, 3))
   # count each geodesic step as 2
-  expect_equal(tPath(test,v=1,graph.step.time=2)$distance,c(0, 2, 4, 6))
+  expect_equal(tPath(test,v=1,graph.step.time=2)$tdist,c(0, 2, 4, 6))
   
   # test with an edge with multiple activity spells, some later
   test<-network.initialize(4)
   add.edges.active(test,tail=1:3,head=2:4,onset=0:2,terminus=1:3)
   activate.edges(test,e=1,onset=5,terminus=10)
-  expect_equal(tPath(test,v=1,graph.step.time=2)$distance,c(0, 7, Inf, Inf))
+  expect_equal(tPath(test,v=1,graph.step.time=2)$tdist,c(0, 7, Inf, Inf))
   
   # test with combination of start and end values
   test<-network.initialize(10)
   add.edges.active(test,tail=1:9,head=2:10,onset=0:9,terminus=10)
-  tPath(test,v=1,start=5,graph.step.time=2)$distance
+  tPath(test,v=1,start=5,graph.step.time=2)$tdist
   
 })
 
@@ -194,7 +194,7 @@ plot(test,displaylabels=TRUE,edge.label=paste(get.edge.attribute(test,'active',u
 #path starting at time 0
 
 path0<-tPath(test,v=1,type='fewest.steps')
-expect_equal(path0$distance,c(0, 2, 0, 5, 3))
+expect_equal(path0$tdist,c(0, 2, 0, 5, 3))
 expect_equal(path0$previous,c(0, 1, 1, 1, 2))
 expect_equal(path0$geodist,c(0, 1, 1, 1, 2))
 
@@ -204,7 +204,7 @@ expect_equal(path0$geodist,c(0, 1, 1, 1, 2))
 #   earliest temporal path to v3 is 1-2-5-3
 #   shortest geodesic temporal path to v3 is 1-4-3
 path1<-tPath(test,v=1,start=1,type='fewest.steps')
-expect_equal(path1$distance,c(0, 1, 6, 4, 2))
+expect_equal(path1$tdist,c(0, 1, 6, 4, 2))
 expect_equal(path1$previous,c(0, 1, 4, 1, 2))
 expect_equal(path1$geodist,c(0, 1, 2, 1, 2))
 
@@ -221,7 +221,7 @@ test<-network.initialize(10)
 add.edges(test,tail=1:9,head=2:10)
 activate.edges(test,onset=10:0,terminus=11:1)
 results<-tPath(test,v=5,direction='bkwd',type='latest.depart')
-expect_equal(results$distance,c(Inf, Inf, Inf,   3,   0, Inf, Inf, Inf, Inf, Inf))
+expect_equal(results$tdist,c(Inf, Inf, Inf,   3,   0, Inf, Inf, Inf, Inf, Inf))
 expect_equal(results$previous,c(0, 0, 0, 5, 0, 0, 0, 0, 0, 0))
 expect_equal(results$geodist,c(Inf, Inf, Inf, 1, 0, Inf, Inf, Inf, Inf, Inf))
 
@@ -230,53 +230,53 @@ test<-network.initialize(10)
 add.edges(test,tail=1:9,head=2:10)
 activate.edges(test,onset=0:10,terminus=1:11)
 results<-tPath(test,v=10,direction='bkwd',type='latest.depart')
-expect_equal(results$distance,c(8,7,6,5,4,3,2,1,0,0))
+expect_equal(results$tdist,c(8,7,6,5,4,3,2,1,0,0))
 expect_equal(results$previous,c(2,3,4,5,6,7,8,9,10,0))
 expect_equal(results$geodist,c(9, 8, 7, 6, 5, 4, 3, 2, 1, 0))
 
 # moody sim
 results<-tPath(moodyContactSim,v=10,direction='bkwd',type='latest.depart')
-expect_equal(results$distance,c(Inf, Inf, Inf, 723, Inf, Inf, 539, Inf, Inf,   0, Inf, Inf, Inf, Inf, Inf, Inf))
+expect_equal(results$tdist,c(Inf, Inf, Inf, 723, Inf, Inf, 539, Inf, Inf,   0, Inf, Inf, Inf, Inf, Inf, Inf))
 expect_equal(results$previous,c(0,  0,  0, 10,  0,  0, 10,  0,  0,  0,  0,  0,  0,  0,  0,  0))
 
 results<-tPath(moodyContactSim,v=16,direction='bkwd',type='latest.depart')
-expect_equal(results$distance,c(180, 196, Inf,  13, Inf,  62, Inf, Inf, Inf, 723, 548, Inf, 271, 103, Inf,   0))
+expect_equal(results$tdist,c(180, 196, Inf,  13, Inf,  62, Inf, Inf, Inf, 723, 548, Inf, 271, 103, Inf,   0))
 expect_equal(results$previous,c(16, 16,  0, 16,  0, 16,  0,  0,  0,  4,  1,  0,  2,  4,  0,  0))
 
 test_that("graph step time param works for bakward path",{
   test<-network.initialize(4)
   add.edges.active(test,tail=1:3,head=2:4,onset=0:2,terminus=1:3)
   # count each geodesic step as instantaneous
-  expect_equal(tPath(test,v=4,graph.step.time=0,direction='bkwd',type='latest.depart')$distance,c(2, 1, 0, 0))
+  expect_equal(tPath(test,v=4,graph.step.time=0,direction='bkwd',type='latest.depart')$tdist,c(2, 1, 0, 0))
   # count each geodesic step as something less than 1
-  expect_equal(tPath(test,v=4,graph.step.time=0.5,direction='bkwd',type='latest.depart')$distance,c(2.5, 1.5, 0.5, 0.0))
+  expect_equal(tPath(test,v=4,graph.step.time=0.5,direction='bkwd',type='latest.depart')$tdist,c(2.5, 1.5, 0.5, 0.0))
   # count each geodesic step as 1
-  expect_equal(tPath(test,v=4,graph.step.time=1,direction='bkwd',type='latest.depart')$distance,c(3, 2, 1, 0))
+  expect_equal(tPath(test,v=4,graph.step.time=1,direction='bkwd',type='latest.depart')$tdist,c(3, 2, 1, 0))
   # count each geodesic step as 2
-  expect_equal(tPath(test,v=4,graph.step.time=2,direction='bkwd',type='latest.depart')$distance,c( Inf, Inf, Inf,0))
+  expect_equal(tPath(test,v=4,graph.step.time=2,direction='bkwd',type='latest.depart')$tdist,c( Inf, Inf, Inf,0))
   
   # test with always active edges
   test<-network.initialize(4)
   add.edges.active(test,tail=1:3,head=2:4,onset=0,terminus=10)
   # count each geodesic step as 1
-  expect_equal(tPath(test,v=4,graph.step.time=1,direction='bkwd',type='latest.depart')$distance,c(3, 2, 1, 0))
+  expect_equal(tPath(test,v=4,graph.step.time=1,direction='bkwd',type='latest.depart')$tdist,c(3, 2, 1, 0))
   # count each geodesic step as 2
-  expect_equal(tPath(test,v=4,graph.step.time=2,direction='bkwd',type='latest.depart')$distance,c(6, 4, 2, 0))
+  expect_equal(tPath(test,v=4,graph.step.time=2,direction='bkwd',type='latest.depart')$tdist,c(6, 4, 2, 0))
   # count each geodesic step as 0
-  expect_equal(tPath(test,v=4,graph.step.time=0,direction='bkwd',type='latest.depart')$distance,c(0, 0, 0, 0))
+  expect_equal(tPath(test,v=4,graph.step.time=0,direction='bkwd',type='latest.depart')$tdist,c(0, 0, 0, 0))
   
   test<-as.networkDynamic(network.initialize(4))
   add.edges(test,tail=1:3,head=2:4)
   # count each geodesic step as 1
-  expect_equal(tPath(test,v=4,graph.step.time=1,direction='bkwd',type='latest.depart')$distance,c(3, 2, 1, 0))
+  expect_equal(tPath(test,v=4,graph.step.time=1,direction='bkwd',type='latest.depart')$tdist,c(3, 2, 1, 0))
   # count each geodesic step as 2
-  expect_equal(tPath(test,v=4,graph.step.time=2,direction='bkwd',type='latest.depart')$distance,c(6, 4, 2, 0))
+  expect_equal(tPath(test,v=4,graph.step.time=2,direction='bkwd',type='latest.depart')$tdist,c(6, 4, 2, 0))
   
   # test with an edge with multiple activity spells, some later
   test<-network.initialize(4)
   add.edges.active(test,tail=1:3,head=2:4,onset=0:2,terminus=1:3)
   activate.edges(test,e=1,onset=5,terminus=10)
-  expect_equal(tPath(test,v=4,graph.step.time=2,direction='bkwd',type='latest.depart')$distance,c(Inf, Inf, 9, 0))
+  expect_equal(tPath(test,v=4,graph.step.time=2,direction='bkwd',type='latest.depart')$tdist,c(Inf, Inf, 9, 0))
   
 })
 
@@ -322,8 +322,8 @@ plot(test,displaylabels=TRUE,edge.label=get.edge.activity(test))
 # test network illustrating problems with implementation of graph.step.time
 test<-network.initialize(4)
 add.edges.active(test,1:3,2:4,at=1)
-tPath(test,v=1,start=0)$distance  # all vertices rechable at t=1
-tPath(test,v=1,start=0,graph.step.time = 1)$distance  # no vertices are reachable because no path is open long enough for transmission to occur
+tPath(test,v=1,start=0)$tdist  # all vertices rechable at t=1
+tPath(test,v=1,start=0,graph.step.time = 1)$tdist  # no vertices are reachable because no path is open long enough for transmission to occur
 
 
 
@@ -344,7 +344,7 @@ as.data.frame(paths5)
 # earliest leaving ACG @ 6
 # earliest arriving ABG @ 4
 res2<-tPath(paths5,v=1)
-expect_equal(res2$distance[7],4)
+expect_equal(res2$tdist[7],4)
 # latest leaving AEG @ 10
 
 

@@ -158,7 +158,7 @@ tReach<-function(nd,direction=c('fwd','bkwd'),sample=network.size(nd),
     type<-'latest.depart'
   }
   sizes<-sapply(seeds,function(v){
-    sum(tPath(nd,v=v,direction=direction,type=type,start=start,end=end,graph.step.time=graph.step.time)$distance<Inf)
+    sum(tPath(nd,v=v,direction=direction,type=type,start=start,end=end,graph.step.time=graph.step.time)$tdist<Inf)
     })
   return(sizes)
 }
