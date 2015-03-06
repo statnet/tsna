@@ -70,7 +70,7 @@ NOTE THAT THE PATH-FINDING ALGORITHM WILL NOT GIVE CORRECT RESULTS IF ANY SPELLS
 
 
 
-\code{'bwkd'} \code{'latest.depart'} is essentially the inverse of fwd earliest arrive.  It finds the latest time paths backwards from the initial seed vertex. This is the \emph{latest-leaving} time. Note that the distance returned are positive, but represent the latest distance back in time from the \code{end} parameter time at which a vertex can reach \code{v}. NOT CORRECTLY IMPLEMENTED YET:
+\code{'bwkd'} \code{'latest.depart'} is essentially the inverse of fwd earliest arrive.  It finds the latest time paths backwards from the initial seed vertex. This is the \emph{latest-leaving} time. Note that the distance returned are positive, but represent the latest distance back in time from the \code{end} parameter time at which a vertex can reach \code{v}. 
 
 
 The \code{is.tPath} function checks if an object has the class \code{tPath}.
@@ -80,9 +80,11 @@ The \code{is.tPath} function checks if an object has the class \code{tPath}.
 Currently an object of class \code{tPath} which is essentially list with several elements providing information on the path found. 
 
 
- \item{distance}{A numeric vector with length equal to network size in which each element contains the earliest/latest (usually temporal) \emph{distance} at which the corresponding vertex could reach / be reached from the seed vertex. Unreachable vertices are marked with \code{Inf}}
+ \item{tdist}{A numeric vector with length equal to network size in which each element contains the earliest/latest  \emph{temporal} distance at which the corresponding vertex could reach / be reached from the seed vertex. Unreachable vertices are marked with \code{Inf}}
  \item{previous}{A numeric vector with length equal to network size in which each element indicates the previous vertex along (a possible)  reachable path. Can be used to reconstruct the path tree. The initial vertex and unreachable vertices are marked with \code{0}}
  \item{geodist}{A numeric vector with length equal to network size in which each element indicates the geodesic distances (number of hops) of the vertex along the temporal path starting at the seed vertex.}
+ \item{start}{the numeric start value that was used as the earliest bound for the path calculation (may not have been explicitly set)}
+ \item{end}{the numerid end value that was used as the latest bound for the path calculation (may not have been explicitly set)}
  \item{direction}{The direction \code{'fwd'} or \code{'bkwd'} of the path}
 \item{type}{The type of temporal constraint for the path}
 
@@ -94,7 +96,7 @@ Unpublished discussions with James Moody and Martina Morris and the statnet team
 Skye Bender-deMoll
 }
 \note{
-Temporal distances are in terms of time measured from the \code{start} parameter, so to recover the model times at which each vertex was reached for forward paths use \code{$distance+start} and backward paths with \code{end- $distance}. This is an early draft of the function, its name and arguments are subject to change before release. 
+Temporal distances are in terms of time measured from the \code{start} parameter, so to recover the model times at which each vertex was reached for forward paths use \code{$distance+start} and backward paths with \code{end- $tdist}. This is an early draft of the function, its name and arguments are subject to change before release. 
 }
 
 

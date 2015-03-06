@@ -14,7 +14,7 @@ as.network.tPath<-function(x,...){
   if(!is.tPath(x)){
     stop("as.network.tPath requires an object of class 'tPath'")
   }
-  distance<-x$distance
+  distance<-x$tdist
   previous<-x$previous
   tree<-network.initialize(length(distance),directed=TRUE)
   vids<-which(distance<Inf)
@@ -24,7 +24,7 @@ as.network.tPath<-function(x,...){
       add.edges.active(tree,tail=fromId,head=vids[v],onset=distance[vids[v]],terminus=Inf)
     }
   }
-  tree%v%'distance'<-distance
+  tree%v%'tdist'<-distance
   tree%v%'geodist'<-x$geodist
   return(tree)
 }
@@ -44,8 +44,8 @@ plot.tPath<-function(x,edge.col="red",
                      displaylabels=TRUE,
                      displayisolates=FALSE,
                      jitter=FALSE,
-                     vertex.lwd=(x$distance==0)*4+1,
-                     vertex.cex=(x$distance==0)*1.5,
+                     vertex.lwd=(x$tdist==0)*4+1,
+                     vertex.cex=(x$tdist==0)*1.5,
                      vertex.col=NA,...){
   tree<-as.network(x)
   edgeTimes<-sapply(get.edge.activity(tree),'[',1)

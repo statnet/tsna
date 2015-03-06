@@ -70,7 +70,6 @@ tPath<-function(nd,v,
 # search stats from vertex v
 # temporal search is bounded by 'start' and 'end' times. 
 
-# TODO: add param for a set of alters and option to stop when they have been reached?
 # TODO: add option to make direct of edge evaluation explicit?
 
 # this finds an earliest-ending path
@@ -196,7 +195,7 @@ paths.fwd.earliest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=
     curDist<-curDist+1
   }
 
-  return(list(distance=dist,previous=previous,geodist=geodist))
+  return(list(tdist=dist,previous=previous,geodist=geodist, start=start, end=end))
 }
 
 # this finds the forward path with the fewest number of intermediate vertices
@@ -294,13 +293,13 @@ paths.fwd.fewest.steps<-function(nd,v,start,end,active.default=TRUE,graph.step.t
   }
   
   
-  return(list(distance=times,previous=previous,geodist=geodist))
+  return(list(tdist=times,previous=previous,geodist=geodist,start=start,end=end))
 }
 
 # compute reverse paths 
 # need to start at the end and minimize backwards
 
-paths.bkwd.latest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0){
+paths.bkwd.latest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0,alter){
 
   if (missing(end) || is.null(end)){
     # TODO: use obs.period if it exists
@@ -345,7 +344,7 @@ paths.bkwd.latest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0
     # we are going backwards, so use 'in' edges instead of 'out'
     nghE<-get.edgeIDs(nd,v=u,neighborhood='in') # check neighbors of u
     for (e in nghE){
-      w <- ifelse(nd$mel[[e]]$inl==u,nd$mel[[e]]$outl,nd$mel[[e]]$inl)   
+      w <- ifelse(nd$mel[[e]]$inl==u,nd$mel[[e]]$outl,nd$mel[[e]]$inl)
       # we ignore graph hop time
       # so "distance" is how long we have to wait from 'now' until onset of edge
       spls<-nd$mel[[e]]$atl$active
@@ -402,8 +401,14 @@ paths.bkwd.latest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0
         dist[w]<-dist_v_w
         previous[w]<-u
       }
+    } # end edge neighbor compare loop
+    # check if we have found the target alter, if so, stop searching
+    if (!missing(alter)){
+      if(all(toCheck[alter]==FALSE)){ # if all alters are checked
+        break;
+      }
     }
-  }
+  } # end search loop
   
   # construct the vector of geodeisc graph steps from previous
   geodist<-rep(Inf,length(previous))
@@ -421,7 +426,7 @@ paths.bkwd.latest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0
   # TODO: we are measuring distance backwards from the end
   # so need to flip distance measure
   
-  return(list(distance=dist,previous=previous, geodist=geodist))
+  return(list(tdist=dist,previous=previous, geodist=geodist,start=start,end=end))
 }
 
 # this version tries to minimize the distance of the latest time forward
@@ -510,7 +515,7 @@ paths.fwd.latestBAD<-function(nd,v,start,end,active.default=TRUE,graph.step.time
   # TODO: we are measuring distance backwards from the end
   # so need to flip distance measure
   
-  return(list(distance=dist,previous=previous))
+  return(list(tdist=dist,previous=previous))
 }
 
 
@@ -547,20 +552,20 @@ paths.fwd.latest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0)
   latest<-rep(Inf, network.size(nd))
   previous<-as.list(rep(0,network.size(nd)))
   # find the earliest path to reachable vertices
-  fwdReachable<-which(paths.fwd.earliest(nd=nd,v=v,start=start,end=end,active.default=active.default,graph.step.time=graph.step.time)$distance<Inf)
+  fwdReachable<-which(paths.fwd.earliest(nd=nd,v=v,start=start,end=end,active.default=active.default,graph.step.time=graph.step.time)$tdist<Inf)
   
   # for each reachable vertex, find the latest return path
   
   latestResults<-lapply(fwdReachable,function(w){
     backwards<-paths.bkwd.latest(nd=nd,v=w,start=start,end=end,active.default=active.default,graph.step.time=graph.step.time)
-    return(list(backwards$distance[v],backwards$previous))
+    return(list(backwards$tdist[v],backwards$previous))
   })
   latest[fwdReachable]<-sapply(latestResults,'[[',1)
   previous[fwdReachable]<-lapply(latestResults,'[[',2)
   
   # because distances are from the end, need to reverse by subtracting the end time
   latest[fwdReachable]<-end-latest[fwdReachable]
-  return(list(distance=latest,previous=previous))
+  return(list(tdist=latest,previous=previous))
 }
 
 

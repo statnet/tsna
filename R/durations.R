@@ -194,3 +194,34 @@ nghOverlap<-function(nd, v, alter,neighborhood =c("out", "in", "combined"), type
   }
   return(lapDur)
 }
+
+# calculate the earliest time a path leaving v could reach alter (NOT earliest time leaving v), and the latest time a path leaving v could leave v (NOT latest time could arrive alter)
+# I don't think this is a useful metric yet :-(
+pathBounds<-function(nd, v, alter){
+  netBounds<-get_bounds(nd)
+  fwdDist<-paths.fwd.earliest(nd = nd,v=v,alter = alter,start=netBounds[1],end=netBounds[2])
+  # check if there is any path at all
+  if (is.infinite(fwdDist$tdist[alter])){
+    return(c(NA,NA))
+  }
+  
+  # find the neighbor on the first step of the early path from v leading to alter
+  firstEarlyNgh<- NA
+  prev<-alter
+  while(prev != v){
+    firstEarlyNgh<-fwdDist$previous[prev]
+    prev<-fwdDist$previous[firstEarlyNgh]
+  }
+  bkwdDist<-paths.bkwd.latest(nd = nd,v=alter,alter=v,start=netBounds[1],end=netBounds[2])
+  
+  # find the neighbor on the last step of the late path from alter to v 
+  # remember that path is backwards!
+  lastLateNgh<-NA
+  nxt<-v
+  while(nxt != alter){
+    lastLateNgh<-bkwdDist$previous[nxt]
+    nxt<-bkwdDist$previous[lastLateNgh]
+  }
+  
+  return(c(fwdDist$tdist[firstEarlyNgh]+fwdDist$start,bkwdDist$end-bkwdDist$tdist[lastLateNgh]))
+}
