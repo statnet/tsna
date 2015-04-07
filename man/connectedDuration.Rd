@@ -46,7 +46,9 @@ Should the default neighborhood for directed network be 'combined'?
   connectedDuration(moodyContactSim)
   
   data(McFarland_cls33_10_16_96)
-  # compute ration of incoming vs. outgoing speach acts
-  connectedDuration(cls33_10_16_96, mode='counts',neighborhood = 'out') / connectedDuration(cls33_10_16_96, mode='counts',neighborhood = 'in')
+  # compute ratio of incoming vs. outgoing speach acts
+  outDur <- connectedDuration(cls33_10_16_96, mode='counts',neighborhood = 'out') 
+  inDur <- connectedDuration(cls33_10_16_96, mode='counts',neighborhood = 'in')
+  outDur / inDur
 }
 

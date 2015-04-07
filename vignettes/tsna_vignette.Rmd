@@ -18,19 +18,30 @@ knitr::opts_chunk$set(cache=TRUE)
 
 
 Skye Bender deMoll (skyebend@uw.edu) and the statnet team (http://statnet.org).
+This work was supported by grant R01HD68395 from the National Institute of Health.
 
 **DRAFT**
 
 -----
 
-## Introduction
+## Overview
 The `tsna` package provides SNA tools for continuous- and discrete-time longitudinal networks having vertex, edge, and attribute dynamics stored in the `networkDynamic` format.  It includes tools for applying "tradditional" static sna metrics at multiple time points, as well as temporal extensions of sna metrics using forwards- and backwards-path routines. 
 
-This package provides tools for working with dynaic networks (or processes on networks) in which the ordering and timing of ties is important.  The tools are need for networks having densities and edge-turnover rates in a parameter space such that the time-collapsed aggregate network give too great a distoration of the connectivity for useful analsysis. 
+This package provides tools for working with dynamic networks (or processes on networks) in which the ordering and timing of ties is important.  The tools are need for networks having densities and edge-turnover rates in a parameter space such that the time-collapsed aggregate network give too great a distoration of the connectivity for useful analsysis. 
 
-This work was supported by grant R01HD68395 from the National Institute of Health.
+Although the `networkDynamic` package is designed to support both continuous- and discrete-time models of networks, the initial version of `tsna` is primairly focused on working with discrete time networks of the sort that might be generated from simulation. 
 
-## Requiremnts
+As always, a general help file for the package can be displayed, and the individual arguments for each function are documented in more detail in the function's help page. 
+
+```{r}
+?tsna
+?tPath
+```
+
+
+Many of the measures included in this package may be formaly idental to measures allready published in literature of various research fields with different names.   We will attept to find and cite such previous work, but if you encounter any omissions, please let us know. 
+
+## Requirements
 
 This document assumes familiarity with general concpets of Social Network Analysis, `R`, and the `statnet` suite of R packages. For more background on the `network` and `networkDynamic` data structures and functions, please see appropriate package documentation.
 
@@ -45,20 +56,72 @@ library(networkDynamicData)
 library(sna)
 ```
 
-## Overview
+## Introduction
 
 Most of the `tsna` package function assume that their input is formated as a `networkDynamic` data structure.  The `networkDynamic` class provides utilities for converting data from various formats (such as timed edgelists, or lists of matrices) as well as utilities for manipulating the data structures. 
 
-Many of the measures included in this package may be formaly idental to measures allready published in literature of various research fields with different names.   We will attept to find and cite such previous work, but if you encounter any omissions, please let us know. 
+The data structure provided by `networkDynamic` objects assumes that the vertices and (directed or non-directed) edges of a network have multiple 'activity spells' associated with them which indicate when they are 'active' or exist from the perspective of the model.  Each spell is an interval with an onset and terminus time. Each edge or vertex an turn on and off multiple times during the period over which the network is observed. 
+
+As an example, consider the incldued `moodyContactSim` example object. 
+
+```{r}
+data(moodyContactSim)
+plot(moodyContactSim,displaylabels = TRUE,main='aggregate network')
+```
+
+We can view the acivity spells associated with the network's edges
+
+```{r}
+as.data.frame(moodyContactSim)
+```
+
+Since this is a fairly simple network, we could plot the times on the aggregate network diagram
+
+```{r}
+plot(moodyContactSim,
+     displaylabels=TRUE,
+     label.cex=0.8,
+     label.pos=5,
+     vertex.col='white',
+     vertex.cex=3,
+     edge.label=sapply(get.edge.activity(moodyContactSim),function(e){
+       paste('(',e[,1],'-',e[,2],')',sep='')
+     }),
+     edge.label.col='blue',
+     edge.label.cex=0.7
+   )
+```
+
+Notice that if we view the network that is actually active at any specific time point, it is much less connected that it appears in the time-collapsed network.  In fact, at most time points there is only a single active edge. 
+
+```{r}
+plot(network.extract(moodyContactSim,at=50),displaylabels = TRUE,main='network at time 50')
+plot(network.extract(moodyContactSim,at=700),displaylabels = TRUE,main='network at time 700')
+```
+
+
 
 ## Durations and densities
 
-`edgeDuration`
-`tDegree` `tEdgeDensity` `connectedDuration`
+The `tsna` package currently contains several functions for reporting on the durations of the activity events (spells) associated with a network.  Most of these functions have options for varying the units of aggregation or analysis. 
+
+`edgeDuration` `tDegree` `tEdgeDensity` `connectedDuration`
 
 ### Distributions of edge durations
 
-We would expect that since the concurrency sims all had the same dissolution parameter, they should all have similarly shaped distrubtions of edge durations
+The 'edgeDuration' function returns the activity durations associated with the edges of the network.  
+```{r}
+edgeDuration(moodyContactSim)
+```
+This output means that the first edge was active for 32 time units, the second for 33, etc. This useful when we want to find out what the distribution of edge durations are shaped like.
+```{r}
+summary(edgeDuration(moodyContactSim))
+hist(edgeDuration(moodyContactSim))
+```
+
+Durations for empty dyads (non existing edges) are not reported. 
+
+For a more realisitic example, we can compare the distributions of several networks simulated using the `tergm` package. (Please see `?concurrencyComparisonNets` for more backround on these networks) We would expect that since the concurrency sims all had the same dissolution parameter in the model, which was simply a uniform probability that an edge would be deactivated at each timestep, they should all have similarly shaped distrubtions of edge durations
 
 ```{r}
 data(concurrencyComparisonNets)
@@ -69,10 +132,15 @@ hist(edgeDuration(monog),ylim=c(0,800))
 par(mfcol=c(1,1))
 ```
 
-How often do edges re-occur in these networks? i.e. which edges have more than one spell?
+### Re-occuring edges
+
+The durations functions also have the ability to count the number of spells instead of aggregating their durations. This is mostly useful for working with event-based continuous data (see below) but also makes it so we can quickly asses if the network has re-occuring ties. In other words, which edges have more than one activity spell associated with them?
 ```{r}
 which(edgeDuration(monog,mode='counts')>1)
+which(edgeDuration(moodyContactSim,mode='counts')>1)
 ```
+
+All of the edges in the `moodyContactSim` network are only active once (making many times of calculations much simpler), where in the `monog` network, there are a few edges that toggle on and off and then back on again. 
 
 
 ### Finding connected times of vertices
@@ -197,6 +265,8 @@ The problem with these measures is that, like density, the values will be very, 
 The `tDegree` function report momentary degree of each vertex in networkDynamic object at multiple timepoints.
 
 ## Rates of Change
+
+These functions are indented to provide descriptive stats about how quickly the elements of the network are changing relative to the time units. 
 
 `tEdgeDissolution`  `tEdgeFormation`   various time to change metrics still need finalization and docs
 
