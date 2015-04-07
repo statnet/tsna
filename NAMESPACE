@@ -1,5 +1,7 @@
 #useDynLib(tsna)
 import(statnet.common,network,networkDynamic)
+importFrom(survival, survfit)
+importFrom(survival, Surv)
 export(
   tPath,
   is.tPath,
@@ -7,6 +9,7 @@ export(
   as.network.tPath,
   tEdgeDensity,
   edgeDuration,
+  edgeDurationEst,
   vertexDuration,
   plotPaths,
   forward.reachable,
