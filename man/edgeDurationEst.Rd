@@ -64,7 +64,9 @@ Prints summary numbers for the survival curves and (invisibly) returns them as a
 }
 }
 \references{
-%% ~put references to the literature/web site here ~
+\url{https://statnet.csde.washington.edu/trac/wiki/Vital\%20Dynamic}
+\url{https://statnet.csde.washington.edu/trac/raw-attachment/wiki/Vital\%20Dynamic/vital.pdf}
+\url{https://statnet.csde.washington.edu/trac/wiki/DurationEstimate}
 }
 \author{
 Kirk Li kirkli@uw.edu
