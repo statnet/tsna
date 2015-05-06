@@ -44,7 +44,7 @@ skyebend@uw.edu
 
 
 \seealso{
-See also \code{\link[ergm]{summary.statistics.formula}} and \code{\link[ergm]{ergm-terms}}. For more information about time-series objects, see \code{\link{ts}} and \code{\link{plot.ts}} for plotting quickly plotting timelines for multiple statistics
+See also \code{\link[ergm]{summary.statistics.formula}} and \code{\link[ergm]{ergm-terms}}. For more information about time-series objects, see \code{\link{ts}} and \code{\link{plot.ts}} for plotting quickly plotting timelines for multiple statistics.  The \code{summary.statistics.networkDynamic} function in the \code{tergm} package offers very similar functionality.
 }
 \examples{
  library(networkDynamicData)
