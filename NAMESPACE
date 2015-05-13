@@ -18,11 +18,13 @@ export(
   tEdgeFormation,
   #edgeFormationAt,
   #edgeDissolutionAt,
-  connectedDuration
+  connectedDuration,
   #meanTimeToChange,
   #reachableRate,
   #meanReachTimes,
   #timeToReach
+  #edgeAgeSummaryAt,
+  pShiftCount
   )
 
 S3method(as.network,tPath)
