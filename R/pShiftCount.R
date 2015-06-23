@@ -2,6 +2,9 @@
 
 
 pShiftCount<-function(nd,start=NULL,end=NULL, output=c('final','full')){
+  if(!is.networkDynamic(nd)){
+    stop('pShiftCount is only appropriate for dynamic networks')
+  }
   if(!is.directed(nd)){
     stop('pShiftCount is only appropriate for directed networks')
   }

@@ -26,7 +26,7 @@ pShiftCount(nd, start = NULL, end = NULL, output = c("final", "full"))
   }
 }
 \details{
-Uses the \code{accum.ps} function in the package \code{relevent} to build counts of accumulated dyad participation shifts (P-shift) using the dynamic information on tie changes represented in a directed \code{networkDynamic} object.   The P-shifts are given in the order used in Gibson's 2003 Social Forces paper, namely:
+Uses the \code{accum.ps} function in the package \code{relevent} to build counts of accumulated dyad participation shifts (turn-taking changes) using the dynamic information on tie changes represented in a directed \code{networkDynamic} object.   The P-shifts are given in the order used in Gibson's 2003 Social Forces paper, namely:
 \itemize{
   \item \itemize{
   Turn Receiving:
@@ -67,7 +67,7 @@ a repetition of a previous event (e.g., AB->AB or A0->A0).  The full set is
 thus affinely independent in general, although they will have a near (or 
 even full) dimension of affine dependence on most data sets.
 
-Event order is determined by sorting the network's edge spells by on the onset time of edge and then by the terminus. Gibson's typology assumes that edges/ties directed 'at the group' are distinguishable those directed at individuals, and has a strong assumption of sequential non-simultaneous events. Because the \code{networkDynamic} object does not explicitly clode for 'group' utterences, simultaneous edges originating from a speaker (same onset,terminus, and tail vertex) are assumed to be directed at the group, even if not all group members are reached by the ties.  
+Event order is determined by sorting the network's edge spells by on the onset time of edge and then by the terminus.  Gibson's typology assumes that edges/ties directed 'at the group' are distinguishable those directed at individuals, and has a strong assumption of sequential non-simultaneous events. Because the \code{networkDynamic} object does not explicitly clode for 'group' utterences, simultaneous edges originating from a speaker (same onset,terminus, and tail vertex) are assumed to be directed at the group, even if not all group members are reached by the ties.  
 }
 \value{
 For \code{output='final'} (the default), the output is a matrix with one row containing counts for each of the 13 P-shift types accumulated over the time period requested. For \code{ouptut='full'}, the output is a data.frame with rows corresponding to each edge spell event. The first 13 rows are the counts of P-shift types, and the remaining four rows are the 'onset', 'terminus', 'tail', 'head', and a 'group' column indicating if the event was considered as a group-directed. 

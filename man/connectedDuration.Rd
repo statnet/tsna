@@ -5,7 +5,7 @@
 Compute the duration of time (or count of events) that each vertex is connected by an edge
 }
 \description{
-Computes the total duration that each vertex in the network is connected by an incident edge.  Alternately, if \code{mode="counts"}, computes the total number of spells each vertex is connected by an incident edge.  The later is especially useful for continuous time networks connected by edges with 0-duration events. For directed networks, the durations can be filtered using the \code{neighborhood} argument to include only incoming, outgoing, or all ties combined in order to return out-connected or in-connected durations. For directed networks, this makes it possible to compare in vs. out connection rates
+Computes the total duration that each vertex in the network is connected by a incident edges.  Alternately, if \code{mode="counts"}, computes the total number of incident edge spells each vertex is connected by.  The later is especially useful for continuous time networks connected by edges with 0-duration events. For directed networks, the durations can be filtered using the \code{neighborhood} argument to include only incoming, outgoing, or all ties combined in order to return out-connected or in-connected durations.
 }
 \usage{
 connectedDuration(nd, mode = c("duration", "counts"), 
