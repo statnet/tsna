@@ -39,6 +39,10 @@ A \code{\link{ts}} (time series) object, a numeric matrix with giving the moment
 skyebend
 }
 
+\seealso{
+See also \code{tSnaStats(nd,'degree')} and \code{tErgmStats(nd,'sociality')} for alternate ways to compute degree using external packages. 
+}
+
 
 \examples{
 data(McFarland_cls33_10_16_96)

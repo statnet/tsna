@@ -1,13 +1,14 @@
 ---
 title: "`r packageDescription('tsna')$Package` Package Vignette"
 output: html_document
+toc: yes
 ---
 <!--
 %\VignetteEngine{knitr::rmarkdown}
 %\VignetteIndexEntry{tsna vignette}
 -->
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(cache=TRUE)
+#knitr::opts_chunk$set(cache=TRUE)
 ```
 
 --------------------
@@ -25,31 +26,28 @@ This work was supported by grant R01HD68395 from the National Institute of Healt
 -----
 
 ## Overview
-The `tsna` package provides SNA tools for continuous- and discrete-time longitudinal networks having vertex, edge, and attribute dynamics stored in the `networkDynamic` format.  It includes tools for applying "tradditional" static sna metrics at multiple time points, as well as temporal extensions of sna metrics using forwards- and backwards-path routines. 
+This package provides tools for working with dynamic networks (or processes on networks) in which the ordering and timing of ties is important.  These approaches are needed when the phenomena of interest involve networks having densities and edge-turnover rates in a parameter space such that the time-collapsed aggregate network give too great a distortion of the connectivity for useful analysis. 
 
-This package provides tools for working with dynamic networks (or processes on networks) in which the ordering and timing of ties is important.  The tools are need for networks having densities and edge-turnover rates in a parameter space such that the time-collapsed aggregate network give too great a distoration of the connectivity for useful analsysis. 
+Most `tsna` functions accept as their input continuous- and discrete-time longitudinal networks having vertex, edge, and attribute dynamics stored in the `networkDynamic` format.  `tsna` includes tools for applying "traditional" static Social Network Analysis (SNA) metrics at multiple time points, as well as temporal extensions of SNA metrics using forwards- and backwards-path routines. The initial version of `tsna` is primarily focused on working with discrete time networks of the sort that might be generated from simulation. 
 
-Although the `networkDynamic` package is designed to support both continuous- and discrete-time models of networks, the initial version of `tsna` is primairly focused on working with discrete time networks of the sort that might be generated from simulation. 
+Analysis of logitundinal netorks is a realitively new area of work. Many of the measures included in this package may be formally identical to measures already published in literature of various research fields with different names.   We will attempt to find and cite such previous work, but if you encounter any omissions, please let us know. 
 
-As always, a general help file for the package can be displayed, and the individual arguments for each function are documented in more detail in the function's help page. 
+## Requirements
+
+This document assumes familiarity with general concepts of SNA, `R`, and the `statnet` suite of R packages. For more background on the `network` and `networkDynamic` data structures and functions, please see appropriate package documentation and tutorials. 
+
+```{r}
+library(tsna)
+```
+
+As always in R, a general help file for the package can be displayed, and the individual arguments for each function are documented in more detail in the function's help page. 
 
 ```{r}
 ?tsna
 ?tPath
 ```
 
-
-Many of the measures included in this package may be formaly idental to measures allready published in literature of various research fields with different names.   We will attept to find and cite such previous work, but if you encounter any omissions, please let us know. 
-
-## Requirements
-
-This document assumes familiarity with general concpets of Social Network Analysis, `R`, and the `statnet` suite of R packages. For more background on the `network` and `networkDynamic` data structures and functions, please see appropriate package documentation.
-
-```{r}
-library(tsna)
-```
-
-This vignette also makes use of various example datasets provided by the `networkDynamicData` package, and various static Social Network Analysis measures provided by the `sna` package. 
+This vignette also makes use of various example data sets provided by the `networkDynamicData` package, and various static Social Network Analysis measures provided by the `sna` package. 
 
 ```{r}
 library(networkDynamicData)
@@ -58,18 +56,18 @@ library(sna)
 
 ## Introduction
 
-Most of the `tsna` package function assume that their input is formated as a `networkDynamic` data structure.  The `networkDynamic` class provides utilities for converting data from various formats (such as timed edgelists, or lists of matrices) as well as utilities for manipulating the data structures. 
+Most of the `tsna` package function assume that their input is formatted as a `networkDynamic` data structure.  The `networkDynamic` package provides utilities ('networkDynamic()')for converting data from various formats (such as timed edge-lists, or lists of matrices) as well as utilities for manipulating the data structures.
 
-The data structure provided by `networkDynamic` objects assumes that the vertices and (directed or non-directed) edges of a network have multiple 'activity spells' associated with them which indicate when they are 'active' or exist from the perspective of the model.  Each spell is an interval with an onset and terminus time. Each edge or vertex an turn on and off multiple times during the period over which the network is observed. 
+The data structure provided by `networkDynamic` objects assumes that the vertices and (directed or non-directed) edges of a network have multiple 'activity spells' associated with them indicating when they are 'active' or exist within the observation period.  Each spell is an interval with an onset and terminus time. Each edge or vertex can activate and deactivate multiple times during the period over which the network is observed. 
 
-As an example, consider the incldued `moodyContactSim` example object. 
+As an example, consider the included `moodyContactSim` example object. 
 
 ```{r}
 data(moodyContactSim)
 plot(moodyContactSim,displaylabels = TRUE,main='aggregate network')
 ```
 
-We can view the acivity spells associated with the network's edges
+We can view the activity spells associated with the network's edges
 
 ```{r}
 as.data.frame(moodyContactSim)
@@ -78,7 +76,7 @@ as.data.frame(moodyContactSim)
 Since this is a fairly simple network, we could plot the times on the aggregate network diagram
 
 ```{r}
-plot(moodyContactSim,
+coords<-plot(moodyContactSim,
      displaylabels=TRUE,
      label.cex=0.8,
      label.pos=5,
@@ -92,20 +90,267 @@ plot(moodyContactSim,
    )
 ```
 
-Notice that if we view the network that is actually active at any specific time point, it is much less connected that it appears in the time-collapsed network.  In fact, at most time points there is only a single active edge. 
+In many situations when we are considering transmission processes on a dynamic network, the aggregate network is not a good representation because it exagerates the connectivity in the network by ignoring the importance of the order of edge events.  For example, the apparent 8 to 11 to 1 path appears traverseable in the aggregate network.  But the edge between 1 and 11 becomes inactive long before the edge between 8 and 11 activates, there is no such path in the dynamic network. 
+
+We could go to the other extreme, and instead of looking at the aggregate network we view only the network that is actually active at a single point in time. These networks will be  much less connected than time-collapsed network.  In fact, at most time points there is only a single active edge, which makes it difficult to determine any connectivity at all.
 
 ```{r}
-plot(network.extract(moodyContactSim,at=50),displaylabels = TRUE,main='network at time 50')
-plot(network.extract(moodyContactSim,at=700),displaylabels = TRUE,main='network at time 700')
+par(mfcol=c(1,2))
+plot(network.extract(moodyContactSim,at=215),
+     main='network at time 215',
+     displaylabels=TRUE,
+     label.cex=0.8,
+     label.pos=5,
+     vertex.col='white',
+     vertex.cex=3,
+     coord=coords)
+plot(network.extract(moodyContactSim,at=750),
+     main='network at time 750',
+     displaylabels=TRUE,
+     label.cex=0.8,
+     label.pos=5,
+     vertex.col='white',
+     vertex.cex=3,
+     coord=coords)
+par(mfcol=c(1,1))
+
+```
+
+A goal of this package is to allow users to flexibly explore network data and apply metrics at multiple temporal resolutions.  We also provide some techniques for extracting networks of potential temporal paths through the network as a means of examining transmission potential without introducing aggregation baises. 
+
+## Temporal Paths and metrics
+
+
+### Explanation of paths in network
+
+One of the key features of this package is the ability to calculate temporal paths in networks.  A *forward temporal path* is a sequence of vertices and directed edges such that the activation spells of successive elements are greater than or equal than those of the previous.  In other words, if the network describes the contacts between people during which disease transmission could occur, a temporal path is a possible sequence of infection events in the network.  In most cases we assume that once a path reaches a vertex, that vertex remains 'infected' and can transmit to all of its future contacts. 
+
+Depending on network topology, there may be lots of possible temporal paths between vertices. The *earliest arriving temporal path* from vertex `i` to vertex `j` can be thought of as the soonest possible time a message sent from `i` to `j` could possibly arrive.  It is analogous to the shortest geodesic path in a static network and can be calculated with similar efficiency. 
+
+The *forward reachable set* (FRS) from vertex `v` at time `t` is the set of vertices reachable by forward temporal paths from v.   
+
+ 
+### Highlite possible paths found on Moody's example.
+
+For a more tangible example, we can use `tPath` to extract a forward temporal path starting from vertex 10 in the Moody example network.  
+```{r}
+v10path<-tPath(moodyContactSim,v=10,start=0)
+print(v10path)
+```
+The `tPath` function returns a `tPath` object which is a list with several components.  The `$tdist` component indicates the (elapsed) time at which each vertex is reached from the starting vertex v.  The `$previous` component gives, for each vertex index, the vertex id of the previous vertex along path. This path information  can be used to construct a new network object containing only the path info. `$geodist` gives the *geodesic distance* (number of steps in the path from the starting vertex) for each vertex. The remaining elements store the query parameters for later use by other functions.  
+
+There is a special plot function for `tPath` objects, which essentially sets some useful presets for `plot.network`.
+
+```{r}
+plot(v10path,coord=coords, displaylabels=TRUE)
 ```
 
 
+The `tsna` package also provides a utility function plot the path on top of the static aggregate network, along with the distance (transmission time) for each edge.  We can use it to visually compare two paths.
+
+Extract an alternate path, this time starting from vertex 1 instead of 10
+```{r}
+v1path<-tPath(moodyContactSim,v=1,start=0)
+```
+
+
+Plot both paths side-by-side.
+```{r}
+par(mfcol=c(01,2)) # set up side-by-side plot
+
+plotPaths(moodyContactSim,v10path,coord=coords, main='fwd path from v10')
+plotPaths(moodyContactSim,v1path,coord=coords, main = 'fwd path from v1')
+
+par(mfcol=c(1,1)) # turn off side-by-side plots
+```
+
+Notice that paths are directed (even if the underlying network is not) and not always symmetric.  For example vertex 10 can reach 1, but 1 cannot reach 10.
+
+It is also possible to pass in a list of multiple paths and draw them on the same network.
+
+```{r}
+# or draw both plots on the  them both on the same network
+plotPaths(moodyContactSim,coord=coords,list(v10path,v1path))
+```
+
+
+The forward reachable set is not the same as the *backwards reachable set* (BWS) : The set of vertices that v can rach along paths traveling backwards in time.  Or perhaps more intuitively, the set of vertices that can reach v along forward paths. 
+
+```{r}
+plotPaths(moodyContactSim, list(
+          tPath(moodyContactSim,v=10,direction='bkwd',type='latest.depart'),
+          tPath(moodyContactSim,v=10)))
+
+```
+
+
+
+### Compare earliest forward set sizes
+For transmission processes, the forward reachable set is a theoretical upper bound (for a perfectly infective process) on the possible number of vertices that can be reached from a source vertex within the time bounds.  Hence, if we calculate the FWS from every vertex, we would know the distribution of maximum possible epidemic sizes in the dynamic network.  Can we characterize networks by looking at the distribution of sizes of fwd reachable sets? 
+
+This example makes use of the `ConcurrencyComparisonNets` example data provided in the `networkDynamicData` package.  
+
+```{r}
+library(networkDynamicData)
+data(concurrencyComparisonNets)
+```
+
+When loaded, this gives of three discrete time networks, simulated via a tergm process, each of which is 100 time steps in duration. All three networks were parameter to have the same size, relationship duration distribution and cross-sectional mean degree, but different cross-sectional degree distributions.
+
+The `tReach` function computes the sizes of temporally reachable sets. Since these are large-ish networks (1000 vertices), we will only calculate the paths from a sample of 25 seed vertices to save time.
+
+```{r}
+baseTrees<-tReach(base,sample=25)
+monogTrees<-tReach(monog,sample=25)
+middleTrees<-tReach(middle,sample=25)
+```
+
+If we peek at the sizes we observe in the `base` network (the network with a Poisson cross-sectional degree distribution) we see a large number of FRS reaching the majority of the network, and a few cases the didn't spread far at all.
+
+```{r}
+baseTrees
+```
+
+The `monog` network has Bernoilli (0,1) cross-section degree distribution, meaning nobody has more than one partner at a time. This greatly reduces the spreading potential of the network, so almost all of the FRS are quite small. 
+
+```{r}
+monogTrees
+```
+
+We can compare the three distributions using boxplots.
+```{r}
+boxplot(cbind(baseTrees,monogTrees,middleTrees),
+        main='fwd-reachable set size distributions for nets of varying concurrency')
+```
+
+
+For a bit more detail on the distribution of FRS sizes, we can plot some overlapping historgrams. 
+```{r}
+hist(baseTrees, main='fwd-reach size distributions',
+     ylim=c(0,50),xlim=c(0,1000),
+     breaks=seq(from=0,to=1000,by=50),
+     col='#55000033',xlab='reachable set size')
+hist(monogTrees,ylim=c(0,50),xlim=c(0,1000),
+     breaks=seq(from=0,to=1000,by=50),
+     col='#00550033',add=TRUE)
+hist(middleTrees,ylim=c(0,50),xlim=c(0,1000),
+     breaks=seq(from=0,to=1000,by=50),
+     col='#00005533',add=TRUE)
+legend(800,50,legend=c('base','monog','middle'),
+       fill=c('#55000033','#00550033','#00005533'))
+```
+
+These networks would clearly have very different spreading potential, despite having nearly identical aggregate mean degrees and densities -- which would often be used to predict the size of expected 'giant component' in the network
+
+```{r}
+mean(degree(as.network(base)))
+mean(degree(as.network(monog)))
+mean(degree(as.network(middle)))
+```
+
+## Rates of Change
+
+
+
+The functions `tEdgeFormation` and `tEdgeDissolution` evaluate a network object at multiple time points and return counts of the number of edges forming (edge onset at time point) and dissolving (edge terminus at time point). These functions are intended to provide descriptive stats about how quickly the elements of the network are changing relative to the observation time units.
+
+
+Various other time-to-change metrics still need finalization and docs
+
+
+```{r}
+plot(tEdgeDissolution(base),main="Edge dissolution counts for network 'base'")
+plot(tEdgeFormation(base), main="Edge formation counts for network 'base'")
+```
+
+Notice the spikes at the beginning and ends of the network caused by the trunction (censoring) of edges by the network's observation time window.
+
+## Static graph metrics as time series
+
+Many authors have described useful generalizations of traditional network statistics by simply applying static graph metrics at multiple time points in order to characterize changes in the network over time.  The `tsna` package provides utilities to draw on the static metrics offered by the `sna` (Butts 2014) and `ergm` (Handcock et. al. 2015) packages.
+
+### Using sna package metrics
+
+```{r}
+data(harry_potter_support)
+```
+
+Compute graph transitivities for all time points
+```{r}
+tSnaStats(harry_potter_support,snafun='gtrans')
+```
+The results are returned as a time series object, which is a special type of matrix in which the rows correspond to regularly spaced time increments and the columns are variables of interest.
+
+
+Other measures, such as `triad.census`, return multiple columns, one for each statistic (counts of the the various triad types)
+```{r}
+# compute triad census scores for each time point
+tSnaStats(harry_potter_support,snafun='triad.census')
+```
+
+For vertex-level measures such as `betweenness` we will get back one column for each vertex indicating how its betweenness score changes over time.  This doesn't fit well on the page, so we will not print it all out. 
+
+```{r}
+# compute degrees
+bet<-tSnaStats(harry_potter_support,snafun='betweenness')
+nrow(bet)
+ncol(bet)
+bet[,25,drop=FALSE]
+class(bet)
+```
+
+Since a time series (`ts`) object really is just a fancy matrix, we can still use matrix functions on the rows and columns.
+
+Compute the mean (over time) betweenness of each vertex
+```{r}
+colMeans(bet,na.rm = TRUE)
+```
+
+Or look at it the other way and compute mean betweenness of all vertices at each timepoint
+```{r}
+rowMeans(bet)
+```
+
+Not surprisingly, HP has the highest betweeness.
+
+
+Since the `sna` metrics are usually not cheep to calculate, we may not want to evaluate them at every single timestep for larger longer-duration networks.  If we just need a sense of the trend in the network, we can use the `time.interval` parameter to sample.
+
+```{r}
+prestScores<-tSnaStats(base,'prestige',time.interval=25,rescale=TRUE)
+```
+
+And notice that we also passed in the `rescale=TRUE` argument used by the `prestige` function.  If the effective size of the network is changing due to vertex activiity, such renormalizing to reduce the effects of making comparisons aross different sized networks. 
+
+
+
+### Using ergm terms as static metrics
+
+Each of the model terms provided by the `ergm` package (and its various add-ons) provide a 'change statistic' for evaluating the effect of changing a single tie on network structure.  These terms can be effectively used as descriptive statistic for static networks.  For the static case, this is done by passing a formula naming the statistics to ergm's `summary` function. 
+
+The `tsna` package provides a wrapper to evaluate the statistics at multiple time points and return the result as a time series (`ts`) object. 
+
+```{r}
+ tErgmStats(base,'~edges+concurrent',
+               start=0,end=100,time.interval = 10)
+```
+
+The `ts` object has a really handy print function that can display the timeseires for each statistic side-by-side or overlayed on a single plot.
+
+```{r}
+ plot(
+   tErgmStats(base,'~edges+concurrent',
+                start=0,end=100,time.interval = 10)
+    )
+```
+
+Note that just like for the `sna` functions, some `ergm` terms (such as `degree`) produce multiple statistics in the output.  Also, there is some overlap with functionality appearing in the sna package i.e. (sna's `degree` vs ergm `sociality`.  Generally the ergm version will be faster).  
 
 ## Durations and densities
 
 The `tsna` package currently contains several functions for reporting on the durations of the activity events (spells) associated with a network.  Most of these functions have options for varying the units of aggregation or analysis. 
 
-`edgeDuration` `tDegree` `tEdgeDensity` `connectedDuration`
+`edgeDuration`  `tEdgeDensity` `connectedDuration` `vertexDuration`
 
 ### Distributions of edge durations
 
@@ -121,38 +366,57 @@ hist(edgeDuration(moodyContactSim))
 
 Durations for empty dyads (non existing edges) are not reported. 
 
-For a more realisitic example, we can compare the distributions of several networks simulated using the `tergm` package. (Please see `?concurrencyComparisonNets` for more backround on these networks) We would expect that since the concurrency sims all had the same dissolution parameter in the model, which was simply a uniform probability that an edge would be deactivated at each timestep, they should all have similarly shaped distrubtions of edge durations
+For a more realisitic example, we can compare the distributions of several networks simulated using the `tergm` package. (Please see `?concurrencyComparisonNets` for more backround on these networks) We would expect that since the concurrency sims all had the same dissolution parameter in the model, which was simply a uniform probability that an edge would be deactivated at each timestep, they should all have similarly shaped distrubtions of edge durations.
 
 ```{r}
 data(concurrencyComparisonNets)
-par(mfcol=c(3,1))
 hist(edgeDuration(base),ylim=c(0,800))
 hist(edgeDuration(middle),ylim=c(0,800))
 hist(edgeDuration(monog),ylim=c(0,800))
-par(mfcol=c(1,1))
 ```
 
 ### Re-occuring edges
 
-The durations functions also have the ability to count the number of spells instead of aggregating their durations. This is mostly useful for working with event-based continuous data (see below) but also makes it so we can quickly asses if the network has re-occuring ties. In other words, which edges have more than one activity spell associated with them?
+The durations functions also have the ability to count the number of spells instead of aggregating their durations. This is mostly useful for working with event-based continuous data (see below) but also makes it so we can quickly determine if the network has re-occuring ties. In other words, which edges have more than one activity spell associated with them?
 ```{r}
 which(edgeDuration(monog,mode='counts')>1)
 which(edgeDuration(moodyContactSim,mode='counts')>1)
 ```
 
-All of the edges in the `moodyContactSim` network are only active once (making many times of calculations much simpler), where in the `monog` network, there are a few edges that toggle on and off and then back on again. 
+All of the edges in the `moodyContactSim` network are only active once (making many times of calculations much simpler), where in the `monog` network, there are a few edges that toggle on and off and then back on again.  By default, the `edgeDuration` aggregates at the level of `subject='edge'` summing the durations together. Setting `subject='spells'` will return / count each activity spell independently.  For example, we just query the duration of the 105th valid edge id which was reported as having multiple spells.
 
+```{r}
+edgeDuration(monog,e=valid.eids(monog)[105],subject='edges')
+edgeDuration(monog,e=valid.eids(monog)[105],subject='spells')
+```
+
+### Finding vertex activity durations ###
+
+For networks with a changing set of active vertices, the durations can be summarized using the `vertexDuration` function.  The `windsurfers` data set only records interactions between the surfers observed on the specific beach.  Since most of the surfers don't make it to beach every day and can't be observed, they are considered inactive. 
+```{r}
+data(windsurfers)
+vertexDuration(windsurfers)
+table(vertexDuration(windsurfers))
+hist(vertexDuration(windsurfers))
+hist(vertexDuration(windsurfers,subject='spells'))
+```
+
+Again, setting `subject='spells'` changes the interpretation from "give me the total number of days each vertex was observed to be active in the dataset" to "give me the number of consecutive days in each spell of days the vertices were observed to be active"
 
 ### Finding connected times of vertices
 
-The McFarland classroom interaction dataset is a collection of time-stamped speach acts among teachers and students duringa 40 minutes of classroom time.  How much total talking does each person in the room do?
+The `connectedDuration` function measures the total amount of time each vertex has ties during the network observation period. 
+
+Although it is possible to represent networks in which edges link to inactive vertices, we assume that the situations are rare enough that we have not implemented a specific measure to describe it. (For data cleaning purposes, such cases can be discovred using `network.dynamic.check`.)
+
+The McFarland classroom interaction dataset is a collection of time-stamped speach acts among teachers and students during 40 minutes of classroom time.  How much total talking does each person in the room do?
 
 ```{r}
 data(McFarland_cls33_10_16_96)
 connectedDuration(cls33_10_16_96, mode='counts')
 ```
 
-Notice that since the edges in this network have no duration, we actually asked it to consider counts instead of durations. So there is one person (7) who talks a lot more, and two people who don't talk at all (2 and 19).  Could this be related to their roles?
+Notice that since the edges in this network are coded has events with no duration, we actually asked it to consider counts instead of durations. So there is one person (7) who talks a lot more, and two people who don't talk at all (2 and 19).  Could this be related to their roles?
 
 ```{r}
 cls33_10_16_96%v%'type'
@@ -175,7 +439,10 @@ text(connectedDuration(cls33_10_16_96, mode='counts',neighborhood = 'out'),
      label=cls33_10_16_96%v%'type',cex=0.8,pos=4)
 ```
 
-Would expect a strong relationship between the number of people contacted and the total contact time.
+
+### Difference between degree and connectedDuration
+
+Like many of the temporal measures, for truely random graphs we might expect a strong correlation between the number of people contacted (degree) and the total contact time (connectedDuration).  But of course there is always the possibility of someone having a very few long-duration ties, or very many short ties.  We can compare the measures on a real contact network. 
 
 ```{r}
 data(hospital_contact)
@@ -185,7 +452,7 @@ plot(degree(as.network(hospital),gmode = 'graph'),connectedDuration(hospital),
      main='Vertices in hospital RFID proximity contact network')
 ```
 
-### compare duration measures on various example networks
+### Compare duration measures on various example networks
 
 Lets put a bunch of the example networks together on a list so we apply the metrics to all of them at once
 ```{r}
@@ -260,208 +527,30 @@ Windsurfers should probably have a correction for dyad duration density, since t
 
 The problem with these measures is that, like density, the values will be very, very low for real world networks so kind of hard to compare.
 
-### Degrees over time
 
-The `tDegree` function report momentary degree of each vertex in networkDynamic object at multiple timepoints.
+## Measures of sequence
+In addition to measures of momentary structure, dynamic or logitudinal networks also give us the ability to explore sequences or patterns of events.  The package `relevent` (Butts 2008) includes some statistical techniques for modeling relational event sequences, and the `tsna` package borrows the participation shift summary statistics from it.  
 
-## Rates of Change
+### pShift
 
-These functions are indented to provide descriptive stats about how quickly the elements of the network are changing relative to the time units. 
+The function `pShiftCount` computes counts of dyadic turn-taking events using a typology outlined by Gibson (2003). Essentially, it looks at the sequence of events (rather than the exact timing) and counts up instances of various types of 'turn taking' speach acts.  For example, two edges in sequence, 'i' talks to 'j', and then 'j' responds to 'i', is counted as one type of event, where  'i' talks to 'j' and then 'j' talks to 'k' would be another type of event.   The set of events Gibson was interested in is certainly not an exhaustive list of potential sequences, but may still be an interesting approach for characterizing dynamic networks. 
 
-`tEdgeDissolution`  `tEdgeFormation`   various time to change metrics still need finalization and docs
-
-## Temporal Paths and metrics
-
-`tPath` `tReach` 
-
-### Explanation of paths in network
-
-### Hilite possible paths found on Moody's example.
-
-Load up an example netwoork and take a peek at the spells
-```{r}
-data(moodyContactSim)
-as.data.frame(moodyContactSim)[,1:4]
-```
-For this network, each edge is active for only a single time period.
-
-
-Plot a view of the static aggregate network with the edge spells timing indicated
-```{r}
-coordinates<- plot(moodyContactSim,
-     displaylabels=TRUE,
-     label.cex=0.8,
-     label.pos=5,
-     vertex.col='white',
-     vertex.cex=3,
-     edge.label=sapply(get.edge.activity(moodyContactSim),function(e){
-       paste('(',e[,1],'-',e[,2],')',sep='')
-     }),
-     edge.label.col='blue',
-     edge.label.cex=0.8
-   )
-```
-
-Extract a forward temporal path starting from vertex 10, 
-```{r}
-v10path<-tPath(moodyContactSim,v=10,start=0)
-print(v10path)
-```
-The `tPathDistaince` function returns a list with two components.  The `$distance` componet indicates the (elapsed) time at which each vertex is reached from the starting vertex v.  The `$previous` component gives, for each vertex, the vertex id of the previous vertex along path. This path information information can be used to construct a new network object containing only the path info.
-
-Using the coordinates from previous plot to make it easier to follow
+We can apply the the `pShiftCount` metric to the McFarland dataset of conversational speach acts in a classroom. 
 
 ```{r}
-plot(v10path,coord=coordinates,displaylabels=TRUE)
+data(McFarland_cls33_10_16_96)
+pShiftCount(cls33_10_16_96)
 ```
 
-The `tsna` package provides a utility function plot the path on top of the static aggregate network, along with the distance (transmission time) for each edge. 
-```{r}
-# extract an alternate path, starting from vertex 1
-v1path<-tPath(moodyContactSim,v=1,start=0)
+By default, it gives us aback a vector with the counts of each type perticipation shifts. After consulting the docs (`?pShiftcount`) we see that there is a lot of call and response 'Turn Receiving' ('AB-BA') as well as quite a bit of 'Turn Usurping' ('AB-XY') events. 
 
-# set up side-by-side plot
-par(mfcol=c(01,2))
-
-# plot each path hilighted on network
-plotPaths(moodyContactSim,v10path,coord=coordinates, main='fwd path from v10')
-plotPaths(moodyContactSim,v1path,coord=coordinates, main = 'fwd path from v1')
-par(mfcol=c(1,1))
-```
-
-It is also possible to pass in a list of multiple paths and draw them on the same network.
+Since we don't really know what these numbers mean in absolute terms, it would be interesting to see if the counts change at various segments of time
 
 ```{r}
-# or draw both plots on the  them both on the same network
-plotPaths(moodyContactSim,coord=coordinates,list(v10path,v1path))
+sliceCounts<- lapply(seq(from = 0,to=45,by = 5),function(onset){
+  pShiftCount(network.extract(cls33_10_16_96,onset,length = 5))
+})
 ```
-
-Notice that paths are directed (even if the underlying network is not) and not always symmetric.  For example v10 can reach v1, but 1 cannot reach 10.
-
-Also, the forward reachable set is not the same as the backwards reachable set
-
-```{r}
-plotPaths(moodyContactSim, list(
-          tPath(moodyContactSim,v=10,direction='bkwd',type='latest.depart'),
-          tPath(moodyContactSim,v=10)))
-
-```
-
-
-
-### Compare earliest forward set sizes
-Characterize networks by looking at the distribution of sizes of fwd reachable sets. 
-
-This example makes use of the `ConcurrencyComparisonNets` example data provided in the `networkDynamicData` package.  
-
-```{r}
-library(networkDynamicData)
-data(concurrencyComparisonNets)
-```
-
-When loaded, this gives of three discrete time networks, simulated via a tergm process, each of which is 100 timesteps in duration. All three networks were parameterized to have the same size, relationship duration distribution and cross-sectional mean degree, but different cross-sectional degree distributions.
-
-Since this are good sized networks (1000 vertices), we will only calculate the paths from a sample of 25 seed vertices
-
-```{r}
-baseTrees<-tReach(base,sample=25)
-monogTrees<-tReach(monog,sample=25)
-middleTrees<-tReach(middle,sample=25)
-
-boxplot(cbind(baseTrees,monogTrees,middleTrees),
-        main='fwd-reachable set size distributions for nets of varying concurrency')
-```
-
-```{r}
-hist(baseTrees, main='fwd-reach size distributions',
-     ylim=c(0,50),xlim=c(0,1000),
-     breaks=seq(from=0,to=1000,by=50),
-     col='#55000033',xlab='reachable set size')
-hist(monogTrees,ylim=c(0,50),xlim=c(0,1000),
-     breaks=seq(from=0,to=1000,by=50),
-     col='#00550033',add=TRUE)
-hist(middleTrees,ylim=c(0,50),xlim=c(0,1000),
-     breaks=seq(from=0,to=1000,by=50),
-     col='#00005533',add=TRUE)
-legend(800,50,legend=c('base','monog','middle'),
-       fill=c('#55000033','#00550033','#00005533'))
-```
-
-
-## Static graph metrics as time series
-
-It is often useful to apply static graph metrics at multiple time points in order to characterize changes in the network over time.  The tsna package provides utilities to draw on the static metrics offered by the sna and ergm packages.
-
-### Using sna package metrics
-
-```{r}
-data(harry_potter_support)
-
-# compute graph transitivities
-tSnaStats(harry_potter_support,snafun='gtrans')
-
-# compute degrees
-tSnaStats(harry_potter_support,snafun='degree')
-
-# compute triad census scores for each time point
-tSnaStats(harry_potter_support,snafun='triad.census')
-```
-
-
-The results are returned as a time series object, which is a special type of matrix in which the rows correspond to regularly spaced time increments and the columns are variables of interest.  Since betweenness is a vertex level measure, we will get back one column for each vertex indicating how its prestige score changes over time. 
-
-
-```{r}
-bet<-tSnaStats(harry_potter_support,'betweenness')
-```
-
-Since it really is just a matrix, we can still use matrix functions on the rows and columns.
-
-```{r}
-class(bet)
-
-# mean (over time) betweenness of each vertex
-colMeans(bet,na.rm = TRUE)
-
-# mean betweenness of all vertices at each timepoint
-rowMeans(bet)
-
-```
-
-Not surprisingly, HP has the highest betweeness.
-
-
-Since the sna metrics are usually not cheep to calculate, we may not want to calculate them at every single timestep for larger longer-duration networks.  If we just need a sense of the trend in the network, we can use the `time.interval` parameter to sample.
-
-```{r}
-# since thes are big nets, with lots of timepoints, 
-# set time.interval to avlid evaluating every step
-prestScores<-tSnaStats(base,'prestige',time.interval=25,rescale=TRUE)
-```
-
-And notice that we also passed in the `rescale=TRUE` argument used by the `prestige` function. 
-
-
-### Using ergm terms as static metrics
-
-Each of the model terms provided by the ergm package (and its various add-ons) provide a 'change statistic' for evaluating the effect of a changing tie on network structure.  These terms can be effectively used as descriptive statistic for static networks.  For the static case, this is done by passing a formula naming the statistics to ergm's `summary` function. 
-
-The tsna package provides a wrapper to evaluate the statistics at multiple time points and return the result as a time series (ts) object. 
-
-```{r}
- tErgmStats(base,'~edges+concurrent',
-               start=0,end=100,time.interval = 10)
- # show as multiple plots
- plot(
-   tErgmStats(base,'~edges+concurrent',
-                start=0,end=100,time.interval = 10),
-                
-                )
- data(windsurfers)
- tErgmStats(windsurfers,'~edges+degree(1:2)')
-```
-
-Note that some ergm terms (such as `degree`) produce multiple statistics in the output. 
 
 ## Related packages
 
@@ -476,3 +565,26 @@ Package is far from complete.  Most functions do not yet include ability to bin 
 ```{r}
 citation('tsna')
 ```
+
+## Bibliography
+
+Carter T. Butts, Ayn Leslie-Cook, Pavel N. Krivitsky and Skye Bender-deMoll (2015). networkDynamic: Dynamic Extensions
+  for Network Objects. R package version 0.8. http://statnet.org
+
+Gibson, D.R. (2003) 'Participation Shifts: Order and Differentiation in Group Conversation' Social Forces 81 (4): 1335-1380 http://sf.oxfordjournals.org/content/81/4/1335.short
+
+Carter T. Butts (2008). A Relational Event Framework for Social Action. Sociological Methodology, 38(1), 155–200.
+
+Handcock M, Hunter D, Butts C, Goodreau S, Krivitsky P and Morris M (2015). _ergm: Fit, Simulate and Diagnose
+Exponential-Family Models for Networks_. The Statnet Project (<URL: http://www.statnet.org>). R package version 3.4.0,
+<URL: http://CRAN.R-project.org/package=ergm>.
+
+Carter T. Butts (2014). sna: Tools for Social Network Analysis. R package version 2.3-2.
+  http://CRAN.R-project.org/package=sna
+  
+Skye Bender-deMoll (2014). networkDynamicData: dynamic network datasets. R package version 0.1.0.
+  http://CRAN.R-project.org/package=networkDynamicData
+
+
+
+
