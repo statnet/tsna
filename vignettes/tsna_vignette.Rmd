@@ -573,7 +573,7 @@ Carter T. Butts, Ayn Leslie-Cook, Pavel N. Krivitsky and Skye Bender-deMoll (201
 
 Gibson, D.R. (2003) 'Participation Shifts: Order and Differentiation in Group Conversation' Social Forces 81 (4): 1335-1380 http://sf.oxfordjournals.org/content/81/4/1335.short
 
-Carter T. Butts (2008). A Relational Event Framework for Social Action. Sociological Methodology, 38(1), 155–200.
+Carter T. Butts (2008). A Relational Event Framework for Social Action. Sociological Methodology, 38(1), 155-200.
 
 Handcock M, Hunter D, Butts C, Goodreau S, Krivitsky P and Morris M (2015). _ergm: Fit, Simulate and Diagnose
 Exponential-Family Models for Networks_. The Statnet Project (<URL: http://www.statnet.org>). R package version 3.4.0,
