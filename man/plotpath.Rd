@@ -88,5 +88,17 @@ plotPaths(moodyContactSim,v10path)
 v1path<-tPath(moodyContactSim,v=1,start=0)
 plotPaths(moodyContactSim,list(v10path,v1path))
 
+# if ndtv package is installed, along with Graphviz system library,
+# nice hierarchical trees can be drawn
+\dontrun{
+plot(v10path,
+     coord=network.layout.animate.Graphviz(
+                   as.network(v10path),
+                   layout.par = list(gv.engine='dot')
+            ),
+            jitter=FALSE
+    )
+}
+
 }
 

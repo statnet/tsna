@@ -1,21 +1,21 @@
 \name{formation_and_dissolution}
 \alias{tEdgeFormation}
 \alias{tEdgeDissolution}
-\alias{edgeFormationAt}
-\alias{edgeDissolutionAt}
+
 \title{
-functions to calculate formation (onset) or dissolution (termination) counts of edges in a networkDynamic object
+Counts or fractions of edge transitions in a networkDynamic object
 }
 \description{
-The functions \code{tEdgeFormation} and \code{tEdgeDissolution} evaluate a network object at multiple time points and return counts of the number of edges forming (edge onset at time point) and dissolving (edge terminus at time point). The counts are returned as numeric vector which is a time-series object (class \code{\link{ts}})
+The functions \code{tEdgeFormation} and \code{tEdgeDissolution} evaluate a network object at multiple time points and return counts (or fractions) of the number of edges forming (edge onset at time point) and dissolving (edge terminus at time point). The counts are returned as numeric vector which is a time-series object (class \code{\link{ts}}). 
 
-The functions \code{edgeFormationAt} and \code{edgeDissolutionsAt} perform similar calculations, but only at a single time point and return only a single value. 
 }
 \usage{
-tEdgeFormation(nd, start, end, time.interval = 1)
-tEdgeDissolution(nd, start, end, time.interval = 1)
-edgeFormationAt(nd, at)
-edgeDissolutionAt(nd, at)
+tEdgeFormation(nd, start, end, time.interval = 1, 
+               result.type=c('count','fraction'))
+
+tEdgeDissolution(nd, start, end, time.interval = 1, 
+               result.type=c('count','fraction'))
+
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -31,12 +31,18 @@ optional numeric time value at which evaluation should end (default is last obse
   \item{time.interval}{
 optional numeric value giving time interval between evaluations (default is 1)
 }
-  \item{at}{
-   numeric value giving the time point at which formation or dissolution counts should be evaluated.
+  \item{result.type}{ either \code{'count'} indicating that results should be returned as counts of tie changes or \code{'fraction'} meaning that results should be returned as fraction of ties dissolving (for dissolution) or fraction of empty dyads forming ties (for formation). In the later case the number of dyads is corrected for network directedness, loops, and bipartite partition size. 
+  
   }
 }
 \details{
-Uses \code{as.data.frame.networkDynamic} internally.  Does not yet correct for censoring of edges forming at the beginning or end of the network.
+Uses \code{as.data.frame.networkDynamic} internally.  Does not yet correct for censoring of edges forming at the beginning or end of the network. 
+
+When \code{result.type='fraction'}:
+\itemize{
+  \item formation returns the ratio of number of  ties forming to the number of possible empty dyads that could have formed ties. So value of 1 would mean all empty dyads formed ties, value of 0 means no ties formed.  In sparse networks, the numbers will tend to be very, very small.    
+  \item dissolution returns the ratio of the number of ties dissolving to the number preexisting ties that could have dissolved. So value of 1 means all ties disolved, 0 means no ties disolved. 
+}
 }
 \value{
 For \code{tEdgeFormation} and \code{tEdgeDissolution}, a numeric vector of class \code{ts} giving the formation and dissolution counts (respectively) as a time-series.  For \code{edgeFormationAt} and \code{edgeDissolutionsAt}, a single numeric value
@@ -53,9 +59,15 @@ should add additional args to allow binning other than 'at' for working with non
 \examples{
   library(networkDynamicData)
   data(concurrencyComparisonNets)
-  # plot formation and dissolution time-series
+  # plot formation and dissolution counts time-series
   plot(tEdgeFormation(base),col='green', 
     main='edge formation and dissolution rates per timestep of base')
   points(tEdgeDissolution(base),col='red',type='l')
+  
+  # compute fraction of ties dissolving every 10 steps
+  tEdgeDissolution(base,time.interval = 10,result.type = 'fraction')
+  # compute fraction of empty dyads forming ties every 10 steps
+  tEdgeFormation(base,time.interval = 10,result.type = 'fraction')
+  
 }
 

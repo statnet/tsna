@@ -13,7 +13,7 @@
 Functions to compute temporal density-related measures on dynamic networks
 }
 \description{
-These functions provide various generalizations of the concept of "network density" from traditional SNA to \code{networkDynamic} objects
+These functions provide various network-level statistics giving information on the fraction of time edges are active in \code{networkDynamic} objects
 }
 \usage{
 tEdgeDensity(nd,mode=c('duration','event'),
@@ -28,7 +28,7 @@ tEdgeDensity(nd,mode=c('duration','event'),
   option indicating if \code{'duration'} of edge spells should be considered or only the \code{'event'} count (for networks in which events have zero-durations)
   }
   \item{agg.unit}{
-  option indicating how to calculate the possible observable time: \code{'edge'} only counts existing edges \code{'dyad'} counts all possible dyads. 
+  option indicating how to calculate the possible observable time to be used as the denominator: \code{'edge'} only counts existing edges \code{'dyad'} counts all possible dyads. 
   }
   \item{active.default}{
   logical, default TRUE.  should edges without explicit timing information be considered active by default?
@@ -36,9 +36,9 @@ tEdgeDensity(nd,mode=c('duration','event'),
 }
 \details{
 
-The \code{tEdgeDensity} measure by default (\code{mode='duration', agg.unit='edge'}) computes the total duration of activity of all the edges in the network and divides by the total amount of observable time for all the \emph{existing edges}. Can be interpreted as the average fraction of observed edges active at any time. A value of 1 corresponds to a network in which all of the existing edges are always active (but the network still may be topologically sparse)
+The \code{tEdgeDensity} measure by default (\code{mode='duration', agg.unit='edge'}) computes the total duration of activity of all the edges in the network and divides by the total amount of observable time for all the dyads \emph{between which edges are ever observed}. Can be interpreted as the average fraction of observed edges active at any time. A value of 1 corresponds to a network in which all of the observed edges are always active (but the network still may be topologically sparse, having a low density)
 
-The \code{tEdgeDensity} function with \code{mode='event'} computes the number of events (spells) occurring on each edge the network and divides it by the total amount of observable time per edge within the time bounds of the network.  Can be interpreted as the fraction of existing ties toggling in a unit time step?
+The \code{tEdgeDensity} function with \code{mode='event'} computes the number of events (spells) occurring on each edge the network and divides it by the total amount of observable time per dyad ever observed to have an edge within the time bounds of the network.  Can be interpreted as the fraction of existing ties toggling in a unit time step?
 
 The \code{agg.unit='dyad'} measure computes the total duration (or count of events) of activity of all the edges in the network, and divides by the total amount of observable time for all the \emph{possible dyads} (existing and non-existing edges). Value of 1 corresponds to a fully-connected network in which all edges are always active, value of 0 would be a network with no active edges. Can be interpreted as the average fraction of possible edges active at any time. 
 

@@ -45,19 +45,20 @@ edgeDuration<-function(nd,mode=c('duration','counts'),subject=c('edges','spells'
 }
 
 
-tEdgeFormation<-function(nd, start, end, time.interval=1){
-    
+tEdgeFormation<-function(nd, start, end, time.interval=1, result.type=c('count','fraction')){
+    result.type<-match.arg(result.type)
     if(missing(start) | missing(end)){
       times <- get.change.times(nd)
       if (length(times) == 0) {
-        warning("network does not appear to have any dynamic information. Using start=0 end=1")
+        warning("network does not appear to have any time range information and start and end parameters not provided. Using start=0 end=0")
         start = 0
         end = 0
+      } else {
+        times[times == Inf] <- NA
+        times[times == -Inf] <- NA
+        start = min(times, na.rm = T)
+        end = max(times, na.rm = T)
       }
-      times[times == Inf] <- NA
-      times[times == -Inf] <- NA
-      start = min(times, na.rm = T)
-      end = max(times, na.rm = T)
     }
     
     # figure out the times where we will do evaluations
@@ -65,22 +66,31 @@ tEdgeFormation<-function(nd, start, end, time.interval=1){
     
     tel<-as.data.frame.networkDynamic(nd)
     formation<-sapply(times,function(t){sum(tel$onset==t)})
+    if(result.type=='fraction'){
+      # compute the number of empty dyads at each time point
+      emptyDyads<-sapply(times,function(t){emptyDyadCount(nd,at=t)})
+      # since we want to compare to number of empty dyads in 'previous' time point, add in the number of forming ties
+      # (because ties that form now must have been empty in previous step)
+      emptyDyads<-emptyDyads+formation
+      formation<-formation/emptyDyads                 
+    }
     return(ts(formation,start=start,end=times[length(times)],deltat=time.interval))
 }
 
-tEdgeDissolution<-function(nd, start, end, time.interval=1){
-  
+tEdgeDissolution<-function(nd, start, end, time.interval=1,result.type=c('count','fraction')){
+  result.type=match.arg(result.type)
   if(missing(start) | missing(end)){
     times <- get.change.times(nd)
     if (length(times) == 0) {
-      warning("network does not appear to have any dynamic information. Using start=0 end=1")
+      warning("network does not appear to have any time range information and start and end parameters not provided. Using start=0 end=0")
       start = 0
       end = 0
+    } else {
+      times[times == Inf] <- NA
+      times[times == -Inf] <- NA
+      start = min(times, na.rm = T)
+      end = max(times, na.rm = T)
     }
-    times[times == Inf] <- NA
-    times[times == -Inf] <- NA
-    start = min(times, na.rm = T)
-    end = max(times, na.rm = T)
   }
   
   # figure out the times where we will do evaluations
@@ -88,6 +98,14 @@ tEdgeDissolution<-function(nd, start, end, time.interval=1){
   
   tel<-as.data.frame.networkDynamic(nd)
   dissolution<-sapply(times,function(t){sum(tel$terminus==t)})
+  if(result.type=='fraction'){
+    # compute the number of existing ties 
+    activeECount<-sapply(times,function(t){network.edgecount.active(nd,at=t)})
+    # add the number of disolving ties (since they would be counted as inactive above)
+    # but recalculate to deal with spells where onset==terminus because they would be counted as active
+    activeECount<-activeECount+sapply(times,function(t){sum(tel$terminus==t & tel$onset!=t)})
+    dissolution<-dissolution/activeECount
+  }
   return(ts(dissolution,start=start,end=times[length(times)],deltat=time.interval))
 }
 
@@ -224,4 +242,54 @@ pathBounds<-function(nd, v, alter){
   }
   
   return(c(fwdDist$tdist[firstEarlyNgh]+fwdDist$start,bkwdDist$end-bkwdDist$tdist[lastLateNgh]))
+}
+
+# compute the number of empty dyads possible in a network
+# allowing for network directedness, loops, 
+emptyDyadCount <-function(net,at=NULL){
+  if(is.multiplex(net)){
+    stop("can not compute possible number of free dyads for multiplex networks")
+  }
+  n<-network.size(net)
+  
+  if(is.bipartite(net)){
+    # need to calculate possible dyads based on feasible ties between the two modes
+    firstSize<-net%n%'bipartite'
+    secondSize<-n-firstSize
+    if(has.loops(net)){
+      # self loops don't make sense for bipartite networks
+      warning('this network is bipartite and permits self-loop edges, loops ignored')
+    }
+    if(is.directed(net)){
+      maxdyads<-firstSize*secondSize
+    } else {
+      maxdyads<-firstSize*secondSize/2
+    }
+  } else { # non- bipartite network
+    if(is.directed(net)){
+      maxdyads<-n*n
+      # if it doesn't support loops, subtract the diagonal
+      if(!has.loops(net)){
+        maxdyads<- maxdyads-n
+      }
+    } else {
+      maxdyads<- (n*(n-1))/2
+      # if it has loops, add the diagnonal
+      if(has.loops(net)){
+        maxdyads<- maxdyads+n
+      }
+    }
+  }
+  
+  # now subtract the number of existing edges
+  if(is.networkDynamic(net)){
+    if(is.null(at)){
+      stop("networkDynamic object must include at parameter")
+    }
+    maxdyads<-maxdyads-network.edgecount.active(net,at=at,)
+  } else {
+    maxdyads<-maxdyads-network.edgecount(net)
+  }
+  
+  return(maxdyads)
 }
