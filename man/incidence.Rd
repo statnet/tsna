@@ -36,7 +36,7 @@ optional numeric value giving time interval between evaluations (default is 1)
   }
 }
 \details{
-Uses \code{as.data.frame.networkDynamic} internally.  Does not yet correct for censoring of edges forming at the beginning or end of the network. 
+Uses \code{as.data.frame.networkDynamic} internally.  Does not yet correct for censoring of edges forming at the beginning or end of the network.  TODO: dyad formation rate is not yet corrected for vertex activity, uses the aggregate, not the momentary, network size. 
 
 When \code{result.type='fraction'}:
 \itemize{
@@ -52,7 +52,7 @@ For \code{tEdgeFormation} and \code{tEdgeDissolution}, a numeric vector of class
 skyebend@uw.edu
 }
 \note{
-should add additional args to allow binning other than 'at' for working with non-discrete time, options to deal with how censored edges are calculated.  As evaluation is currently done with 'at' syntax, these functions are probably only useful for discrete time networks. 
+should add additional args to allow binning other than 'at' for working with non-discrete time, options to deal with how censored edges are calculated.  
 }
 
 
