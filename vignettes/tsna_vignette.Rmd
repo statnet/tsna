@@ -67,7 +67,7 @@ Most of the `tsna` package function assume that their input is formatted as a `n
 
 The data structure provided by `networkDynamic` objects assumes that the vertices and (directed or non-directed) edges of a network have multiple 'activity spells' associated with them indicating when they are 'active' or exist within the observation period.  Each spell is an interval with an *onset* and *terminus* time. Each edge or vertex can activate and deactivate multiple times during the period over which the network is observed. Please see `?activate` for additional details. 
 
-As an example, consider the included `moodyContactSim` example object. We will first plot it as a time-aggregated network, ignoring the temporal info and showing all of the edges that are ever active.
+As an example, consider the included `moodyContactSim` example object (Moody 2008). We will first plot it as a time-aggregated network, ignoring the temporal info and showing all of the edges that are ever active.
 
 ```{r}
 data(moodyContactSim)
@@ -97,7 +97,7 @@ coords<-plot(moodyContactSim,
    )
 ```
 
-In situations when we are considering transmission processes on a dynamic network, the aggregate network is not a good representation because it exaggerates the connectivity in the network by ignoring the importance of the order of edge events.  For example, the apparent 8 to 11 to 1 path appears to be the shortest path traverseable in the static aggregate network.  But when we consider the constraints of edge activity, the edge between 1 and 11 becomes inactive long before the edge between 8 and 11 activates, there is no suchpath in the dynamic network. 
+In situations when we are considering transmission processes on a dynamic network, the aggregate network is not a good representation because it exaggerates the connectivity in the network by ignoring the importance of the order of edge events (Moody, 2002).  For example, the apparent 8 to 11 to 1 path appears to be the shortest path traverseable in the static aggregate network.  But when we consider the constraints of edge activity, the edge between 1 and 11 becomes inactive long before the edge between 8 and 11 activates, there is no such path in the dynamic network. 
 
 We could go to the other extreme, and instead of looking at the aggregate network we view only the network that is actually active at a single point in time. These networks will be  much less connected than time-collapsed network. We see the edge between 1 and 11, and the edge between 11 and 8, but is difficult to determine any connectivity at all for the network as a whole.   
 
@@ -134,7 +134,7 @@ One of the key features of this package is the ability to calculate temporal pat
 
 To give a concrete example, if a network describes the time-evolution of contacts between people during which disease transmission could occur, a sequence of infection events spreading out through network from a single person would be a temporal path. Likewise, a series of messages forwarding a cute cat picture would be a temporal path in an email network. In most cases we assume that once a path (message) reaches a vertex, that vertex remains 'infected' and can transmit to all of its future contacts. 
 
-Depending on network topology, there may be lots of possible temporal paths between a single pair of vertices. The *earliest arriving forward temporal path* from vertex `i` to vertex `j` can be thought of as the soonest possible time a message sent from `i` to `j` could possibly arrive.  Because it depends on the sequence of edge timing,  earliest forward path is *not* usually equal to the *shortest path geodesic* in a static network and may not be the same as the shortest temporal path.  However, we can calculate the earliest path with relative efficiency using algorithms similar to those used to calculate the shortest geodesic path (Bui Xuan, et al. 2002).  Please see the package documentation for \code{?tPath} for further algorithm details. 
+Depending on network topology, there may be lots of possible temporal paths between a single pair of vertices. Bui Xuan, et al (2002) call a permissable time-respecting path between a pair of vertices a *journey*. The *earliest arriving forward temporal path* from vertex `i` to vertex `j` can be thought of as the soonest possible time a message sent from `i` to `j` could possibly arrive. Because it depends on the sequence of edge timing,  earliest forward path is *not* usually equal to the *shortest path geodesic* in a static network and may not be the same as the shortest temporal path.  However, we can calculate the earliest path with relative efficiency using algorithms similar to those used to calculate the shortest geodesic path (Bui Xuan, et al. 2002).  Please see the package documentation for \code{?tPath} for further algorithm details. 
 
 
 The *forward reachable set* (FRS) from vertex `v` at time `t` is the set of vertices reachable by forward temporal paths from `v`, begining at time `t`.   
@@ -147,7 +147,7 @@ For a more tangible example, we can use `tPath` to extract a forward temporal pa
 v10path<-tPath(moodyContactSim,v=10,start=0)
 print(v10path)
 ```
-The `tPath` function returns a `tPath` object which is a list with several components.  The `$tdist` component indicates the time (elapsed from `start`) at which each vertex is reached from the starting vertex `v`.  The `$previous` component gives, for each vertex index, the vertex id of the previous vertex along path. As we will see, this path information can be used to construct a new network object containing only the path info. `$gsteps` gives the number of steps (graph hops) in the path ("journey" in Bui Xuan, et al) from `v` for each vertex. The remaining elements store the query parameters for later use by other functions.  
+The `tPath` function returns a `tPath` object which is a list with several components.  The `$tdist` component indicates the time (elapsed from `start`) at which each vertex is reached from the starting vertex `v`.  The `$previous` component gives, for each vertex index, the vertex id of the previous vertex along path. As we will see, this path information can be used to construct a new network object containing only the tPath tree. `$gsteps` gives the number of steps (graph hops) in the path from `v` for each vertex. The remaining elements store the query parameters for later use by other functions.  
 
 There is a special plot function for `tPath` objects, which essentially sets some useful presets for `plot.network`.
 
@@ -174,6 +174,8 @@ plotPaths(moodyContactSim,v1path,coord=coords, main = 'fwd path from v1')
 par(mfcol=c(1,1)) # turn off side-by-side plots
 ```
 
+### More fun facts about paths
+
 Notice that paths are directed (even if the underlying network is not) and not always symmetric.  For example vertex 10 can reach 1, but 1 cannot reach 10.
 
 It is also possible to pass in a list of multiple paths and draw them on the same network.
@@ -193,6 +195,19 @@ plotPaths(moodyContactSim, list(
 
 ```
 
+In most of the examples, we've been assuming that the the start of the tPath search begins at the earliest time observed in the network.  But that doesn't have to be true, a tPath can begin at any time on the network, and the size of the reachable set will often depend on the time at which the search began. 
+
+```{r}
+par(mfcol=1:2)
+plot(tPath(moodyContactSim,v=1,start=0),coord=coords,
+     main='tPath from v1 @ t=0')
+plot(tPath(moodyContactSim,v=1,start=500),coord=coords,
+     main='tPath from v1 @ t=500')
+par(mfcol=c(1,1))
+```
+
+In the plots above, both tPaths started at vertex 1, but the one that started later (at t=500) doesn't include vertices 11 and 8 because the 1-11 edge had already ended before the path search begain. 
+
 
 ### Other types of temporal paths
 
@@ -211,7 +226,7 @@ as.data.frame(pathCompare)
 ```
 
 Now plot it, with each edge labeled with onset and terminus times, and each path type in a different color. 
-```{r}
+```{r,fig.width=8,fig.height=8}
 # pre-define some coords for arbitrary positioning
 coords<-cbind(c(0,0.5,0.5,0.5,0.5,0.5,1),c(0.3,0.15,0.3,0.45,0.65,0.8,0.7))
 # do the plot
@@ -234,33 +249,9 @@ legend(-0.3,1,legend = c('earliest leaving (ACG @ 6)',
 ```
 
 
-Most of these other path types would be useful for certain applications, but we do not yet have algorithms implemented for effiently calculating them on non-trivial networks.  
+Most of these other path types would be useful for specific applications, but we do not yet have algorithms implemented for effiently calculating them on non-trivial networks.  
 
-Again, it is important to rember that the *earliest* temporal path is not always the same as the *shortest* (fewest step) temporal path. As in this example below
-```{r}
-par(mfcol=c(1,2))
-plotPaths(moodyContactSim,tPath(moodyContactSim,v=10),coord=coords, main='earliest fwd path from v10')
-plotPaths(moodyContactSim,tPath(moodyContactSim,v=10,type = 'fewest.steps'),coord=coords, main='fewest.step fwd path from v10')
-par(mfcol=c(1,2))
-```
-```{r}
-
-plotPaths(moodyContactSim,v10path,coord=coords, main='fwd path from v10')
-shortEarly<-network.initialize(6)
-add.edges.active(shortEarly,tail=1,head=2,onset=1, terminus=10)
-add.edges.active(shortEarly,tail=2,head=3,onset=2, terminus=10)
-add.edges.active(shortEarly,tail=3,head=4,onset=3, terminus=10)
-add.edges.active(shortEarly,tail=4,head=5,onset=4, terminus=10)
-add.edges.active(shortEarly,tail=1,head=6,onset=5, terminus=10)
-add.edges.active(shortEarly,tail=6,head=4,onset=1, terminus=10)
-
-plot(shortEarly,displaylabels=TRUE,edge.label=get.edge.activity(shortEarly))
-
- earliest<-tPath(pathExample,v=1)
- shortest<-tPath(pathExample,v=1,type = 'fewest.steps')
-plotPaths(shortEarly,list(shortest,earliest))
-
-```
+Again, it is important to rember that the *earliest* temporal path is not always the same as the *shortest* (fewest step) temporal path. 
 
 
 ### Compare earliest forward set sizes
@@ -657,15 +648,24 @@ pShiftCount(cls33_10_16_96)
 
 By default, it gives us aback a vector with the counts of each type participation shifts. After consulting the docs (`?pShiftcount`) we see that there is a lot of call and response 'Turn Receiving' ('AB-BA') as well as quite a bit of 'Turn Usurping' ('AB-XY') events. 
 
-Since we don't really know what these numbers mean in absolute terms, it would be interesting to see if the counts change at various segments of time
+Since we don't really know what these numbers mean in absolute terms, it would be interesting to see if the counts change at various segments of time.  So divide the time up into 5-minute intervals and compute counts for each
 
 ```{r}
 sliceCounts<- lapply(seq(from = 0,to=45,by = 5),function(onset){
   pShiftCount(network.extract(cls33_10_16_96,onset,length = 5))
 })
+# convert to a matrix
+sliceCounts<-do.call(rbind,sliceCounts)
+sliceCounts
+# plot
+plot(sliceCounts[,'AB-BA'],type='b',col='blue',ylim=c(0,170),
+     main='pShift counts for 5-min intervals of cls33',
+     ylab='count of selected pShift',xlab='slice index')
+points(sliceCounts[,'AB-AY'],type='b',col='red')
+points(sliceCounts[,'AB-XA'],type='b',col='green')
 ```
 
-
+Perhaps it is interesting that the 'AB-BA' call-and-response starts out low and increases for most of the class, in contrast to the where the 'AB-AY' counts?  But I think we'd need to go back and look at the narrative accounts for the classroom.  
 
 ## Next steps
 
@@ -679,26 +679,28 @@ citation('tsna')
 
 ## Bibliography
 
-Carter T. Butts, Ayn Leslie-Cook, Pavel N. Krivitsky and Skye Bender-deMoll (2015). networkDynamic: Dynamic Extensions
-  for Network Objects. R package version 0.8. http://statnet.org
+Skye Bender-deMoll (2014). networkDynamicData: dynamic network datasets. R package version 0.1.0.
+  http://CRAN.R-project.org/package=networkDynamicData
 
-Gibson, D.R. (2003) 'Participation Shifts: Order and Differentiation in Group Conversation' Social Forces 81 (4): 1335-1380 http://sf.oxfordjournals.org/content/81/4/1335.short
+B. Bui Xuan, Afonso Ferreira, Aubin Jarry. "Computing shortest, fastest, and foremost journeys
+in dynamic networks". RR-4589, 2002. https://hal.inria.fr/inria-00071996/document
 
+Carter T. Butts, Ayn Leslie-Cook, Pavel N. Krivitsky and Skye Bender-deMoll (2015). networkDynamic: Dynamic Extensions for Network Objects. R package version 0.8. http://statnet.org
+  
 Carter T. Butts (2008). A Relational Event Framework for Social Action. Sociological Methodology, 38(1), 155-200.
-
-Handcock M, Hunter D, Butts C, Goodreau S, Krivitsky P and Morris M (2015). _ergm: Fit, Simulate and Diagnose
-Exponential-Family Models for Networks_. The Statnet Project (<URL: http://www.statnet.org>). R package version 3.4.0,
-<URL: http://CRAN.R-project.org/package=ergm>.
 
 Carter T. Butts (2014). sna: Tools for Social Network Analysis. R package version 2.3-2.
   http://CRAN.R-project.org/package=sna
-  
-Skye Bender-deMoll (2014). networkDynamicData: dynamic network datasets. R package version 0.1.0.
-  http://CRAN.R-project.org/package=networkDynamicData
-  
-Moody, James. 2002. "The Importance of Relationship Timing for Diffusion." *Social  Forces* 81:25-56
 
-B. Bui Xuan, Afonso Ferreira, Aubin Jarry. "Computing shortest, fastest, and foremost journeys
-in dynamic networks". RR-4589, 2002.
- https://hal.inria.fr/inria-00071996/document
+Gibson, D.R. (2003) 'Participation Shifts: Order and Differentiation in Group Conversation' Social Forces 81 (4): 1335-1380 http://sf.oxfordjournals.org/content/81/4/1335.short
+
+
+Handcock M, Hunter D, Butts C, Goodreau S, Krivitsky P and Morris M (2015). _ergm: Fit, Simulate and Diagnose Exponential-Family Models for Networks_. The Statnet Project (<URL: http://www.statnet.org>). R package version 3.4.0, <URL: http://CRAN.R-project.org/package=ergm>.
+
+  
+Moody, James. (2002) "The Importance of Relationship Timing for Diffusion." *Social  Forces* 81:25-56
+
+Moody, James (2008) "Static Representations of Dynamic Networks" Duke Population Research Institute On-line Working Paper Series. http://papers.ccpr.ucla.edu/papers/PWP-DUKE-2009-009/PWP-DUKE-2009-009.pdf
+
+
 
