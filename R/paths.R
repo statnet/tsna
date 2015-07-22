@@ -12,7 +12,7 @@
 # this is a wrapper function to check args and call the appropriate paths method
 tPath<-function(nd,v, 
                  direction=c('fwd','bkwd'),
-                 type=c('earliest.arrive', 'latest.depart','fewest.steps'),
+                 type=c('earliest.arrive', 'latest.depart'),
                  start,end,active.default=TRUE,
                  graph.step.time=0){
   
@@ -182,23 +182,24 @@ paths.fwd.earliest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=
   }
   
   # construct the vector of geodeisc graph steps from previous
-  geodist<-rep(Inf,length(previous))
+  gsteps<-rep(Inf,length(previous))
   curDist<-0
   preV<-v
   # loop down the tree path and mark the distances
   # until all reachable vertices are updated
   while(length(preV)>0){
-    geodist[preV]<-curDist
+    gsteps[preV]<-curDist
     preV<-unlist(sapply(preV,function(v){
       which(previous==v)
     }))
     curDist<-curDist+1
   }
 
-  return(list(tdist=dist,previous=previous,geodist=geodist, start=start, end=end))
+  return(list(tdist=dist,previous=previous,gsteps=gsteps, start=start, end=end))
 }
 
 # this finds the forward path with the fewest number of intermediate vertices
+# THIS IS WRONG, IT RETURNS THE  SHORTEST PATH THAT IS ALSO EARLISET (but may miss shortest paths arriving later) or something like that
 paths.fwd.fewest.steps<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0){
   
   if (missing(start) || is.null(start)){
@@ -226,14 +227,14 @@ paths.fwd.fewest.steps<-function(nd,v,start,end,active.default=TRUE,graph.step.t
   # TODO: multiplex behavior?
   
   times<-rep(Inf,network.size(nd))     # default all vertices to un-reachable (Inf)
-  geodist<-rep(Inf,network.size(nd))
+  gsteps<-rep(Inf,network.size(nd))
   previous<-rep(0,network.size(nd)) # array used for reconstructing the path
   times[v]<-0                          # set distance to self to 0
-  geodist[v]<-0
+  gsteps[v]<-0
   toCheck<-rep(TRUE,network.size(nd)) # make a list of unchecked vertices
   # begin depth first search loop
   while(sum(toCheck)>0){
-    minToCheck<-which.min(geodist[toCheck])  # select 'closest' vertex to check in terms of geodist
+    minToCheck<-which.min(gsteps[toCheck])  # select 'closest' vertex to check in terms of gsteps
     # have to translate index found back to network index
     u<-which(toCheck)[minToCheck]
     toCheck[u]<-FALSE
@@ -251,10 +252,10 @@ paths.fwd.fewest.steps<-function(nd,v,start,end,active.default=TRUE,graph.step.t
       if (is.null(spls)){ # handle possibly missing activity value, assume always active
         if (active.default){
           time_u_w<-0+graph.step.time
-          geodist_u_w<-1 
+          gsteps_u_w<-1 
         } else {
           time_u_w<-Inf
-          geodist_u_w<-Inf
+          gsteps_u_w<-Inf
         }
         
       } else { # since edge activities are defined ..
@@ -271,7 +272,7 @@ paths.fwd.fewest.steps<-function(nd,v,start,end,active.default=TRUE,graph.step.t
           }
         }
         if (splIndex<0){ # no active spells found so
-          geodist_u_w<-Inf
+          gsteps_u_w<-Inf
           time_u_w<-Inf  # vertex is never reachable in the future / within time bound
           
         } else {
@@ -279,13 +280,13 @@ paths.fwd.fewest.steps<-function(nd,v,start,end,active.default=TRUE,graph.step.t
           # 'current' time and the onset of the edge
           # if we are counting graph steps as part of the distance, distance can't be less than graph step
           time_u_w<-max(0,(spls[splIndex,1]-start)-times[u])+graph.step.time #
-          geodist_u_w <- 1 # graph step distances (unweighted)
+          gsteps_u_w <- 1 # graph step distances (unweighted)
         }
       }
-      geodist_v_w <-geodist[u]+geodist_u_w 
+      gsteps_v_w <-gsteps[u]+gsteps_u_w 
       time_v_w <-times[u]+time_u_w
-      if (geodist_v_w < geodist[w]){ # if this new GEODESIC DISTANCE is shorter, update distance and times
-        geodist[w]<-geodist_v_w
+      if (gsteps_v_w < gsteps[w]){ # if this new GEODESIC DISTANCE is shorter, update distance and times
+        gsteps[w]<-gsteps_v_w
         times[w]<-time_v_w
         previous[w]<-u
       }
@@ -293,7 +294,7 @@ paths.fwd.fewest.steps<-function(nd,v,start,end,active.default=TRUE,graph.step.t
   }
   
   
-  return(list(tdist=times,previous=previous,geodist=geodist,start=start,end=end))
+  return(list(tdist=times,previous=previous,gsteps=gsteps,start=start,end=end))
 }
 
 # compute reverse paths 
@@ -411,13 +412,13 @@ paths.bkwd.latest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0
   } # end search loop
   
   # construct the vector of geodeisc graph steps from previous
-  geodist<-rep(Inf,length(previous))
+  gsteps<-rep(Inf,length(previous))
   curDist<-0
   preV<-v
   # loop down the tree path and mark the distances
   # until all reachable vertices are updated
   while(length(preV)>0){
-    geodist[preV]<-curDist
+    gsteps[preV]<-curDist
     preV<-unlist(sapply(preV,function(v){
       which(previous==v)
     }))
@@ -426,7 +427,7 @@ paths.bkwd.latest<-function(nd,v,start,end,active.default=TRUE,graph.step.time=0
   # TODO: we are measuring distance backwards from the end
   # so need to flip distance measure
   
-  return(list(tdist=dist,previous=previous, geodist=geodist,start=start,end=end))
+  return(list(tdist=dist,previous=previous, gsteps=gsteps,start=start,end=end))
 }
 
 # this version tries to minimize the distance of the latest time forward

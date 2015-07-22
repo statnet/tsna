@@ -75,6 +75,7 @@ img {
 
 <div id="TOC">
 <ul>
+<li><a href="#tsna-tools-for-temporal-social-network-analysis">tsna : Tools for Temporal Social Network Analysis</a><ul>
 <li><a href="#overview">Overview</a></li>
 <li><a href="#requirements">Requirements</a></li>
 <li><a href="#introduction">Introduction</a></li>
@@ -103,6 +104,7 @@ img {
 <li><a href="#next-steps">Next steps</a></li>
 <li><a href="#citation">Citation</a></li>
 <li><a href="#bibliography">Bibliography</a></li>
+</ul></li>
 </ul>
 </div>
 
@@ -111,14 +113,15 @@ img {
 %\VignetteIndexEntry{tsna vignette}
 -->
 <hr />
-<p><strong>tsna : Tools for Temporal Social Network Analysis</strong></p>
-<p><em>version 0.1 2015-05-06</em></p>
-<p>Skye Bender deMoll (<a href="mailto:skyebend@uw.edu">skyebend@uw.edu</a>) and the statnet team (<a href="http://statnet.org" class="uri">http://statnet.org</a>). This work was supported by grant R01HD68395 from the National Institute of Health.</p>
-<p><strong>DRAFT</strong> Tue Jul 14 13:19:57 2015</p>
+<div id="tsna-tools-for-temporal-social-network-analysis" class="section level1">
+<h1>tsna : Tools for Temporal Social Network Analysis</h1>
+<p><em>package version 0.1 built 2015-05-06</em></p>
+<p>Skye Bender deMoll (<a href="mailto:skyebend@uw.edu">skyebend@uw.edu</a>) and the statnet team (<a href="http://statnet.org" class="uri">http://statnet.org</a>). Major contributions from James Moody, Martina Morris, Carter Butts, Steve Goodreau, Samuel Jenness, Li Wang and Kirk Li. This work was supported by grant R01HD68395 from the National Institute of Health.</p>
+<p><strong>DRAFT</strong> Tue Jul 14 13:39:46 2015</p>
 <hr />
 <div id="overview" class="section level2">
 <h2>Overview</h2>
-<p>This package provides tools for working with dynamic networks (or processes on networks) in which the ordering and timing of ties is important. These approaches are needed when the phenomena of interest involve networks having densities and edge-turnover rates in a parameter space such that the time-collapsed aggregate network give too great a distortion of the connectivity for useful analysis.</p>
+<p>This package provides tools for working with dynamic networks (or processes on networks) in which the ordering and timing of ties is important. These approaches are needed when the phenomena of interest involve networks having densities and edge-turnover rates in a parameter space such that the time-collapsed aggregate network give too great a distortion of the toplology connectivity for useful analysis.</p>
 <p>Most <code>tsna</code> functions accept as their input continuous- and discrete-time longitudinal networks having vertex, edge, and attribute dynamics stored in the <code>networkDynamic</code> format. <code>tsna</code> includes tools for applying “traditional” static Social Network Analysis (SNA) metrics at multiple time points, as well as temporal extensions of SNA metrics using forwards- and backwards-path routines. The initial version of <code>tsna</code> is primarily focused on working with networks of the type that might be generated from discrete time simulations of network evolution.</p>
 <p>Research on formal methods for analysis of longitudinal networks is a relatively new area of study. Many of the measures included in this package may be formally identical to measures already published with different names in literature of diverse research fields. We will attempt to find and cite such previous work, but if you encounter any omissions, please let us know.</p>
 </div>
@@ -726,6 +729,7 @@ A BibTeX entry for LaTeX users is
 <p>Handcock M, Hunter D, Butts C, Goodreau S, Krivitsky P and Morris M (2015). <em>ergm: Fit, Simulate and Diagnose Exponential-Family Models for Networks</em>. The Statnet Project (<URL: http: www.statnet.org>). R package version 3.4.0, <URL: http: CRAN.R-project.org package="ergm">.</p>
 <p>Carter T. Butts (2014). sna: Tools for Social Network Analysis. R package version 2.3-2. <a href="http://CRAN.R-project.org/package=sna" class="uri">http://CRAN.R-project.org/package=sna</a></p>
 <p>Skye Bender-deMoll (2014). networkDynamicData: dynamic network datasets. R package version 0.1.0. <a href="http://CRAN.R-project.org/package=networkDynamicData" class="uri">http://CRAN.R-project.org/package=networkDynamicData</a></p>
+</div>
 </div>
 
 

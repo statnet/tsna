@@ -25,7 +25,7 @@ as.network.tPath<-function(x,...){
     }
   }
   tree%v%'tdist'<-distance
-  tree%v%'geodist'<-x$geodist
+  tree%v%'gsteps'<-x$gsteps
   return(tree)
 }
 
@@ -44,8 +44,8 @@ plot.tPath<-function(x,edge.col="red",
                      displaylabels=TRUE,
                      displayisolates=FALSE,
                      jitter=FALSE,
-                     vertex.lwd=(x$tdist==0)*4+1,
-                     vertex.cex=(x$tdist==0)*1.5,
+                     vertex.lwd=(x$gsteps==0)*4+1,
+                     vertex.cex=(x$gsteps==0)*1.5,
                      vertex.col=NA,...){
   tree<-as.network(x)
   edgeTimes<-sapply(get.edge.activity(tree),'[',1)

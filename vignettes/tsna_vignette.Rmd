@@ -65,7 +65,7 @@ library(sna)
 
 Most of the `tsna` package function assume that their input is formatted as a `networkDynamic` data structure.  The `networkDynamic` package provides utilities (`networkDynamic()`) for converting data from various formats (such as timed edge-lists, or lists of matrices) as well as functions for manipulating the data structures.
 
-The data structure provided by `networkDynamic` objects assumes that the vertices and (directed or non-directed) edges of a network have multiple 'activity spells' associated with them indicating when they are 'active' or exist within the observation period.  Each spell is an interval with an *onset* and *terminus* time. Each edge or vertex can activate and deactivate multiple times during the period over which the network is observed. 
+The data structure provided by `networkDynamic` objects assumes that the vertices and (directed or non-directed) edges of a network have multiple 'activity spells' associated with them indicating when they are 'active' or exist within the observation period.  Each spell is an interval with an *onset* and *terminus* time. Each edge or vertex can activate and deactivate multiple times during the period over which the network is observed. Please see `?activate` for additional details. 
 
 As an example, consider the included `moodyContactSim` example object. We will first plot it as a time-aggregated network, ignoring the temporal info and showing all of the edges that are ever active.
 
@@ -97,9 +97,9 @@ coords<-plot(moodyContactSim,
    )
 ```
 
-In situations when we are considering transmission processes on a dynamic network, the aggregate network is not a good representation because it exaggerates the connectivity in the network by ignoring the importance of the order of edge events.  For example, the apparent 8 to 11 to 1 path appears traverseable in the aggregate network.  But the edge between 1 and 11 becomes inactive long before the edge between 8 and 11 activates, there is no such path in the dynamic network. 
+In situations when we are considering transmission processes on a dynamic network, the aggregate network is not a good representation because it exaggerates the connectivity in the network by ignoring the importance of the order of edge events.  For example, the apparent 8 to 11 to 1 path appears to be the shortest path traverseable in the static aggregate network.  But when we consider the constraints of edge activity, the edge between 1 and 11 becomes inactive long before the edge between 8 and 11 activates, there is no suchpath in the dynamic network. 
 
-We could go to the other extreme, and instead of looking at the aggregate network we view only the network that is actually active at a single point in time. These networks will be  much less connected than time-collapsed network.  In fact, at most time points there is only a single active edge, which makes it difficult to determine any connectivity at all.
+We could go to the other extreme, and instead of looking at the aggregate network we view only the network that is actually active at a single point in time. These networks will be  much less connected than time-collapsed network. We see the edge between 1 and 11, and the edge between 11 and 8, but is difficult to determine any connectivity at all for the network as a whole.   
 
 ```{r}
 par(mfcol=c(1,2))
@@ -130,11 +130,14 @@ A goal of the `tsna` package is to allow users to flexibly explore network data 
 
 ### Explanation of paths in network
 
-One of the key features of this package is the ability to calculate temporal paths in networks.  A *forward temporal path* is a sequence of vertices and directed edges such that the activation spells of successive elements are greater than or equal than those of the previous.  In other words, if the network describes the contacts between people during which disease transmission could occur, a temporal path is a possible sequence of infection events spreading through network.  In most cases we assume that once a path reaches a vertex, that vertex remains 'infected' and can transmit to all of its future contacts. 
+One of the key features of this package is the ability to calculate temporal paths in networks.  A *forward temporal path* is a sequence of vertices and directed edges such that the start times of successive elements are greater than or equal than those of the previous. The path is a directed traversal of the network that respects the constraints of edge activity spells and permits 'waiting' at intermediate vertices for 'future' edges to form.
 
-Depending on network topology, there may be lots of possible temporal paths between a single pair of vertices. The *earliest arriving temporal path* from vertex `i` to vertex `j` can be thought of as the soonest possible time a message sent from `i` to `j` could possibly arrive.  It is analogous to the shortest geodesic path in a static network and can be calculated with similar efficiency. 
+To give a concrete example, if a network describes the time-evolution of contacts between people during which disease transmission could occur, a sequence of infection events spreading out through network from a single person would be a temporal path. Likewise, a series of messages forwarding a cute cat picture would be a temporal path in an email network. In most cases we assume that once a path (message) reaches a vertex, that vertex remains 'infected' and can transmit to all of its future contacts. 
 
-The *forward reachable set* (FRS) from vertex `v` at time `t` is the set of vertices reachable by forward temporal paths from v.   
+Depending on network topology, there may be lots of possible temporal paths between a single pair of vertices. The *earliest arriving forward temporal path* from vertex `i` to vertex `j` can be thought of as the soonest possible time a message sent from `i` to `j` could possibly arrive.  Because it depends on the sequence of edge timing,  earliest forward path is *not* usually equal to the *shortest path geodesic* in a static network and may not be the same as the shortest temporal path.  However, we can calculate the earliest path with relative efficiency using algorithms similar to those used to calculate the shortest geodesic path (Bui Xuan, et al. 2002).  Please see the package documentation for \code{?tPath} for further algorithm details. 
+
+
+The *forward reachable set* (FRS) from vertex `v` at time `t` is the set of vertices reachable by forward temporal paths from `v`, begining at time `t`.   
 
  
 ### Highlite possible paths found on Moody's example.
@@ -144,7 +147,7 @@ For a more tangible example, we can use `tPath` to extract a forward temporal pa
 v10path<-tPath(moodyContactSim,v=10,start=0)
 print(v10path)
 ```
-The `tPath` function returns a `tPath` object which is a list with several components.  The `$tdist` component indicates the time (elapsed from `start`) at which each vertex is reached from the starting vertex `v`.  The `$previous` component gives, for each vertex index, the vertex id of the previous vertex along path. As we will see, this path information can be used to construct a new network object containing only the path info. `$geodist` gives the *geodesic distance* (number of steps in the path from the starting vertex) for each vertex. The remaining elements store the query parameters for later use by other functions.  
+The `tPath` function returns a `tPath` object which is a list with several components.  The `$tdist` component indicates the time (elapsed from `start`) at which each vertex is reached from the starting vertex `v`.  The `$previous` component gives, for each vertex index, the vertex id of the previous vertex along path. As we will see, this path information can be used to construct a new network object containing only the path info. `$gsteps` gives the number of steps (graph hops) in the path ("journey" in Bui Xuan, et al) from `v` for each vertex. The remaining elements store the query parameters for later use by other functions.  
 
 There is a special plot function for `tPath` objects, which essentially sets some useful presets for `plot.network`.
 
@@ -163,7 +166,7 @@ v1path<-tPath(moodyContactSim,v=1,start=0)
 
 Plot both paths side-by-side.
 ```{r}
-par(mfcol=c(01,2)) # set up side-by-side plot
+par(mfcol=c(1,2)) # set up side-by-side plot
 
 plotPaths(moodyContactSim,v10path,coord=coords, main='fwd path from v10')
 plotPaths(moodyContactSim,v1path,coord=coords, main = 'fwd path from v1')
@@ -191,6 +194,75 @@ plotPaths(moodyContactSim, list(
 ```
 
 
+### Other types of temporal paths
+
+Here is a trivial example that illustrates several types of potential 2-step temporal paths from vertex A to vertex G. 
+
+First we construct a directed network with edge timing very specifically constructed to make only certain paths feasible.
+```{r}
+pathCompare<-network.initialize(7)
+network.vertex.names(pathCompare)<-LETTERS[1:7]
+add.edges.active(pathCompare,tail=c(1,2),head=c(2,7),onset=c(1,4),terminus=c(2,5))
+add.edges.active(pathCompare,tail=c(1,3),head=c(3,7),onset=c(0,6),terminus=c(2,7))
+add.edges.active(pathCompare,tail=c(1,4),head=c(4,7),onset=c(4,5),terminus=c(5,6))
+add.edges.active(pathCompare,tail=c(1,5),head=c(5,7),onset=c(6,9),terminus=c(7,10))
+add.edges.active(pathCompare,tail=c(1,6),head=c(6,7),onset=c(4,10),terminus=c(5,11))
+as.data.frame(pathCompare)
+```
+
+Now plot it, with each edge labeled with onset and terminus times, and each path type in a different color. 
+```{r}
+# pre-define some coords for arbitrary positioning
+coords<-cbind(c(0,0.5,0.5,0.5,0.5,0.5,1),c(0.3,0.15,0.3,0.45,0.65,0.8,0.7))
+# do the plot
+plot(pathCompare,
+     coord=coords,jitter=FALSE,
+     #mode='circle',
+     displaylabels=TRUE, vertex.col='white',
+     edge.label=get.edge.activity(pathCompare),edge.label.cex=0.8,
+     edge.lwd=4,
+     edge.col=c('blue','blue','red','red','green','green','orange','orange','pink','pink'),
+    main='Comparison of fwd temporal path types from A to G')
+# plot a legend
+legend(-0.3,1,legend = c('earliest leaving (ACG @ 6)',
+                         'earliest arriving (ABG @ 4)',
+                         'latest leaving (AEG @ 10)',
+                         'quickest (ADG @ 5)',
+                         'latest arriving (AFG @ 11)'),
+               fill=c('red','blue','orange','green','pink'),
+       cex=0.8)
+```
+
+
+Most of these other path types would be useful for certain applications, but we do not yet have algorithms implemented for effiently calculating them on non-trivial networks.  
+
+Again, it is important to rember that the *earliest* temporal path is not always the same as the *shortest* (fewest step) temporal path. As in this example below
+```{r}
+par(mfcol=c(1,2))
+plotPaths(moodyContactSim,tPath(moodyContactSim,v=10),coord=coords, main='earliest fwd path from v10')
+plotPaths(moodyContactSim,tPath(moodyContactSim,v=10,type = 'fewest.steps'),coord=coords, main='fewest.step fwd path from v10')
+par(mfcol=c(1,2))
+```
+```{r}
+
+plotPaths(moodyContactSim,v10path,coord=coords, main='fwd path from v10')
+shortEarly<-network.initialize(6)
+add.edges.active(shortEarly,tail=1,head=2,onset=1, terminus=10)
+add.edges.active(shortEarly,tail=2,head=3,onset=2, terminus=10)
+add.edges.active(shortEarly,tail=3,head=4,onset=3, terminus=10)
+add.edges.active(shortEarly,tail=4,head=5,onset=4, terminus=10)
+add.edges.active(shortEarly,tail=1,head=6,onset=5, terminus=10)
+add.edges.active(shortEarly,tail=6,head=4,onset=1, terminus=10)
+
+plot(shortEarly,displaylabels=TRUE,edge.label=get.edge.activity(shortEarly))
+
+ earliest<-tPath(pathExample,v=1)
+ shortest<-tPath(pathExample,v=1,type = 'fewest.steps')
+plotPaths(shortEarly,list(shortest,earliest))
+
+```
+
+
 ### Compare earliest forward set sizes
 
 For transmission processes, the forward reachable set is a theoretical upper bound (for a perfectly infectious process) on the possible number of vertices that can be reached from a source vertex within the time bounds.  Hence, if we calculate the forward reachable set from every vertex, we would know the distribution of maximum possible epidemic sizes in the dynamic network.  Can we characterize networks by looking at the distribution of sizes of fwd reachable sets? 
@@ -204,7 +276,7 @@ data(concurrencyComparisonNets)
 
 When loaded, this brings in three discrete time networks, simulated via a tergm process, each of which is 100 time steps in duration. All three networks were parameterized to have the same size, relationship duration distribution and cross-sectional mean degree, but different cross-sectional degree distributions.
 
-The `tReach` function computes the sizes of temporally reachable sets. Since these are large-ish networks (1000 vertices), we will only calculate the paths from a sample of 25 seed vertices to save time.
+The `tReach` function computes the sizes of forward reachable sets. Since these are large-ish networks (1000 vertices), we will only calculate the paths from a sample of 25 seed vertices to save time.
 
 ```{r}
 baseTrees<-tReach(base,sample=25)
@@ -522,9 +594,9 @@ par(mfcol=c(1,1))
 
 ### Density of activity
 
-The `tEdgeDensity` function is a network-level metric to compute the *temporal density* of a networkDynamic object.  It can be thought of as a crude measure of the total connectivity in the network.  It is expressed as a measure of the total amount of time vertices are connected by active edges in the network, divided by the amount of time they could possibly be connected.  
+The `tEdgeDensity` function is a network-level metric to compute the *temporal density* of a networkDynamic object.  It can be thought of as a crude measure of the total relational activity in the network.  It is expressed as a measure of the total amount of time vertices are tied by active edges in the network, divided by the amount of time they could possibly be tied.  
 
-For all the dyads which are ever observed to have edges, what fraction of the time are they connected?
+For all the dyads which are ever observed to have edges, what fraction of the time are they tied?
 
 ```{r}
 tEdgeDensity(base)
@@ -532,7 +604,7 @@ tEdgeDensity(base)
 
 So for the base network, if an edge is observed, it is likely to be active 19% of the time.  This may be useful, but it doesn't really tell us how connected the overall network is because we could get this value for a network with only a single edge that is active for 19% of the observational period. We can change the aggregation unit from `'edge'` to `'dyad'` so that the denominator will be the total amount of time dyads could possibly be connected.
 
-For all the possible dyads in the network, what fraction of time are they actually connected?
+For all the possible dyads in the network, what fraction of time are they actually tied?
 
 ```{r}
 tEdgeDensity(base,agg.unit = 'dyad')
@@ -624,4 +696,9 @@ Carter T. Butts (2014). sna: Tools for Social Network Analysis. R package versio
 Skye Bender-deMoll (2014). networkDynamicData: dynamic network datasets. R package version 0.1.0.
   http://CRAN.R-project.org/package=networkDynamicData
   
+Moody, James. 2002. "The Importance of Relationship Timing for Diffusion." *Social  Forces* 81:25-56
+
+B. Bui Xuan, Afonso Ferreira, Aubin Jarry. "Computing shortest, fastest, and foremost journeys
+in dynamic networks". RR-4589, 2002.
+ https://hal.inria.fr/inria-00071996/document
 
