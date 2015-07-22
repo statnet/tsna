@@ -1,4 +1,11 @@
 #useDynLib(tsna)
+importFrom(stats,aggregate)
+importFrom(stats,aggregate.data.frame)
+importFrom(grDevices,rainbow)
+importFrom(stats, rexp)
+importFrom(stats, ts)
+importFrom(stats,as.formula)
+importFrom(graphics, plot)
 import(statnet.common,network,networkDynamic)
 export(
   tPath,
