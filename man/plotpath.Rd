@@ -28,8 +28,8 @@ plotPaths(nd, paths,  path.col = rainbow(length(paths), alpha = 0.5),
               displaylabels = TRUE, 
               displayisolates = FALSE, 
               jitter = FALSE, 
-              vertex.lwd = (x$tdist == 0) * 4 + 1, 
-              vertex.cex = (x$tdist == 0) * 1.5, 
+              vertex.lwd = (x$gsteps == 0) * 4 + 1, 
+              vertex.cex = (x$gsteps == 0) * 1.5, 
               vertex.col = NA, ...) 
 }
 %- maybe also 'usage' for other objects documented here.

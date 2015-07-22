@@ -18,7 +18,7 @@ test_that('tPath basic tests',{
   line<-network.initialize(4)
   add.edges.active(line,tail=1:3,head=2:4,onset=0:2,terminus=1:3)
   # check return format
-  expect_equal(names(tPath(line,v=1)),c('tdist','previous','geodist','start','end','direction','type'))
+  expect_equal(names(tPath(line,v=1)),c('tdist','previous','gsteps','start','end','direction','type'))
   expect_is(tPath(line,v=1),class = 'tPath')
   
   # check args
@@ -87,7 +87,7 @@ test_that("test of moody's example network",{
   
   expect_equal(paths$tdist,c(543, 454, 594,   0, 672, 661, 184, 679, 634,   0, 709, 581, 413, 625, 669, 535))
   expect_equal(paths$previous,c(16,13,13,10,13,16,10,13,1,0,8,1,4,4,2,2))
-  expect_equal(paths$geodist,c(5, 3, 3, 1, 3, 5, 1, 3, 6, 0, 4, 6, 2, 2, 4, 4))
+  expect_equal(paths$gsteps,c(5, 3, 3, 1, 3, 5, 1, 3, 6, 0, 4, 6, 2, 2, 4, 4))
   
   # render a pdf for visual inspection of correctness
   # tree<-create_tree(paths)
@@ -181,35 +181,35 @@ test_that("graph step time param works",{
 # ----- tests for shortest geo fwd path ----
 # construct a network in which distinguishes paths (
 #
-tel<-matrix(c(2,3,1,2,
-              3,4,2,5,
-              4,5,5,3,
-              0,1,1,3,
-              5,6,1,4,
-              7,8,4,3),byrow=TRUE,ncol=4)
-# shortest path from 1 to 3 is the direct route, arriving at time
-test<-networkDynamic(edge.spells=tel)
-plot(test,displaylabels=TRUE,edge.label=paste(get.edge.attribute(test,'active',unlist=FALSE)),label.col='blue',edge.label.cex=0.7)
-
-#path starting at time 0
-
-path0<-tPath(test,v=1,type='fewest.steps')
-expect_equal(path0$tdist,c(0, 2, 0, 5, 3))
-expect_equal(path0$previous,c(0, 1, 1, 1, 2))
-expect_equal(path0$geodist,c(0, 1, 1, 1, 2))
-
-# path starting at v1 time 1
-# (direct path to v3 eliminated because it is too early)
-#   shortest geodesic path to v3 is  1-3
-#   earliest temporal path to v3 is 1-2-5-3
-#   shortest geodesic temporal path to v3 is 1-4-3
-path1<-tPath(test,v=1,start=1,type='fewest.steps')
-expect_equal(path1$tdist,c(0, 1, 6, 4, 2))
-expect_equal(path1$previous,c(0, 1, 4, 1, 2))
-expect_equal(path1$geodist,c(0, 1, 2, 1, 2))
-
-
-# test for a later-leaving path arriving earlier
+# tel<-matrix(c(2,3,1,2,
+#               3,4,2,5,
+#               4,5,5,3,
+#               0,1,1,3,
+#               5,6,1,4,
+#               7,8,4,3),byrow=TRUE,ncol=4)
+# # shortest path from 1 to 3 is the direct route, arriving at time
+# test<-networkDynamic(edge.spells=tel)
+# plot(test,displaylabels=TRUE,edge.label=paste(get.edge.attribute(test,'active',unlist=FALSE)),label.col='blue',edge.label.cex=0.7)
+# 
+# #path starting at time 0
+# 
+# path0<-tPath(test,v=1,type='fewest.steps')
+# expect_equal(path0$tdist,c(0, 2, 0, 5, 3))
+# expect_equal(path0$previous,c(0, 1, 1, 1, 2))
+# expect_equal(path0$gsteps,c(0, 1, 1, 1, 2))
+# 
+# # path starting at v1 time 1
+# # (direct path to v3 eliminated because it is too early)
+# #   shortest geodesic path to v3 is  1-3
+# #   earliest temporal path to v3 is 1-2-5-3
+# #   shortest geodesic temporal path to v3 is 1-4-3
+# path1<-tPath(test,v=1,start=1,type='fewest.steps')
+# expect_equal(path1$tdist,c(0, 1, 6, 4, 2))
+# expect_equal(path1$previous,c(0, 1, 4, 1, 2))
+# expect_equal(path1$gsteps,c(0, 1, 2, 1, 2))
+# 
+# 
+# # test for a later-leaving path arriving earlier
 
 
 # ----- tests for paths.bkwd.latest -----
@@ -223,7 +223,7 @@ activate.edges(test,onset=10:0,terminus=11:1)
 results<-tPath(test,v=5,direction='bkwd',type='latest.depart')
 expect_equal(results$tdist,c(Inf, Inf, Inf,   3,   0, Inf, Inf, Inf, Inf, Inf))
 expect_equal(results$previous,c(0, 0, 0, 5, 0, 0, 0, 0, 0, 0))
-expect_equal(results$geodist,c(Inf, Inf, Inf, 1, 0, Inf, Inf, Inf, Inf, Inf))
+expect_equal(results$gsteps,c(Inf, Inf, Inf, 1, 0, Inf, Inf, Inf, Inf, Inf))
 
 # forward-ordred edge spells
 test<-network.initialize(10)
@@ -232,7 +232,7 @@ activate.edges(test,onset=0:10,terminus=1:11)
 results<-tPath(test,v=10,direction='bkwd',type='latest.depart')
 expect_equal(results$tdist,c(8,7,6,5,4,3,2,1,0,0))
 expect_equal(results$previous,c(2,3,4,5,6,7,8,9,10,0))
-expect_equal(results$geodist,c(9, 8, 7, 6, 5, 4, 3, 2, 1, 0))
+expect_equal(results$gsteps,c(9, 8, 7, 6, 5, 4, 3, 2, 1, 0))
 
 # moody sim
 results<-tPath(moodyContactSim,v=10,direction='bkwd',type='latest.depart')
