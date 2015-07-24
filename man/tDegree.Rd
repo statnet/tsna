@@ -2,7 +2,7 @@
 \alias{tDegree}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-DRAFT function to report momentary degree of a networkDynamic object and multiple timepoints
+Report momentary degree of a networkDynamic object at multiple timepoints
 }
 \description{
 Calculates the degree of vertices at a sequence of time points over a network's temporal evolution

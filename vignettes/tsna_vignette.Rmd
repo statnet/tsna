@@ -523,16 +523,45 @@ text(connectedDuration(cls33_10_16_96, mode='counts',neighborhood = 'out'),
      label=cls33_10_16_96%v%'type',cex=0.8,pos=4)
 ```
 
+If we turn to the concurrency comparison networks, it is interesting to compare the distributions of connected duration for the three scenarios.  We might assume that vertices that are connected longer are more likely to be reached (or infected) because, ignoring topology, they simply have more opertunities to transmit or recieve.  Since this is an undirected network, `connectedDuration` totals the amount of time that each vertex appears as the tail or head of each edge. 
+
+```{r}
+plot(sort(connectedDuration(base)),type='l',ylim=c(0,400),
+     main='sorted connectedDuration for concurrency scenearios',
+     xlab='sorted vertices',ylab='duration that each vertex is connected', col ='#55000033',lwd=4)
+points(sort(connectedDuration(monog)),type='l',col='#00550033',lwd=4)
+points(sort(connectedDuration(middle)),type='l',col='#00005533',lwd=4)
+legend(200,300,legend=c('base','monog','middle'),
+       fill=c('#55000033','#00550033','#00005533'))
+
+mean(connectedDuration(base))
+mean(connectedDuration(monog))
+mean(connectedDuration(middle))
+```
+
+The means for the networks are quite similar, as we would expect since they were simulated to have the same momentary mean degree, but the shape of the distributions are somewhat different.  There is very little variation in the `monog` version, but the `middle` and `base` networks each have some vertices have much higher connection rates.  
+
 
 ### Difference between degree and connectedDuration
 
-Like many of the temporal measures, for truly random graphs we might expect a strong correlation between the number of people contacted (degree) and the total contact time (connectedDuration).  But of course there is always the possibility of someone having a very few long-duration ties, or very many short ties.  We can compare the measures on a real network, plotting aggregate degree against connected duration for each person in the hospital contact network. 
+Like many of the temporal measures, for truly random graphs we might expect a strong correlation between the number of people contacted (degree) and the total contact time (connectedDuration).  But of course there is always the possibility of someone having a very few long-duration ties, or very many short ties.  
+
+Indeed, plotting aggregate degree against connected duration in the simulated networks suggests they are pretty tightly correlated.
+```{r,fig.width=8,fig.height=4}
+par(mfcol=c(1,3))
+plot(degree(as.network(base)),connectedDuration(base),xlim=c(0,25),ylim=c(0,350),main='base')
+plot(degree(as.network(middle)),connectedDuration(middle),xlim=c(0,25), ylim=c(0,350),main='middle')
+plot(degree(as.network(monog)),connectedDuration(monog),xlim=c(0,25),ylim=c(0,350),main='monog')
+par(mfcol=c(1,1))
+```
+
+We can compare the measures on observations for each person in the real-world observations of the hospital contact network. 
 
 ```{r}
 data(hospital_contact)
 plot(degree(as.network(hospital),gmode = 'graph'),connectedDuration(hospital),
      xlab='aggregate degree (total number of unique contacts)',
-     ylab='total contact duration',
+     ylab='total contact duration (seconds)',
      main='Vertices in hospital RFID proximity contact network')
 ```
 
