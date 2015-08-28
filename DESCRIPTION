@@ -8,7 +8,7 @@ Authors@R: c(
            person("Martina", "Morris", role=c("aut"), email="morrism@u.washington.edu"),
            person("James", "Moody", role=c("ctb"), email="jmoody77@soc.duke.edu")
            )
-Depends: network (>= 1.12), networkDynamic (>= 0.7), R (>= 3.0)
+Depends: network (>= 1.13), networkDynamic (>= 0.7), R (>= 3.0)
 Imports: statnet.common
 Suggests: ergm, networkDynamicData, testthat, sna,  knitr, relevent
 Description: Temporal SNA tools for continuous- and discrete-time longitudinal networks having vertex, edge, and attribute dynamics stored in the networkDynamic format. This work was supported by grant R01HD68395 from the National Institute of Health.
