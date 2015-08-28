@@ -37,10 +37,6 @@ tEdgeDensity<-function(nd,mode=c('duration','event'),agg.unit=c('edge','dyad'),a
     if (agg.unit=='dyad'){ # at the dyad level
       # total number of possible dyads
       num_dyads<-network.dyadcount(nd)
-      # correct for self loops
-      if (has.loops(nd)){
-        num_dyads<-num_dyads+network.size(nd)
-      }
       return(total_dur/(num_dyads*(bounds[2]-bounds[1])))
     }
     
@@ -93,11 +89,8 @@ dyad_duration_density<-function(nd,active.default=TRUE){
   spls<-as.data.frame.networkDynamic(nd,start=bounds[1],end=bounds[2],active.default=active.default)
   total_dur<-sum(spls$duration)
   # total number of possible dyads
-  num_dyads<-network.dyadcount(nd)
-  # correct for self loops
-  if (has.loops(nd)){
-    num_dyads<-num_dyads+network.size(nd)
-  }
+  num_dyads<-network.dyadcount(nd)  # corrects for self loops as of network 1.13
+
   return(total_dur/(num_dyads*(bounds[2]-bounds[1])))
 }
 

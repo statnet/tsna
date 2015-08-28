@@ -32,7 +32,8 @@ export(
   #timeToReach
   #edgeAgeSummaryAt,
   pShiftCount,
-  timeProjectedNetwork
+  timeProjectedNetwork,
+  concurDur
   )
 
 S3method(as.network,tPath)
