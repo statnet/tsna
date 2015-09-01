@@ -32,7 +32,7 @@ export(
   #timeToReach
   #edgeAgeSummaryAt,
   pShiftCount,
-  timeProjectedNetwork,
+  timeProjectedNetwork
   #concurDur
   )
 
