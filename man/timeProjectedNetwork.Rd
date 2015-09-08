@@ -40,6 +40,8 @@ Additional arguments to \code{\link{network.collapse}} (such as \code{rule},\cod
 Uses \code{\link{network.collapse}} to bin the \code{nd} network into a list of static networks, aggregates them into a new network with size equal to original network size X number of slices.  To assist with plotting an edge attribute \code{edge.type} is added to all of the edges, having the value \code{'within_slice'} for edges existing the the original network and \code{'identity_arc'} for edges linking the vertices in time.  Vertex attributes (possibly collapsed TEAs) are copied from the original network to the projected network. 
 
 Vertex activity is currently ignored(\code{retain.all.vertices} is set to true internally to force all time slice networks to have the same size).
+
+This function can be used as a means to construct a diagonal block matrix. 
 }
 
 \note{

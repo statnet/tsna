@@ -45,7 +45,7 @@ These functions can be used to compute distributions of (observed) activity dura
   \itemize{
     \item \code{\link{edgeDuration}}
     \item \code{\link{vertexDuration}}
-    \item \code{\link{connectedDuration}}
+    \item \code{\link{tiedDuration}}
     \item \code{\link{tEdgeDissolution}}
     \item \code{\link{tEdgeFormation}}
   }

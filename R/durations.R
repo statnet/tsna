@@ -151,8 +151,8 @@ vertexDuration<-function(nd,mode=c('duration','counts'),subject=c('vertices','sp
   
 }
 
-# return the total amount of time that each vertex was connected via active edges
-connectedDuration<-function(nd, mode=c('duration','counts'),active.default=TRUE,neighborhood=c('out','in','combined')){
+# return the total amount of time that each vertex was tied via active edges
+tiedDuration<-function(nd, mode=c('duration','counts'),active.default=TRUE,neighborhood=c('out','in','combined')){
   neighborhood<-match.arg(neighborhood)
   mode<-match.arg(mode)
   if(!is.directed(nd)){
