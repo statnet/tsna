@@ -1,14 +1,14 @@
-\name{connectedDuration}
-\alias{connectedDuration}
+\name{tiedDuration}
+\alias{tiedDuration}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Compute the duration of time (or count of events) that each vertex is connected by an edge
+Compute the duration of time (or count of events) that each vertex is tied/connected to others by an edge
 }
 \description{
-Computes the total duration that each vertex in the network is connected by a incident edges.  Alternately, if \code{mode="counts"}, computes the total number of incident edge spells each vertex is connected by.  The later is especially useful for continuous time networks connected by edges with 0-duration events. For directed networks, the durations can be filtered using the \code{neighborhood} argument to include only incoming, outgoing, or all ties combined in order to return out-connected or in-connected durations.
+Computes the total duration that each vertex in the network is tied to other vertices by incident edges.  Alternately, if \code{mode="counts"}, computes the total number of incident edge spells each vertex is tied by.  The later is especially useful for continuous time networks tied by edges with 0-duration events. For directed networks, the durations can be filtered using the \code{neighborhood} argument to include only incoming, outgoing, or all ties combined in order to return out-tiedor in-tied durations.
 }
 \usage{
-connectedDuration(nd, mode = c("duration", "counts"), 
+tiedDuration(nd, mode = c("duration", "counts"), 
                      active.default = TRUE, 
                      neighborhood = c("out", "in", "combined"))
 }
@@ -24,7 +24,7 @@ connectedDuration(nd, mode = c("duration", "counts"),
 logical, should edges with no defined activity spells be considered active by default?
 }
   \item{neighborhood}{
-  value of \code{"out"}, \code{"in"} or \code{"combined"} indicating if -- for directed networks -- the durations (counts) should be limited to there vertex's ties edges outgoing, incoming, or combined (both).
+  value of \code{"out"}, \code{"in"} or \code{"combined"} indicating if -- for directed networks -- the durations (counts) should be limited to the vertices' ties outgoing, incoming, or combined (both).
 }
 }
 \details{
@@ -43,12 +43,12 @@ Should the default neighborhood for directed network be 'combined'?
 
 \examples{
   data(moodyContactSim)
-  connectedDuration(moodyContactSim)
+  tiedDuration(moodyContactSim)
   
   data(McFarland_cls33_10_16_96)
   # compute ratio of incoming vs. outgoing speach acts
-  outDur <- connectedDuration(cls33_10_16_96, mode='counts',neighborhood = 'out') 
-  inDur <- connectedDuration(cls33_10_16_96, mode='counts',neighborhood = 'in')
+  outDur <- tiedDuration(cls33_10_16_96, mode='counts',neighborhood = 'out') 
+  inDur <- tiedDuration(cls33_10_16_96, mode='counts',neighborhood = 'in')
   outDur / inDur
 }
 

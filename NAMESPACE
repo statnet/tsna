@@ -25,7 +25,7 @@ export(
   tEdgeFormation,
   #edgeFormationAt,
   #edgeDissolutionAt,
-  connectedDuration,
+  tiedDuration,
   #meanTimeToChange,
   #reachableRate,
   #meanReachTimes,
