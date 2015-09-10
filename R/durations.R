@@ -164,21 +164,21 @@ tiedDuration<-function(nd, mode=c('duration','counts'),active.default=TRUE,neigh
     aggFun<-'length'  # function to use to count events
   }
   bounds<-get_bounds(nd)
+  spls<-as.data.frame.networkDynamic(nd,start=bounds[1],end=bounds[2],active.default=active.default)
   durations<-rep(0,network.size(nd))
-  if(neighborhood=='out'){
-    spls<-as.data.frame.networkDynamic(nd,start=bounds[1],end=bounds[2],active.default=active.default)
-    connectDur<-aggregate(spls['duration'],list(spls$tail),aggFun)
-    durations[connectDur[,1]]<-connectDur[,2]
-  } else if (neighborhood=='in'){
-    spls<-as.data.frame.networkDynamic(nd,start=bounds[1],end=bounds[2],active.default=active.default)
-    connectDur<-aggregate(spls['duration'],list(spls$head),aggFun)
-    durations[connectDur[,1]]<-connectDur[,2]
-  } else {  # ngh is combined
-    spls<-as.data.frame.networkDynamic(nd,start=bounds[1],end=bounds[2],active.default=active.default)
-    connectDurHead<-aggregate(spls['duration'],list(spls$head),aggFun)
-    connectDurTail<-aggregate(spls['duration'],list(spls$tail),aggFun)
-    durations[connectDurHead[,1]]<-connectDurHead[,2]
-    durations[connectDurTail[,1]]<-durations[connectDurTail[,1]]+connectDurTail[,2]
+  if(nrow(spls)>0){  # make sure there are some spells to aggregate
+    if(neighborhood=='out'){
+      connectDur<-aggregate(spls['duration'],list(spls$tail),aggFun)
+      durations[connectDur[,1]]<-connectDur[,2]
+    } else if (neighborhood=='in'){
+      connectDur<-aggregate(spls['duration'],list(spls$head),aggFun)
+      durations[connectDur[,1]]<-connectDur[,2]
+    } else {  # ngh is combined
+      connectDurHead<-aggregate(spls['duration'],list(spls$head),aggFun)
+      connectDurTail<-aggregate(spls['duration'],list(spls$tail),aggFun)
+      durations[connectDurHead[,1]]<-connectDurHead[,2]
+      durations[connectDurTail[,1]]<-durations[connectDurTail[,1]]+connectDurTail[,2]
+    }
   }
   return(durations)
 }

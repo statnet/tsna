@@ -318,6 +318,56 @@ mean(degree(as.network(monog)))
 mean(degree(as.network(middle)))
 ```
 
+## Static projections of temporal networks
+
+Dynamic networks -- especially those that are constructed from multiple waves of static networks -- can be be converted into a time-projected "multi-slice" static network representation which preserves the potential paths the network.  This type of network is conceptually similar to the representation used internally for the forward path calculations and be very helpful for testing and understanding flow through temporal networks.  
+
+Create four random 'slice' networks and plot them
+```{r,fig.width=8,fig.height=8}
+nets4<-replicate(4,list(network(matrix(rbinom(16,5,0.1),ncol=4,nrow=4))))
+par(mfcol=c(2,2))
+plot(nets4[[1]],displaylabels=TRUE,main='t0')
+plot(nets4[[2]],displaylabels=TRUE,main='t1')
+plot(nets4[[3]],displaylabels=TRUE,main='t2')
+plot(nets4[[4]],displaylabels=TRUE,main='t3')
+par(mfcol=c(1,1))
+```
+
+Aggregate them into a networkDynamic object, and project it in time by creating "identity arcs" bentween the vertices' realizations in sucessive time slices. 
+
+```{r}
+nets4Dyn<-networkDynamic(network.list=nets4)
+nets4Projected<-timeProjectedNetwork(nets4Dyn)
+```
+The projected network will have size equal the the number of vertices in the original network times the number of time slices, with each vertex now appearing multiple times. 
+```{r}
+network.size(nets4Projected)
+network.vertex.names(nets4Projected)
+```
+
+The new network will have an edge attribute named `edge.type` added to distinguish the original "within_slice" ties from the between-slice identity arcs. We can use this control edge color to make the plot a little clearer.  
+
+```{r,fig.width=8,fig.height=8}
+plot(nets4Projected,
+     displaylabels=TRUE,
+     mode='kamadakawai',
+     edge.col=ifelse(nets4Projected%e%'edge.type'=='identity_arc','gray','black'))
+```
+
+For a temporally sparse network like moodyContactSim this can start to get a bit croweded on the plot.
+
+```{r,fig.width=8,fig.height=8}
+changes<-get.change.times(moodyContactSim)
+moodyProj<-timeProjectedNetwork(moodyContactSim,onsets=changes,termini=changes)
+plot(moodyProj,
+     mode='kamadakawai',
+     vertex.cex=0.3,
+     arrowhead.cex=0.1,
+     edge.col=ifelse(moodyProj%e%'edge.type'=='identity_arc','gray','black'))
+```
+
+Note that we computed a network slice at every time point that the network changed.  The produced quite a lote of "extra" vertices, but does make it so that we are sure that the temporal connectivity of the original dynamic network is completly represented in the projected one.  
+
 ## Rates of Change
 
 The functions `tEdgeFormation` and `tEdgeDissolution` evaluate a network object at multiple time points and return counts of the number of edges forming (edge onset at time point) and dissolving (edge terminus at time point). These functions are intended to provide descriptive stats about momentary rates of change in the network.

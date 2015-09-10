@@ -5,7 +5,7 @@
 Construct a time-projected ("multi-slice") network by binning a networkDynamic object
 }
 \description{
-Builds a new static representation of a dynamic network constructed by binning the dynamic network into static slices and constructing new directed 'identity-arcs' between the vertices' realizations in sucessive time slices. 
+Builds a new static representation of a dynamic network constructed by binning the dynamic network into static slices and constructing new directed 'identity-arcs' between the vertices' realizations in successive time slices. 
 }
 \usage{
 timeProjectedNetwork(nd, start = NULL, end = NULL, 
@@ -24,7 +24,7 @@ optional numeric start time to be use as lower bound for binning interval (defau
 optional numeric end time to be use as upper bound for binning interval (default is what is observed in network)
 }
   \item{time.increment}{
-value for the offset (and duration) between sucessive samples. Will default to 1 if not otherwise specified
+value for the offset (and duration) between successive samples. Will default to 1 if not otherwise specified
 }
   \item{onsets}{
 A numeric vector containing the onset times of the networks to be extracted. This must be accompanied by \code{termini} of the same length.
@@ -37,16 +37,15 @@ Additional arguments to \code{\link{network.collapse}} (such as \code{rule},\cod
 }
 }
 \details{
-Uses \code{\link{network.collapse}} to bin the \code{nd} network into a list of static networks, aggregates them into a new network with size equal to original network size X number of slices.  To assist with plotting an edge attribute \code{edge.type} is added to all of the edges, having the value \code{'within_slice'} for edges existing the the original network and \code{'identity_arc'} for edges linking the vertices in time.  Vertex attributes (possibly collapsed TEAs) are copied from the original network to the projected network. 
+Uses \code{\link{network.collapse}} to bin the \code{nd} network into a list of static networks, aggregates them into a new network with size equal to original network size X number of slices.  To assist with plotting, an edge attribute \code{edge.type} is added to all of the edges, having the value \code{'within_slice'} for edges existing the the original network and \code{'identity_arc'} for edges linking the vertices in time.  Vertex attributes (possibly collapsed TEAs) are copied from the original network to the projected network.  Because of the assumed directionality of time, the output network will always be directed, with the identity arcs pointing forward in time.  If the input network is undirected, two corresponding directed edges (one in each direction) will be added in the projected network. Edge attributes (possibly collapsed TEAs) will be copied from the original network to the corresponding  within-slice edges in the projected network.   
 
-Vertex activity is currently ignored(\code{retain.all.vertices} is set to true internally to force all time slice networks to have the same size).
+Vertex activity is currently ignored in the projected network (\code{retain.all.vertices} is set to TRUE internally to force all time slice networks to have the same size).
 
-This function can be used as a means to construct a diagonal block matrix. 
+As with all discrete representations of dynamic processes, the time projected graph is an approximation and may over- or under-represent some transmission potential depending on the choice of bin size. Binning is performed by \code{\link{get.networks}}, so will use its defaults if not specified.
+
 }
 
-\note{
-As with all discrete representations of dynamic processes, the time projected graph is an approximation and may over- or under-represent some transmission potential depending on the bin size. 
-}
+
 
 \value{
 a \code{\link{network}} object that encodes a discrete time representation of the temporal evolution of the input \code{\link{networkDynamic}} object. 
