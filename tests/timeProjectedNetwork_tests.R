@@ -50,7 +50,7 @@ testProj<-timeProjectedNetwork(test,start=0,end=10)
 expect_equal(get.edge.attribute(testProj,'foo'),c("A", "A","B","B", "C","C","D", "D", "E","E","F", "F", "G","G",NA,NA, NA , NA))
 expect_equal(get.edge.attribute(testProj,'pid'),c(1 ,1 ,2 ,2 ,3 ,3 ,4 ,4 ,5, 5, 6, 6 ,7, 7, 8, 8 ,9 ,9))
 
-
+data(moodyContactSim)
 changes<-get.change.times(moodyContactSim)
 moodyProj<-timeProjectedNetwork(moodyContactSim,onsets=changes,termini=changes)
 # make sure the listing didn't get mangled for NA
@@ -73,7 +73,7 @@ expect_equal(length(network.vertex.names(hpProj)),network.size(hpProj))
 # check edge type added
 expect_true("edge.type"%in%list.edge.attributes(hpProj))
 
-data(moodyContactSim)
+
 moodyProj<-timeProjectedNetwork(moodyContactSim,time.increment=100)
 
 # correct size of new network?
