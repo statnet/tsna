@@ -48,6 +48,7 @@ These functions can be used to compute distributions of (observed) activity dura
     \item \code{\link{tiedDuration}}
     \item \code{\link{tEdgeDissolution}}
     \item \code{\link{tEdgeFormation}}
+    \item \code{\link{tiedDuration}}
   }
 }
 
@@ -55,6 +56,7 @@ These functions can be used to compute distributions of (observed) activity dura
   \itemize{
     \item \code{\link{as.network.tPath}}
     \item \code{\link{plotPaths}}
+    \item \code{\link{timeProjectedNetwork}}
   }
 }
 

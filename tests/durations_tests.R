@@ -63,3 +63,22 @@ expect_equal(vertexDuration(windsurfers,mode='counts'),c(4, 6, 8, 7, 4, 5, 3, 2,
 
 
 # ------- tiedDuration ------
+
+# directed case (out)
+test<-network.initialize(3)
+add.edges.active(test,1,2,onset=0,terminus=2)
+add.edges.active(test,1,3,onset=1,terminus=2)
+expect_equal(tiedDuration(test),c(3,0,0))
+# un directed
+expect_equal(tiedDuration(test,neighborhood = 'combined'),c(2,1,1))
+# reversed
+expect_equal(tiedDuration(test,neighborhood = 'in'),c(0,2,1))
+
+# counts
+expect_equal(tiedDuration(test,mode='counts'),c(2,0,0))
+
+# active default on non-dynamic netowrk
+test2<-network.initialize(3)
+add.edges(test2,1,2)
+expect_equal(tiedDuration(test2,active.default = FALSE), c(1,0,0))
+expect_equal(tiedDuration(test2,active.default = FALSE),c(0,0,0))
