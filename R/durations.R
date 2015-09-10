@@ -45,7 +45,7 @@ edgeDuration<-function(nd,mode=c('duration','counts'),subject=c('edges','spells'
 }
 
 
-tEdgeFormation<-function(nd, start, end, time.interval=1, result.type=c('count','fraction')){
+tEdgeFormation<-function(nd, start, end, time.interval=1, result.type=c('count','fraction'),include.censored=FALSE){
     result.type<-match.arg(result.type)
     if(missing(start) | missing(end)){
       times <- get.change.times(nd)
@@ -65,7 +65,12 @@ tEdgeFormation<-function(nd, start, end, time.interval=1, result.type=c('count',
     times<-seq(from = start, to=end,by = time.interval)
     
     tel<-as.data.frame.networkDynamic(nd)
-    formation<-sapply(times,function(t){sum(tel$onset==t)})
+    if (include.censored){  # detrmine of censored/truncated onset ties will be included in count
+      formation<-sapply(times,function(t){sum(tel$onset==t)})
+    } else {
+      formation<-sapply(times,function(t){sum(tel$onset==t & !tel$onset.censored)})
+    }
+    
     if(result.type=='fraction'){
       # compute the number of empty dyads at each time point
       emptyDyads<-sapply(times,function(t){emptyDyadCount(nd,at=t)})
@@ -77,7 +82,7 @@ tEdgeFormation<-function(nd, start, end, time.interval=1, result.type=c('count',
     return(ts(formation,start=start,end=times[length(times)],deltat=time.interval))
 }
 
-tEdgeDissolution<-function(nd, start, end, time.interval=1,result.type=c('count','fraction')){
+tEdgeDissolution<-function(nd, start, end, time.interval=1,result.type=c('count','fraction'),include.censored=FALSE){
   result.type=match.arg(result.type)
   if(missing(start) | missing(end)){
     times <- get.change.times(nd)
@@ -97,7 +102,11 @@ tEdgeDissolution<-function(nd, start, end, time.interval=1,result.type=c('count'
   times<-seq(from = start, to=end,by = time.interval)
   
   tel<-as.data.frame.networkDynamic(nd)
-  dissolution<-sapply(times,function(t){sum(tel$terminus==t)})
+  if(include.censored){ # determine if terminus.censored ties will be included in the count
+    dissolution<-sapply(times,function(t){sum(tel$terminus==t)})
+  } else {
+    dissolution<-sapply(times,function(t){sum(tel$terminus==t & !tel$terminus.censored)})
+  }
   if(result.type=='fraction'){
     # compute the number of existing ties 
     activeECount<-sapply(times,function(t){network.edgecount.active(nd,at=t)})

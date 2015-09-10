@@ -47,6 +47,7 @@ See also \code{tSnaStats(nd,'degree')} and \code{tErgmStats(nd,'sociality')} for
 \examples{
 data(McFarland_cls33_10_16_96)
 tDegree(cls33_10_16_96)
+# compute mean temporal degree
 mean(tDegree(cls33_10_16_96),na.rm=TRUE)
 
 library(networkDynamicData)

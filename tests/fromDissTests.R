@@ -1,6 +1,7 @@
 # tests for formation and dissolution functions
 require(tsna)
 require(testthat)
+require(networkDynamicData)
 
 # ------ tEdgeDissolution -------
 test<-network.initialize(4,directed = TRUE,loops = FALSE)
@@ -55,3 +56,11 @@ expect_equal(as.numeric(tEdgeFormation(test,result.type='fraction')),c(1/6,0,0))
 # check multiplex 
 expect_error(tEdgeFormation(network.initialize(0,multiple = TRUE),result.type='fraction'),regexp = 'can not compute possible number of free dyads for multiplex networks')
 # 
+
+# check censoring toggle
+data(concurrencyComparisonNets)
+expect_equal(as.numeric(tEdgeFormation(base,start=1,end=4,include.censored = FALSE)),c(0,0,24,18))
+expect_equal(as.numeric(tEdgeFormation(base,start=1,end=4,include.censored = TRUE)),c(0,371,24,18))
+
+expect_equal(as.numeric(tEdgeDissolution(base,start=100,end=103,include.censored = TRUE)),c(23,20,364,0))
+expect_equal(as.numeric(tEdgeDissolution(base,start=100,end=103,include.censored = FALSE)),c(23,20,18,0))

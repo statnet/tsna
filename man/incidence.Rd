@@ -11,10 +11,10 @@ The functions \code{tEdgeFormation} and \code{tEdgeDissolution} evaluate a netwo
 }
 \usage{
 tEdgeFormation(nd, start, end, time.interval = 1, 
-               result.type=c('count','fraction'))
+               result.type=c('count','fraction'), include.censored=FALSE)
 
 tEdgeDissolution(nd, start, end, time.interval = 1, 
-               result.type=c('count','fraction'))
+               result.type=c('count','fraction'), include.censored=FALSE)
 
 }
 %- maybe also 'usage' for other objects documented here.
@@ -34,15 +34,21 @@ optional numeric value giving time interval between evaluations (default is 1)
   \item{result.type}{ either \code{'count'} indicating that results should be returned as counts of tie changes or \code{'fraction'} meaning that results should be returned as fraction of ties dissolving (for dissolution) or fraction of empty dyads forming ties (for formation). In the later case the number of dyads is corrected for network directedness, loops, and bipartite partition size. 
   
   }
+  \item{include.censored}{
+  logical, should ties with truncated/censored onset or termination times be included in the respective formation or dissolution counts?
+  }
 }
 \details{
-Uses \code{as.data.frame.networkDynamic} internally.  Does not yet correct for censoring of edges forming at the beginning or end of the network.  TODO: dyad formation rate is not yet corrected for vertex activity, uses the aggregate, not the momentary, network size. 
+Uses \code{as.data.frame.networkDynamic} internally.  TODO: dyad formation rate is not yet corrected for vertex activity, uses the aggregate, not the momentary, network size. 
 
 When \code{result.type='fraction'}:
 \itemize{
   \item formation returns the ratio of number of  ties forming to the number of possible empty dyads that could have formed ties. So value of 1 would mean all empty dyads formed ties, value of 0 means no ties formed.  In sparse networks, the numbers will tend to be very, very small.    
   \item dissolution returns the ratio of the number of ties dissolving to the number preexisting ties that could have dissolved. So value of 1 means all ties disolved, 0 means no ties disolved. 
 }
+
+When \code{include.censored=FALSE} spells of edges which onset outside of the query range will not be included in formation counts. 
+
 }
 \value{
 For \code{tEdgeFormation} and \code{tEdgeDissolution}, a numeric vector of class \code{ts} giving the formation and dissolution counts (respectively) as a time-series.  For \code{edgeFormationAt} and \code{edgeDissolutionsAt}, a single numeric value

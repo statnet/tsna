@@ -15,7 +15,7 @@ output:
 
 library(knitr)
 knitr::opts_chunk$set(comment='')
-knitr::opts_chunk$set(cache=TRUE)
+knitr::opts_chunk$set(cache=FALSE)
 ```
 
 --------------------
@@ -377,7 +377,6 @@ plot(tEdgeDissolution(base),main="Edge dissolution counts for network 'base'")
 plot(tEdgeFormation(base), main="Edge formation counts for network 'base'")
 ```
 
-Notice the spikes at the beginning and ends of the network caused by the truncation (censoring) of edges by the network's observation time window.
 
 Both measures also include the ability to output the results as fractions instead of a raw counts.  For edge dissolution, it then returns the the fraction of previously-active edges that dissolve at the specified time point.  We can also use the `start`, `end` and `time.interval` parameters to adjust how frequently the evaluations are made. 
 
