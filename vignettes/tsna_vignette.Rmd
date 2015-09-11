@@ -137,7 +137,7 @@ To give a concrete example, if a network describes the time-evolution of contact
 Depending on network topology, there may be lots of possible temporal paths between a single pair of vertices. Bui Xuan, et al (2002) call a permissable time-respecting path between a pair of vertices a *journey*. The *earliest arriving forward temporal path* from vertex `i` to vertex `j` can be thought of as the soonest possible time a message sent from `i` to `j` could possibly arrive. Because it depends on the sequence of edge timing,  earliest forward path is *not* usually equal to the *shortest path geodesic* in a static network and may not be the same as the shortest temporal path.  However, we can calculate the earliest path with relative efficiency using algorithms similar to those used to calculate the shortest geodesic path (Bui Xuan, et al. 2002).  Please see the package documentation for \code{?tPath} for further algorithm details. 
 
 
-The *forward reachable set* (FRS) from vertex `v` at time `t` is the set of vertices reachable by forward temporal paths from `v`, begining at time `t`.   
+The *forward reachable set* (FRS) from vertex `v` at time `t` is the set of vertices reachable by forward temporal paths from `v`, begining at time `t`.   Also known as *temporal out-component*  
 
  
 ### Highlite possible paths found on Moody's example.
@@ -756,6 +756,9 @@ citation('tsna')
 ```
 
 ## Bibliography
+
+Vincenzo Nicosia, John Tang, Cecilia Mascolo, Mirco Musolesi, Giovanni Russo, and Vito Latora (2013) Graph Metrics for Temporal Networks. http://arxiv.org/pdf/1306.0493v1.pdf
+
 
 Skye Bender-deMoll (2014). networkDynamicData: dynamic network datasets. R package version 0.1.0.
   http://CRAN.R-project.org/package=networkDynamicData
