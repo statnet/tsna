@@ -47,6 +47,9 @@ skyebend@uw.edu
 See also \code{\link[ergm]{summary.statistics.formula}} and \code{\link[ergm]{ergm-terms}}. For more information about time-series objects, see \code{\link{ts}} and \code{\link{plot.ts}} for plotting quickly plotting timelines for multiple statistics.  The \code{summary.statistics.networkDynamic} function in the \code{tergm} package offers very similar functionality.
 }
 \examples{
+ \dontrun{
+ data(windsurfers)
+ tErgmStats(windsurfers,'~edges+degree(c(1,2))')
  library(networkDynamicData)
  data(concurrencyComparisonNets)
  tErgmStats(base,'~edges+concurrent',
@@ -57,7 +60,7 @@ See also \code{\link[ergm]{summary.statistics.formula}} and \code{\link[ergm]{er
                 start=0,end=100,time.interval = 10),
                 
                 )
- data(windsurfers)
- tErgmStats(windsurfers,'~edges+degree(c(1,2))')
+  }
+
  
 }

@@ -49,7 +49,7 @@ data(McFarland_cls33_10_16_96)
 tDegree(cls33_10_16_96)
 # compute mean temporal degree
 mean(tDegree(cls33_10_16_96),na.rm=TRUE)
-
+\dontrun{
 library(networkDynamicData)
 data(concurrencyComparisonNets)
 # compute mean for each network, sampled at 11 time points
@@ -62,6 +62,6 @@ hist(rowMeans(tDegree(base,start = 0,end=102,time.interval = 10)))
 
 # plot distribution of momentary degrees of vertices
 hist(tDegree(base,start = 0,end=102,time.interval = 10))
-
+}
 
 }

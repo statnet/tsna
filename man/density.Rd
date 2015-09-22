@@ -69,8 +69,10 @@ These are experimental functions, names and arguments still subject to change.  
 
 
 \examples{
+\dontrun{
 require(networkDynamicData)
 data(hospital_contact)
 tEdgeDensity(hospital)
+}
 }
 
