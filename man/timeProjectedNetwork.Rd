@@ -80,7 +80,7 @@ plot(vanDProj,
     arrowhead.cex = 0,
      edge.col=ifelse(vanDProj\%e\%'edge.type'=='within_slice','black','gray'),
      vertex.cex=0.7,mode='kamadakawai')
-
+\dontrun{
 
 # compute shortest temporal path distances from each vertex in first slice
 # to each vertex in last slice
@@ -93,5 +93,6 @@ moodyProj<-timeProjectedNetwork(moodyContactSim,time.increment=100)
 plot(moodyProj,arrowhead.cex = 0,
     edge.col=ifelse(moodyProj\%e\%'edge.type'=='within_slice','black','gray'),
     vertex.cex=0.7,displaylabels = TRUE,label.cex=0.6)
+}    
     
 }  

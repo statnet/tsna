@@ -69,11 +69,12 @@ should add additional args to allow binning other than 'at' for working with non
   plot(tEdgeFormation(base),col='green', 
     main='edge formation and dissolution rates per timestep of base')
   points(tEdgeDissolution(base),col='red',type='l')
-  
+  \dontrun{
   # compute fraction of ties dissolving every 10 steps
   tEdgeDissolution(base,time.interval = 10,result.type = 'fraction')
   # compute fraction of empty dyads forming ties every 10 steps
   tEdgeFormation(base,time.interval = 10,result.type = 'fraction')
+  }
   
 }
 

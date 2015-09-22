@@ -77,11 +77,12 @@ See also \code{\link{as.data.frame.networkDynamic}}
 
 # look at the distributions of edge durations for
 # a real-world contact network
+\dontrun{
 require(networkDynamicData)
 data(hospital_contact)
 summary(edgeDuration(hospital,subject='edges'))
 summary(edgeDuration(hospital,mode='counts',subject='edges'))
-
+}
 # look at the vertex durations for a network were 
 # vertices are not present every day
 require(networkDynamic)

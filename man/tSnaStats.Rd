@@ -100,13 +100,14 @@ tSnaStats(harry_potter_support,snafun='triad.census')
 
 # compute graph transitivities
 tSnaStats(harry_potter_support,snafun='gtrans')
-
+\dontrun{
 data(concurrencyComparisonNets)
 # since thes are big nets, with lots of timepoints, 
-# set time.interval to avlid evaluating every step
+# set time.interval to avoid evaluating every step
 tSnaStats(base,'prestige',time.interval=25,rescale=TRUE)
 
 # since it is time series, easy to plot
 plot(tSnaStats(base,'components',time.interval=10))
+}
 }
 
