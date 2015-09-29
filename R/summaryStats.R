@@ -41,15 +41,16 @@ tErgmStats<-function(nd, formula,start, end, time.interval=1){
     # rquires that ergm is loaded
     # if(requireNamespace('ergm',quietly=TRUE)){
     # requireNamespace line above is prefered by CRAN, but if ergm is not loaded the necessary terms are also not loaded
-    if(require('ergm',quietly=TRUE)){
+    # TODO: remove ergm depends and reactivate requireNamspace code
+#    if(require('ergm',quietly=TRUE)){
       stats<-lapply(times,function(t){
         net<-network.collapse(nd,at=t)
         ergm::summary.statistics.formula(as.formula(paste('net',formula)))
       })
       
-    } else {
-      stop(" the ergm package could not be loaded to provide summary functions and terms")
-    }
+#    } else {
+#      stop(" the ergm package could not be loaded to provide summary functions and terms")
+#    }
     # rearrange list into matrix
     stats<-do.call(rbind,stats)
     return(ts(stats,start=start,end=times[length(times)],deltat=time.interval))

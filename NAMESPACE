@@ -6,7 +6,7 @@ importFrom(stats, rexp)
 importFrom(stats, ts)
 importFrom(stats,as.formula)
 importFrom(graphics, plot)
-import(statnet.common,network,networkDynamic)
+import(statnet.common,network,networkDynamic,ergm) # ergm import will be removed once its namespace loading issue is fixed
 export(
   tPath,
   is.tPath,
