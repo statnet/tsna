@@ -1,0 +1,496 @@
+---
+title: "fwd comp thoughts"
+author: "skyebend"
+date: "October 23, 2015"
+output: html_document
+---
+
+# Using Transmission Trees to Characterize Epidemic Potential in Dynamic Networks 
+
+Calculating the forward component in tsna essentially caculates the earliest possible forward transmission path for an diffusion/infection process with infectivity 1.0.  What happens if the infectivity is < 1.0 ?
+
+Hypothesis:  If the earliest path is the *only* possible path (and is traversable only at one point in time) then the transmission probability for each vertex on the tree will be reduced by the transprob ^ times the number of hops in the path.  But most networks need to relax this assumption because the path can be traversed at multiple time points and/or there may be multiple possible paths over which the transmission could occur.
+
+
+earliest path may be a resonable approximation when the network is temporally sparse (so there are few alternate paths) and the duration of edge overlap is very short (momentary ties) so that we wouldn't have to account for multiple transmission attempts over the same edge spell (Burnulli trials. )
+
+The problem is that as these assumptions are relaxed we would have to sum up all of the probabilities of the infection reaching each vertex at each time point.  It seems like this would be possible for the discrete time case, but not sure how it would be done in continuouse time. 
+
+
+One possibility is to run a bunch of 'realistic' disease simulations on simulated network and compare final prevealance distribution to fwd set size distribution.  
+
+In otherwords, assuming can we use a sample of forward paths to efficently estimate the fwd path distribution, how well correlated is it with an actuall infection sim?  For what types of network structures (or infection processes) does the correlation break down?   For the range of networks structures we care about for epidemiological questions, is the tPath a reasonable approximation?
+
+Assumptions:  We are talking about networks where the transmission process is independent from -- and bounded by -- dynamic structure of network contacts.  I.e. STI is transmitted across a network 'substrate' of sex contacts between people, and people do not change their behavior in response to the transmission process.  
+
+## compare infection size distribution with fwd comp size
+
+The EpiModel code is derrived from Sam Jenness' workbook Modeling Epidemics over Observed Networks  http://statnet.github.io/gal/empnet.html
+
+```{r}
+library(tsna)
+library(EpiModel)
+library(networkDynamicData)
+library(ndtv)
+```
+
+load example data object and remove existing infection attribute
+```{r}
+data(concurrencyComparisonNets)
+basenw <- base
+basenw <- delete.vertex.attribute(basenw, "status.active")
+```   
+
+Define an init module for EpiModel that will use the observed example network instead of generating one from a sim, and also accepts a pre-specifid seed vertex for the infection start 
+
+```{r}
+net.init.mod <- function(x, param, init, control, s) {
+
+  # Master Data List
+  dat <- list()
+  dat$param <- param
+  dat$init <- init
+  dat$control <- control
+
+  dat$attr <- list()
+  dat$stats <- list()
+  dat$temp <- list()
+
+  # Network Parameters
+  dat$nw <- x
+  dat$param$modes <- 1
+
+  # Initialization
+
+  ## Infection Status and Time Modules
+  n <- network.size(dat$nw)
+  dat$attr$status <- rep("s", n)
+  dat$attr$status[init$seed.v] <- "i"
+  
+  dat$attr$active <- rep(1, n)
+  dat$attr$entrTime <- rep(1, n)
+  dat$attr$exitTime <- rep(NA, n)
+  
+  dat$attr$infTime <- rep(NA, n)
+  dat$attr$infTime[dat$attr$status == "i"] <- 1
+
+  ## Get initial prevalence
+  dat <- get_prev.net(dat, at = 1)
+
+  return(dat)
+}
+```
+
+Similarly, define an infection module
+
+```{r}
+my.inf.mod <- function(dat, at) {
+
+    ## Variables ##
+    active <- dat$attr$active
+    status <- dat$attr$status
+
+    inf.prob <- dat$param$inf.prob
+    act.rate <- dat$param$act.rate
+
+    nw <- dat$nw
+
+    # Vector of infected and susceptible IDs
+    idsSus <- which(active == 1 & status == "s")
+    idsInf <- which(active == 1 & status == "i")
+    nActive <- sum(active == 1)
+    nElig <- length(idsInf)
+
+    # Initialize vectors
+    nInf <- totInf <- 0
+
+    ## Processes ##
+    # If some infected AND some susceptible, then proceed
+    if (nElig > 0 && nElig < nActive) {
+
+      # Get discordant edgelist
+      del <- discord_edgelist(dat, idsInf, idsSus, at)
+
+      # If some discordant edges, then proceed
+      if (!(is.null(del))) {
+
+        # Infection probabilities
+        del$transProb <- inf.prob
+
+        # Act rates
+        del$actRate <- act.rate
+
+        # Calculate final transmission probability per timestep
+        del$finalProb <- 1 - (1 - del$transProb) ^ del$actRate
+
+        # Randomize transmissions and subset df
+        transmit <- rbinom(nrow(del), 1, del$finalProb)
+        del <- del[which(transmit == 1), ]
+
+        # Set new infections vector
+        idsNewInf <- unique(del$sus)
+        totInf <- length(idsNewInf)
+
+        # Update attributes
+        if (totInf > 0) {
+          dat$attr$status[idsNewInf] <- "i"
+          dat$attr$infTime[idsNewInf] <- at
+        }
+
+      } 
+    } 
+   ## save transmission tree as transmat ##
+     # Save transmission matrix
+   if (totInf > 0) {
+     del <- del[!duplicated(del$sus), ]
+     if (at == 1) {
+       dat$stats$transmat <- del
+     } else {
+       dat$stats$transmat <- rbind(dat$stats$transmat, del)
+     }
+   }
+   ## Summary statistics ##
+   if (at == 2) {
+     dat$epi$si.flow <- c(0, totInf)
+   } else {
+     dat$epi$si.flow[at] <- totInf
+   }
+
+   dat$nw <- nw
+   return(dat)
+}
+```
+
+Set up sim params
+
+
+
+```{r}
+param <- param.net(inf.prob = 0.5)
+init <- init.net(seed.v = 10)
+control <- control.net(type = "SI", start=2, nsteps = 103, nsims = 1,
+                       initialize.FUN = net.init.mod, infection.FUN = my.inf.mod,
+                       verbose.FUN = NULL,
+                       module.order = c("infection.FUN", "get_prev.FUN"),
+                       skip.check = TRUE, save.nwstats = FALSE, save.network = FALSE,save.transmat = TRUE)
+episim<-netsim(basenw,param,init,control)
+```
+
+Make a script that runs the two methods from the same seed vertex and compares results.  It has to explicitly sync the time bounds in order to make `netsim` and `tPath` give the same results. 
+
+```{r}
+compareTrees<-function(nd,v,inf.prob=1.0){
+  # figure out the timerange we will be using base not net.obs period
+  tr<-range((nd%n%'net.obs.period')$'observations')
+  
+  param <- param.net(inf.prob = inf.prob)
+  init <- init.net(seed.v = v)
+  control <- control.net(type = "SI", start=tr[1], nsteps = tr[2], nsims = 1,
+                       initialize.FUN = net.init.mod, infection.FUN = my.inf.mod,
+                       verbose.FUN = NULL,
+                       module.order = c("infection.FUN", "get_prev.FUN"),
+                       skip.check = TRUE, save.nwstats = FALSE, save.network = FALSE,save.transmat = FALSE)
+  episim<-netsim(nd,param,init,control)
+  epiSize<-sum(na.omit(episim$epi$si.flow$sim1))+length(v) # make sure to count initial seed
+  fwdpath<-tPath(nd,v=v,graph.step.time = 1,start = tr[1],end = tr[2]+1) # +1 fudge to match the discrete sim
+  pathSize<-sum(fwdpath$gsteps!=Inf)
+  return(c(epiSize,pathSize))
+}
+
+```
+
+
+
+
+utility function to convert a tPath into something like a transmat (but time is elapsed not clock time)
+```{r}
+as.transmat.tPath<-function(tp){
+  pathtm<-cbind(tp$tdist,1:length(tp$previous),tp$previous)
+  # drop unreached
+  pathtm<-pathtm[pathtm[,1]!=Inf,]
+  # sort by time
+  pathtm<-pathtm[order(pathtm[,1]),]
+  # add the start time to correct offset
+  # TODO: need to subtract for reverse
+  pathtm[,1]<-pathtm[,1]+tp$start
+  return(pathtm)
+}
+```
+
+utility function to convert a transmat into a tPath
+
+```{r}
+as.tPath.transmat<-function(x,n,...){
+  if(missing(n)){
+    # we don't know the actuall size of the network, so use max id
+    n<-max(x$sus,x$inf)
+  }
+  tdist<-rep(Inf,n)
+  previous<-rep(0,n)
+  gsteps<-rep(Inf,n) 
+  gsteps[x$inf[1]] <-0
+  tdist[x$inf[1]] <-0
+  # assume root is first element
+  # need to walk through tree to calculate depth
+  verts<-x$inf[1]
+  steps<-0
+  while(length(verts)>0){
+    # pull v off the list of vertices to check
+    v<-verts[1]
+    verts<-verts[-1]
+    # pull its distance
+    steps<-gsteps[v]
+    # find the children of v
+    vKids<-x$sus[x$inf==v]  
+    # update their distance
+    gsteps[vKids]<-steps+1
+    # update the list of vertices to check  (ASSUMING NO LOOPS PRESENT!)
+    verts<-c(verts,vKids)
+  }
+  tdist[x$sus]<-x$at
+  previous[x$sus]<-x$inf
+  out<-list(tdist=tdist,previous=previous,gsteps=gsteps,start=min(x$at),end=max(x$at),directed='fwd',type='EpiModel.transmat')
+  class(out)<-c('tPath',class(out))
+  return(out)
+}
+
+```
+
+
+utility wrapper for EpiModel infect sim to extract infection path as tPath for given params
+
+```{r}
+epiPath<-function(nD,v, inf.prob){
+    # figure out the timerange we will be using base not net.obs period
+  tr<-range((nD%n%'net.obs.period')$'observations')
+  
+  param <- param.net(inf.prob = inf.prob)
+  init <- init.net(seed.v = v)
+  control <- control.net(type = "SI", start=tr[1], nsteps = tr[2], nsims = 1,
+                       initialize.FUN = net.init.mod, infection.FUN = my.inf.mod,
+                       verbose.FUN = NULL,
+                       module.order = c("infection.FUN", "get_prev.FUN"),
+                       skip.check = TRUE, save.nwstats = FALSE, save.network = FALSE,save.transmat = TRUE)
+  episim<-netsim(nD,param,init,control)
+  tp<-as.tPath.transmat(get_transmat(episim),n=network.size(nD))
+}
+```
+
+Compare set sizes for a sample of vertices to make sure we are getting the same paths
+
+```{r}
+vsample<-sample(1:network.size(basenw),10)
+sizes<-lapply(vsample,function(v){
+  compareTrees(basenw,v)
+})
+sizes<-do.call(rbind,sizes)
+cor(sizes[,1],sizes[,2])
+plot(sizes,ylab='path size',xlab='epi size',main='comparison of epidemic sizes to earliest fwd component size',pch=NA,asp=1)
+text(sizes,label=vsample,cex=0.5)
+
+```
+
+
+Now lets do it with a lower infection probability for the epimodel version
+
+```{r}
+sizes<-lapply(vsample,function(v){
+  compareTrees(basenw,v,inf.prob=0.5)
+})
+sizes<-do.call(rbind,sizes)
+cor(sizes[,1],sizes[,2])
+plot(sizes,ylab='path size',xlab='epi size',main='epidemic sizes (inf.prob=0.5) vs\n earliest fwd component size',pch=NA,asp=1)
+text(sizes,label=vsample,cex=0.5)
+
+```
+
+
+much lower correlation.  lets run a complete sample, using some parallel to speed it up
+```{r}
+library(parallel)
+cl<-makeCluster(3)
+sizes<-parLapply(cl,1:network.size(basenw),function(v,nd,net.init.mod,my.inf.mod){
+  require(tsna)
+  require(EpiModel)
+  # figure out the timerange we will be using base not net.obs period
+  tr<-range((nd%n%'net.obs.period')$'observations')
+  
+  param <- param.net(inf.prob = 0.5)
+  init <- init.net(seed.v = v)
+  control <- control.net(type = "SI", start=tr[1], nsteps = tr[2], nsims = 1,
+                       initialize.FUN = net.init.mod, infection.FUN = my.inf.mod,
+                       verbose.FUN = NULL,
+                       module.order = c("infection.FUN", "get_prev.FUN"),
+                       skip.check = TRUE, save.nwstats = FALSE, save.network = FALSE,save.transmat = FALSE)
+  episim<-netsim(nd,param,init,control)
+  epiSize<-sum(na.omit(episim$epi$si.flow$sim1))+length(v) # make sure to count initial seed
+  fwdpath<-tPath(nd,v=v,graph.step.time = 1,start = tr[1],end = tr[2]+1) # +1 fudge to match the discrete sim
+  pathSize<-sum(fwdpath$gsteps!=Inf)
+  return(c(epiSize,pathSize))
+},nd=basenw,net.init.mod=net.init.mod,my.inf.mod=my.inf.mod)
+stopCluster(cl)
+sizes_0.5<-do.call(rbind,sizes)
+cor(sizes_0.5[,1],sizes_0.5[,2])
+plot(sizes_0.5,ylab='path size',xlab='epi size',main='epidemic sizes (inf.prob=0.5) vs\n earliest fwd component size',pch=20,asp=1,col='#00000055')
+```
+
+Do it again for a lower inf prob
+
+```{r}
+cl<-makeCluster(3)
+sizes<-parLapply(cl,1:network.size(basenw),function(v,nd,net.init.mod,my.inf.mod){
+  require(tsna)
+  require(EpiModel)
+  # figure out the timerange we will be using base not net.obs period
+  tr<-range((nd%n%'net.obs.period')$'observations')
+  
+  param <- param.net(inf.prob = 0.1)
+  init <- init.net(seed.v = v)
+  control <- control.net(type = "SI", start=tr[1], nsteps = tr[2], nsims = 1,
+                       initialize.FUN = net.init.mod, infection.FUN = my.inf.mod,
+                       verbose.FUN = NULL,
+                       module.order = c("infection.FUN", "get_prev.FUN"),
+                       skip.check = TRUE, save.nwstats = FALSE, save.network = FALSE,save.transmat = FALSE)
+  episim<-netsim(nd,param,init,control)
+  epiSize<-sum(na.omit(episim$epi$si.flow$sim1))+length(v) # make sure to count initial seed
+  fwdpath<-tPath(nd,v=v,graph.step.time = 1,start = tr[1],end = tr[2]+1) # +1 fudge to match the discrete sim
+  pathSize<-sum(fwdpath$gsteps!=Inf)
+  return(c(epiSize,pathSize))
+},nd=basenw,net.init.mod=net.init.mod,my.inf.mod=my.inf.mod)
+stopCluster(cl)
+sizes_0.1<-do.call(rbind,sizes)
+cor(sizes_0.1[,1],sizes_0.1[,2])
+plot(sizes_0.1,ylab='path size',xlab='epi size',main='epidemic sizes (inf.prob=0.1) vs\n earliest fwd component size',pch=20,col='#00000055',xlim=c(0,850))
+```
+
+When the inf.prob is low relative to the length of simulation time, it wipes out a lot of the path effects.  (Even a fully connected graph would have trouble spreading in a short time window with low inf.prob)
+
+Are the shapes of the distribution of sizes the same for epi and fwd path?
+
+```{r}
+par(mfcol=c(2,1))
+hist(sizes_0.5[,1],20,main='hist of epi sizes, inf.prob = 0.5')
+hist(sizes_0.5[,2],20,main='hist of fwd path sizes, inf.prob = 0.5')
+```
+
+```{r}
+par(mfcol=c(2,1))
+hist(sizes_0.1[,1],20,main='hist of epi sizes, inf.prob = 0.1')
+hist(sizes_0.1[,2],20,main='hist of fwd path sizes, inf.prob = 0.1')
+par(mfcol=c(1,1))
+```
+
+
+
+## properties of single transmission trees
+
+### size of tree (number of verticse reached)
+
+### distribution / mean of transmission event times
+
+### distribution / mean of of branch depths (how many gsteps to each vertex)
+
+
+## tree comparison measures / properties
+
+### percent overlap of vertex sets
+
+Count the size of the set of vertex ids in both paths and compare it to the sizes of the set of ids in either path
+```{r}
+leafOverlap<-function(tPathA,tPathB){
+  if (length(tPathA$gsteps)!=length(tPathA$gsteps)){
+    stop("path sizes differ. overlap calculation assumes that tPaths were extract from the same network")
+  }
+  setA<-which(tPathA$gsteps!=Inf)
+  setB<-which(tPathB$gsteps!=Inf)
+  lap <-length(intersect(setA,setB))/length(union(setA,setB))
+  return(lap)
+}
+```
+
+### percent matching of previous ids (for matching reached vertices)
+
+count the number of matching previous parents for each vertex that is in both paths, and divide by the number of vertices in both paths.  This metric is useful for comparing a partial tree to the complete tree, but not as useful for comparing two partial trees that may have found different vertex sets because if the overlap in vertex sets is small the branch overlap can be very high even tho the trees are very different. 
+```{r}
+branchMatch<-function(tPathA,tPathB){
+  if (length(tPathA$gsteps)!=length(tPathA$gsteps)){
+    stop("path sizes differ. overlap calculation assumes that tPaths were extract from the same network")
+  }
+  setA<-which(tPathA$gsteps!=Inf)
+  setB<-which(tPathB$gsteps!=Inf)
+  leaflap <-intersect(setA,setB)
+  branchlap<-sum(tPathA$previous[leaflap]==tPathB$previous[leaflap])
+  return(branchlap/length(leaflap))
+}
+```
+
+
+counts the number of matching previous parents for each vertex that is in both paths, divided by the number of vertices found in either path.  This effectivly counts paths to non-matching vertices as non-matching paths
+```{r}
+branchOverlap<-function(tPathA,tPathB){
+  if (length(tPathA$gsteps)!=length(tPathA$gsteps)){
+    stop("path sizes differ. overlap calculation assumes that tPaths were extract from the same network")
+  }
+  setA<-which(tPathA$gsteps!=Inf)
+  setB<-which(tPathB$gsteps!=Inf)
+  leaflap <-intersect(setA,setB)
+  branchlap<-sum(tPathA$previous[leaflap]==tPathB$previous[leaflap])
+  return(branchlap/length(union(setA,setB)))
+}
+```
+
+
+
+### percent matching of tdist (reach times) for matching reached vertices
+
+Sometimes it may find the same vertex set, but not at the same time.  Calculate euclidan distance between the vectors of times of matching vertices
+
+```{r}
+leafTDist<-function(tPathA,tPathB){
+  if (length(tPathA$gsteps)!=length(tPathA$gsteps)){
+    stop("path sizes differ. overlap calculation assumes that tPaths were extract from the same network")
+  }
+  setA<-which(tPathA$gsteps!=Inf)
+  setB<-which(tPathB$gsteps!=Inf)
+  leaflap <-intersect(setA,setB)
+  # euclidan distance between 
+  leafdist<-sqrt(sum((tPathA$tdist[leaflap]-tPathB$tdist[leaflap])^2))
+  return(leafdist)
+}
+```
+
+
+What are the properties of the paths from seeds that have big differences?  Is there a bottleneck early on? (Hilite them on a network plot with edges colored by age?) Is it just that they are bigger trees and less probable? Find the vertices in top quartile of differences.  
+
+```{r}
+hist(sizes_0.5[,2]-sizes_0.5[,1])
+which((sizes_0.5[,2]-sizes_0.5[,1])>400)
+```
+
+
+How often / how much does the actuall epi transmission path overlap with the earliest fwd component path?
+
+```{r}
+pathA<-epiPath(basenw,v=1,inf.prob=0.1)
+pathB<-epiPath(basenw,v=1,inf.prob=0.1)
+pathC<-epiPath(basenw,v=1,inf.prob=1)
+
+transmissionTimeline(pathA,label.cex=0.6,main='Path A (v=1, inf.prob=0.1)')
+transmissionTimeline(pathB,label.cex=0.6,main='Path B (v=1, inf.prob=0.1)')
+transmissionTimeline(pathC,label.cex=0.6,main='Path C (v=1, inf.prob=1)')
+leafOverlap(pathA,pathB)
+branchOverlap(pathA,pathB)
+leafOverlap(pathA,pathC)
+branchOverlap(pathA,pathC)
+```
+
+with almost no overlap in the leaves (vertices) there is very little matching so the branch overlap is high.
+
+make grid of epi size vs path size plots  for base, middle, monog, and inf.prob = 0.8, 0.5, 0.2
+
+
+Create animated gif showing a grayed out fwd path, overlaying with a sequence of different realizations of the inf.prob=0.1 infection paths?  Alternetly, do a network plot of fixed positions and flipbook the various tree overlays
+
+```{r}
+
+```
