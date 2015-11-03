@@ -273,6 +273,7 @@ epiPath<-function(nD,v, inf.prob){
                        skip.check = TRUE, save.nwstats = FALSE, save.network = FALSE,save.transmat = TRUE)
   episim<-netsim(nD,param,init,control)
   tp<-as.tPath.transmat(get_transmat(episim),n=network.size(nD))
+  return(tp)
 }
 ```
 
@@ -443,7 +444,7 @@ branchOverlap<-function(tPathA,tPathB){
 
 ### percent matching of tdist (reach times) for matching reached vertices
 
-Sometimes it may find the same vertex set, but not at the same time.  Calculate euclidan distance between the vectors of times of matching vertices
+Sometimes it may find the same vertex set, but not at the same time.  Calculate euclidan distance between the vectors of times of matching vertices.  If we want to be able to count non-matching vertices, should add them in with the maximal distances.
 
 ```{r}
 leafTDist<-function(tPathA,tPathB){
@@ -470,7 +471,7 @@ which((sizes_0.5[,2]-sizes_0.5[,1])>400)
 
 How often / how much does the actuall epi transmission path overlap with the earliest fwd component path?
 
-```{r}
+```{r,fig.width=8,fig.height=6,fig.show='animate'}
 pathA<-epiPath(basenw,v=1,inf.prob=0.1)
 pathB<-epiPath(basenw,v=1,inf.prob=0.1)
 pathC<-epiPath(basenw,v=1,inf.prob=1)
@@ -488,6 +489,45 @@ with almost no overlap in the leaves (vertices) there is very little matching so
 
 make grid of epi size vs path size plots  for base, middle, monog, and inf.prob = 0.8, 0.5, 0.2
 
+Function to do a bunch of replications aross several networks and epi conditions
+
+```{r}
+batchEpi<-function(networks,net.names,inf.probs, seed.count, times){
+  reps <-length(networks)*length(inf.probs)*seed.count*times
+  # create vectors of all the parameters
+  networks<-rep(networks,each=length(inf.probs)*seed.count*times)
+  net.names<-rep(net.names,each=length(inf.probs)*seed.count*times)
+  inf.probs<-rep(inf.probs,each=seed.count*times)
+  seeds<-sapply(networks,function(net){sample(1:network.size(net),seed.count)})
+  # make cluster for parallelizng
+  cl<-makeCluster(detectCores())
+  # export relevent enviroment variables to cluster
+  clusterExport(cl,c('epiPath','net.init.mod','my.inf.mod','as.tPath.transmat'))
+  trees<-parLapply(cl,1:reps,function(n){
+    require('EpiModel')
+    epiPath(nD=networks[[n]],v = seeds[n], inf.prob=inf.probs[n])
+  })
+  # append net names and inf probs lists to make lookup easier
+  trees$'net.names'<-net.names
+  trees$'inf.probs'<-inf.probs
+  stopCluster(cl)
+  return(trees)
+}
+```
+
+
+Now actually do the runs
+
+```{r}
+treeRuns<-batchEpi(list(base,middle,monog),
+                   c('base','middle','monog'),
+                   c(1,0.8, 0.5, 0.2),
+                   10, # 5 different seeds
+                   5)  # 5 replications per seed
+
+# write out the data to file 
+save(treeRuns, file='epiTreeRuns.Rdata')
+```
 
 Create animated gif showing a grayed out fwd path, overlaying with a sequence of different realizations of the inf.prob=0.1 infection paths?  Alternetly, do a network plot of fixed positions and flipbook the various tree overlays
 
