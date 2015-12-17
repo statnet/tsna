@@ -6,22 +6,39 @@ output: html_document
 ---
 
 # Using Transmission Trees to Characterize Epidemic Potential in Dynamic Networks 
+"Detecting potential transmission substrate in dynamic networks using transmission trees"
+"Give me a social network and I'll tell you if the underlying connectivity is sufficient to sustain an epidemic"
 
 Calculating the forward component in tsna essentially caculates the earliest possible forward transmission path for an diffusion/infection process with infectivity 1.0.  What happens if the infectivity is < 1.0 ?
 
-Hypothesis:  If the earliest path is the *only* possible path (and is traversable only at one point in time) then the transmission probability for each vertex on the tree will be reduced by the transprob ^ times the number of hops in the path.  But most networks need to relax this assumption because the path can be traversed at multiple time points and/or there may be multiple possible paths over which the transmission could occur.
+Hypothesis:  If the earliest path is the *only* possible path (and is traversable only at one point in time) then the transmission probability for each vertex on the tree will be reduced by the transprob ^ times the number of hops in the path (gsteps).  But most networks need to relax this assumption because the path can be traversed at multiple time points and/or there may be multiple possible paths over which the transmission could occur.
 
 
-earliest path may be a resonable approximation when the network is temporally sparse (so there are few alternate paths) and the duration of edge overlap is very short (momentary ties) so that we wouldn't have to account for multiple transmission attempts over the same edge spell (Burnulli trials. )
+The earliest path may be a resonable approximation when the network is temporally sparse (so there are few alternate paths) and the duration of edge overlap is very short (momentary ties) so that we wouldn't have to account for multiple transmission attempts over the same edge spell (Burnulli trials. )
 
 The problem is that as these assumptions are relaxed we would have to sum up all of the probabilities of the infection reaching each vertex at each time point.  It seems like this would be possible for the discrete time case, but not sure how it would be done in continuouse time. 
 
 
-One possibility is to run a bunch of 'realistic' disease simulations on simulated network and compare final prevealance distribution to fwd set size distribution.  
+One possibility is to run a bunch of 'realistic' disease simulations on simulated network and compare final prevealance distribution to earliest fwd set size distribution.  
 
-In otherwords, assuming can we use a sample of forward paths to efficently estimate the fwd path distribution, how well correlated is it with an actuall infection sim?  For what types of network structures (or infection processes) does the correlation break down?   For the range of networks structures we care about for epidemiological questions, is the tPath a reasonable approximation?
+In otherwords, assuming can we use a sample of forward paths to efficently estimate the fwd path distribution, how well correlated is it with an actuall infection sim?  For what types of network structures (or infection processes) does the correlation break down?   For the range of networks structures we care about for epidemiological questions, is the earrliest fwd path a reasonable approximation?
+
+
+Idea:  If we are talking about bernolli trials across the tpath network, perhaps it is the distribution of gsteps (number of hops needed to reach each vertex) rather than epidemic size?  NOPE! because the earliest tpath is not necessairly the shortest or the the most probable.  
+
+
+When considering the possible infection path from a single vertex, the verties with larger tdist from the seed vertex are less likely to be hit by infections because there is simply less time availible for them to be reached.  Of course, it is possible that a late-connecting vertex is suddently tightly connected and likely to be reached, but these configurations should be rare.
+
+In all path and infection metrics it is necessary to consider the duration of the observation window on the network process relative to the rate of change of the network.  Most of the network models we are interested in, if observed long enough, will become well-mixed.
+
 
 Assumptions:  We are talking about networks where the transmission process is independent from -- and bounded by -- dynamic structure of network contacts.  I.e. STI is transmitted across a network 'substrate' of sex contacts between people, and people do not change their behavior in response to the transmission process.  
+
+
+The S-shaped growth curve describing the spread of an epidemic tree in a finite population (exponential growth in the beginning, tapering down as it becomes less and less likely to encounter un-reached nodes) often described as a occuring at the scale of the network -- the bounds it runs up against are the size of the network.   I would assume that the same dynamics must also describe the spread through densely connected communities within a network.  When a network with strong local clustering is viewed from the perspective of the disease, perhaps the clusters are the appropriate community sizes, and the process could be though of as a collection of independently evolving networks with vertices entering and exiting as they are brought into contect by the evolution of the network's edges.   Network boundry problem. 
+
+The earliest fwd path is a convientent temporaly bounded path metric because it is efficient to calculate and well defined for a large class of dynamic network data models. It even works for transit networks (via a two-mode projection) perhaps not for citation networks in which papers cite papers back in time?
+
 
 ## compare infection size distribution with fwd comp size
 
@@ -309,7 +326,7 @@ text(sizes,label=vsample,cex=0.5)
 much lower correlation.  lets run a complete sample, using some parallel to speed it up
 ```{r}
 library(parallel)
-cl<-makeCluster(3)
+cl<-makeCluster(detectCores()-1)
 sizes<-parLapply(cl,1:network.size(basenw),function(v,nd,net.init.mod,my.inf.mod){
   require(tsna)
   require(EpiModel)
@@ -338,7 +355,7 @@ plot(sizes_0.5,ylab='path size',xlab='epi size',main='epidemic sizes (inf.prob=0
 Do it again for a lower inf prob
 
 ```{r}
-cl<-makeCluster(3)
+cl<-makeCluster(detectCores()-1)
 sizes<-parLapply(cl,1:network.size(basenw),function(v,nd,net.init.mod,my.inf.mod){
   require(tsna)
   require(EpiModel)
@@ -371,15 +388,37 @@ Are the shapes of the distribution of sizes the same for epi and fwd path?
 ```{r}
 par(mfcol=c(2,1))
 hist(sizes_0.5[,1],20,main='hist of epi sizes, inf.prob = 0.5')
-hist(sizes_0.5[,2],20,main='hist of fwd path sizes, inf.prob = 0.5')
+hist(sizes_0.5[,2],20,main='hist of fwd path sizes')
 ```
 
 ```{r}
 par(mfcol=c(2,1))
 hist(sizes_0.1[,1],20,main='hist of epi sizes, inf.prob = 0.1')
-hist(sizes_0.1[,2],20,main='hist of fwd path sizes, inf.prob = 0.1')
+hist(sizes_0.1[,2],20,main='hist of fwd path sizes')
 par(mfcol=c(1,1))
 ```
+
+Not suprisingly, as the infection probability gets smaller, the epidemic size distribution becomes increasingly skewed to the left comapred to the fwd component size.
+
+## epi size pathss vs earliest tpath dis
+
+For a single source vertex, compare the number of graph steps it takes to reach each of the other vertices.  An simulated epidemic process with infection probability 1.0 
+```{r}
+v10path<-tPath(base,v=10,graph.step.time = 1)
+v10epi<-epiPath(base,v=10,inf.prob = 1)
+plot(jitter(v10path$gsteps),jitter(v10epi$gsteps),pch=16,col='#55555555',
+     main='comparison of # of steps to reach vertex in earliest fwd path \nvs. epi sim (inf.prob 1) vfom v=10')
+```
+note that the tPath version is almost always 1 time unit later (I think this is due to how the timings of infections are recorded). And there are a few instances where the epi path arrives earlier. Need to investigate this
+
+
+Similarly, compare the times at which they are reached.
+```{r}
+plot(jitter(v10path$tdist),jitter(v10epi$tdist),pch=16,col='#55555555',
+     main='comparison of time to reach vertex in earliest fwd path \nvs. epi sim (inf.prob 1) vfom v=10')
+which(v10path$tdist!=v10epi$tdist+1)
+```
+As expected, the epi version never reaches any vertices earlier than the earliest path, but there are a few that are surprisingly later. 
 
 
 
@@ -388,6 +427,51 @@ par(mfcol=c(1,1))
 ### size of tree (number of verticse reached)
 
 ### distribution / mean of transmission event times
+
+### mean time between generations
+
+On average, how long does the path wait on each vertex before jumping to a new one
+
+```{r}
+generationTime<-function(tp){
+  include<-which(tp$tdist>0 & tp$tdist<Inf)
+  # time that each vertex was reached minus the time its parent was reached
+  times<-tp$tdist[include]-tp$tdist[tp$previous[include]]
+  return(times)
+}
+
+mean(generationTime(tPath(base,v=1,graph.step.time = 1)))
+mean(generationTime(tPath(middle,v=1,graph.step.time = 1)))
+mean(generationTime(tPath(middle,v=1,graph.step.time = 1)))
+
+```
+
+### time to reach vs size plot
+
+for a given tPath, how long does it take to reach a set of size x?
+create plots of the cumulative number of vertices reached against time.
+
+```{r}
+ttrPlot<-function(tp,new=TRUE,...){
+  reached<-which(!is.infinite(tp$tdist))
+  totals<-(1:length(reached))/length(tp$tdist)  # convert to percent reached
+  if (new){
+  plot(tp$tdist[reached[order(tp$tdist[reached])]],totals,type='l',ylim=c(0,1), ylab='cumulative fraction of network reached',xlab='time',...)
+  } else {
+    lines(tp$tdist[reached[order(tp$tdist[reached])]],totals,type='l',...)
+  }
+}
+```
+
+plot the cumulative reach curves for a bunch of paths in the same network
+
+```{r}
+
+```
+
+
+Looking at the cumulative reached curves suggests that one way to answer the "how big of a time window do I need to get representative dynammics" question might be to look at when the (aggregate ensample) curves starts to flatten out because the tPaths have reached close to the entire network.  
+
 
 ### distribution / mean of of branch depths (how many gsteps to each vertex)
 
@@ -470,8 +554,9 @@ which((sizes_0.5[,2]-sizes_0.5[,1])>400)
 
 
 How often / how much does the actuall epi transmission path overlap with the earliest fwd component path?
+Create animated gif showing a grayed out fwd path, overlaying with a sequence of different realizations of the inf.prob=0.1 infection paths?  Alternetly, do a network plot of fixed positions and flipbook the various tree overlays
 
-```{r,fig.width=8,fig.height=6,fig.show='animate'}
+```{r,fig.width=8,fig.height=6}
 pathA<-epiPath(basenw,v=1,inf.prob=0.1)
 pathB<-epiPath(basenw,v=1,inf.prob=0.1)
 pathC<-epiPath(basenw,v=1,inf.prob=1)
@@ -487,20 +572,68 @@ branchOverlap(pathA,pathC)
 
 with almost no overlap in the leaves (vertices) there is very little matching so the branch overlap is high.
 
+## how often is the earliest fwd path also the most likely path of infection?
+When are there shorter (and therefor more probable) paths for the infection to reach?
+Would expect that for sparse networks it often is the path of infection, but not for dense ones
+```{r}
+fwdPath1<-tPath(basenw,v=1,graph.step.time = 1)
+epiPath1_0.1<-epiPath(basenw,v=1,inf.prob = 0.1)
+
+vBothFound<-which(fwdPath1$previous>0 &epiPath1_0.1$previous>0)
+
+```
+
+## in a complete census of seed vertices, how often is each vertex on the network reached
+```{r}
+
+```
+
+
+
+What happens if we plot a (static) network using the computed (symetrized) tdist between vertices instead of the geodesic distance
+
+
+## betweeness measures
+
+Easy to compute a tdist matrix of paths from each vertex to every other.  However, computing a full betweeness would require also knowing the number of paths passing through each vertex?
+
+```{r}
+dynamicBetweeness<-function(nd){
+  # compute the earliest fwd path from each vertx
+  paths<-lapply(1:network.size(nd),function(v){
+    tPath(nd,v)
+    })
+  # compute matrix of earliest paths (measured in tdist)
+  tdists<-lapply(paths,'[[','tdist')
+  tdists<-do.call(rbind,tdists)
+  # compute matrix of counts of number of earliest paths going through each vertex
+  pathcounts<-lapply(paths,'[[','previous')
+  # count how many times the paths from v to the reached vertices pass through each other vertex
+  pathcounts<-lapply(pathcounts,tabule,nbins=16)
+  path
+  
+  return(gdist)
+}
+```
+
+## batch comparison of epi sim trees
+
 make grid of epi size vs path size plots  for base, middle, monog, and inf.prob = 0.8, 0.5, 0.2
 
 Function to do a bunch of replications aross several networks and epi conditions
 
 ```{r}
 batchEpi<-function(networks,net.names,inf.probs, seed.count, times){
-  reps <-length(networks)*length(inf.probs)*seed.count*times
+  nNets<-length(networks)
+  reps <-nNets*length(inf.probs)*seed.count*times
   # create vectors of all the parameters
   networks<-rep(networks,each=length(inf.probs)*seed.count*times)
   net.names<-rep(net.names,each=length(inf.probs)*seed.count*times)
-  inf.probs<-rep(inf.probs,each=seed.count*times)
-  seeds<-sapply(networks,function(net){sample(1:network.size(net),seed.count)})
+  inf.probs<-sample(inf.probs,reps,replace = TRUE)
+  # draw a seed vertex for each network
+  seeds<-sapply(networks,function(net){sample(1:network.size(net),1)})
   # make cluster for parallelizng
-  cl<-makeCluster(detectCores())
+  cl<-makeCluster(detectCores()-1)
   # export relevent enviroment variables to cluster
   clusterExport(cl,c('epiPath','net.init.mod','my.inf.mod','as.tPath.transmat'))
   trees<-parLapply(cl,1:reps,function(n){
@@ -516,9 +649,11 @@ batchEpi<-function(networks,net.names,inf.probs, seed.count, times){
 ```
 
 
-Now actually do the runs
+Now actually do the runs (but only run the code chunk below on a fast server)
+```{r} 
+# only run this block if on a very fast machine
+if (detectCores()>8){
 
-```{r}
 treeRuns<-batchEpi(list(base,middle,monog),
                    c('base','middle','monog'),
                    c(1,0.8, 0.5, 0.2),
@@ -527,10 +662,198 @@ treeRuns<-batchEpi(list(base,middle,monog),
 
 # write out the data to file 
 save(treeRuns, file='epiTreeRuns.Rdata')
+}
 ```
-
-Create animated gif showing a grayed out fwd path, overlaying with a sequence of different realizations of the inf.prob=0.1 infection paths?  Alternetly, do a network plot of fixed positions and flipbook the various tree overlays
 
 ```{r}
+# load back in (this so I can actually do the run on another server)
+load('epiTreeRuns.Rdata')
+```
+
+```{r}
+runs<-length(treeRuns$net.names)
+treeStats<-data.frame(treeRuns$net.names,
+           treeRuns$inf.probs,
+           size=sapply(1:runs,function(r){
+             sum(treeRuns[[r]]$tdist!=Inf)
+           })
+           #seed=sapply(1:runs,function(r){
+          #   which(treeRuns[[r]]$tdist==0)
+          # })
+)
+library(plyr)
+
+hist(treeStats[(as.character(treeStats[,1])=='base') &treeStats[,2]==1,3], main='compsize, base net, prob 1.0')
+hist(treeStats[(as.character(treeStats[,1])=='base') &treeStats[,2]==0.2,3], main='compsize, base net, prob 0.2')
+hist(treeStats[(as.character(treeStats[,1])=='middle') &treeStats[,2]==1,3], main='compsize, middle net, prob 1.0')
+hist(treeStats[(as.character(treeStats[,1])=='monog') &treeStats[,2]==1,3], main='compsize, monog net, prob 1.0')
+hist(treeStats[(as.character(treeStats[,1])=='monog') &treeStats[,2]==0.5,3], main='compsize, monog net, prob 0.5')
+
+boxplot(size~treeRuns.net.names+treeRuns.inf.probs,data=treeStats,
+main='component size reached for three networks with varying infect prob\n(random vert for initial seed)')
+boxplot(size~treeRuns.inf.probs+treeRuns.net.names,data=treeStats)
 
 ```
+
+This plot suggests several things to me.  The three networks have the same cross-sectional mean degree (0.75) and mean relationship duration (25) but different cross-sectional degree distributions.  The differences in transmission potential between the three networks are clear for all the infect prob levels.  In other words, if I choose a network blindly and calculate a set of full earliest fwd path sizes (inf. prob 1.0) for each network, I may not yet be able to predict what the 0.2 inf comp size will be, but I could definitly tell you which of the the three networks it was.  On the otherhand, I could easily do this by looking at the momentary degree distribution as well.    
+
+The mean value of the 1.0 infect level is actually slightly lower (presumeably not significantly) for the 1.0 vs the 0.8 condition. 
+
+Is reducing the infect prob by a factor rougly equivilent to obsering the network for a correspondingly shorter time range.   In other words, if what drives infection spread is really the relative rates between the network mixing process and the infection spread processes.   Assuming the processes are homogenous, can we get the same infection distribution for a 0.5 inf prob process on 100 time step network as a 1.0 inf. prob. process on a 50 steps of the same network?
+
+```{r}
+hist(treeStats[(as.character(treeStats[,1])=='base') &treeStats[,2]==0.5,3])
+
+hist(tReach(base,start=0,end=50,sample = 50,graph.step.time = 1.0))
+```
+
+Hmm, maybe not!  Even if the intuition is right, the scaling parameter is definitly not!!   I guess also that the shorter the time scale, the more the component size is driven by the momentary degree of the seed node.  Where longer time scales will be more driven by graph connectivity. 
+
+
+## Individual level metrics
+Are the vertices that are hit by lots of earliest fwd path trees more likely to get hit by infections?
+```{r}
+# create list of vectors of who is reached by each seed
+seeds<-sample(1:network.size(base),20)
+pathReachedCounts<-lapply(seeds,function(v){
+  tPath(base,v=v,graph.step.time = 1)$previous>0
+  })
+# convert into matrix
+pathReachedCounts<-do.call(rbind,pathReachedCounts)
+colSums(pathReachedCounts)
+```
+
+problem for hospital paths is that most people are very reachable so doesn't give much granularity.  So, assuming that alternate paths are more likely the longer the time remaining in the observation window, perhaps we base the metric on the tdist of whe the vertices are reached.
+
+An interesting feature for comparing to the infection paths is that the more we decrease the infectivity, the more likely the chain is to die out before reaching the tharget vertices.  So we will need increase the sample size a lot.  But computing via EpiModel for this is too slow for hosiptal network because it has 17k timesteps, have to do it for shorter nets
+
+First for inf.prob=0.5
+```{r}
+seeds<-sample(1:network.size(base),100)
+EpiReachedCounts_0.5<-lapply(seeds,function(v){
+  epiPath(base,v = v,inf.prob = 0.5)$previous>0
+})
+EpiReachedCounts_0.5<-do.call(rbind,EpiReachedCounts_0.5)
+colSums(EpiReachedCounts_0.5)
+
+```
+
+Compare the ordering of vertex 'risks' computed by each method
+
+Compare the relative risks
+```{r}
+plot(colSums(pathReachedCounts)/max(colSums(pathReachedCounts)),colSums(EpiReachedCounts_0.5)/max(colSums(EpiReachedCounts_0.5)),pch=16,col="#55555555")
+cor(colSums(pathReachedCounts),colSums(EpiReachedCounts_0.5))
+```
+
+And again for inf.prob=0.1
+```{r}
+seeds<-sample(1:network.size(base),200)
+EpiReachedCounts_0.1<-lapply(seeds,function(v){
+  epiPath(base,v = v,inf.prob = 0.1)$previous>0
+})
+EpiReachedCounts_0.1<-do.call(rbind,EpiReachedCounts_0.1)
+colSums(EpiReachedCounts_0.1)
+
+```
+
+```{r}
+plot(colSums(pathReachedCounts)/max(colSums(pathReachedCounts)),colSums(EpiReachedCounts_0.1)/max(colSums(EpiReachedCounts_0.1)),pch=16,col="#55555555")
+cor(colSums(pathReachedCounts),colSums(EpiReachedCounts_0.1))
+```
+
+ Perhaps the comparison would be more effective if the infection starting times for both metrics are randomized. 
+
+
+
+
+## Real data
+### Hosptial RFID proximity contacts
+
+What do these types of trees look like for real data?  Hospital contact would be a nice example, but even using a 20-second time increment, we would have 17382 time steps.  Still quite fast to calculate
+
+
+```{r}
+data(hospital_contact)
+# evaluate the path from each vertex
+hospitalPaths<-lapply(1:network.size(hospital),function(v){tPath(hospital,v=v)})
+transmissionTimeline(hospitalPaths[[1]])
+transmissionTimeline(hospitalPaths[[49]])
+```
+
+Transmission timelines seem to reveal strong periodicity in contact network, presumeably due to night vs day. Lets veryify that by looking just at the contact times in the network
+
+```{r}
+hospitalOnset<-as.data.frame(hospital)$onset
+plot(density(hospitalOnset))
+```
+
+```{r}
+hospitalReach<-tReach(hospital)
+hist(hospitalReach)
+```
+
+It looks like, given the time period recored, about half of the vertices could reach the entire network. 
+
+
+
+
+EpiModel doesn't really support timesteps not equal to 1, so try adjusting the timing of the network to feed into EpiModel
+
+```{r}
+hospitalAdj<-hospital
+adjust.activity(hospitalAdj,offset=-120,factor=1/20)  # this is wicked fast!
+hosEpiPath1_5<-epiPath(hospitalAdj,v = 1,inf.prob=0.5)
+hosEpiPath1_1<-epiPath(hospitalAdj,v = 1,inf.prob=0.1)
+transmissionTimeline(hosEpiPath1_1)
+```
+works great.
+
+Interesting to see how much the complete path overlaps with the others.  Need to use the tree comparison metrics to see how much they overlap
+
+
+
+### Measles infection path
+
+Construct a crude tPath from real-world infection data. Hagelloch measles data. Epidemic data derived from a measles outbreak in the town of Hagelloch, Germany in 1861. 188 individuals were infected over the course of the epidemic. 
+
+```{r}
+library(epinet)
+data(Hagelloch)
+initialParent<-which(is.na(HagellochTimes[,'Parent']))
+# need to walk through to reconstruct gteps from presumed parents
+gsteps<-rep(Inf,nrow(HagellochTimes)) 
+gsteps[initialParent] <-0
+# need to walk through tree to calculate depth
+verts<-initialParent
+steps<-0
+while(length(verts)>0){
+    # pull v off the list of vertices to check
+    v<-verts[1]
+    verts<-verts[-1]
+    # pull its distance
+    steps<-gsteps[v]
+    # find the children of v
+    vKids<-which(HagellochTimes[,'Parent']==v)
+    # update their distance
+    gsteps[vKids]<-steps+1
+    # update the list of vertices to check  (ASSUMING NO LOOPS PRESENT!)
+    verts<-c(verts,vKids)
+}
+hagPath<-list(tdist=HagellochTimes[,'Itime'],
+              previous=HagellochTimes[,'Parent'],
+              gsteps=gsteps,
+              start=29,
+              end=75,
+              directed='fwd',
+              type='observation')
+# recode the id of initial parent from NA to 0
+
+hagPath$previous[initialParent]<-0
+
+
+class(hagPath)<-'tPath'
+plot(hagPath)
+transmissionTimeline(hagPath,main='transmission timeline for 1861 Hagelloch measles outbreak')
+```
+
