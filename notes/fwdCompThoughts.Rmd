@@ -237,19 +237,25 @@ as.transmat.tPath<-function(tp){
 utility function to convert a transmat into a tPath
 
 ```{r}
-as.tPath.transmat<-function(x,n,...){
+as.tPath.transmat<-function(x,n,seed,...){
   if(missing(n)){
     # we don't know the actuall size of the network, so use max id
     n<-max(x$sus,x$inf)
   }
+  if(missing(seed)){
+    # if no infections have occured because seed vertex is an isolate
+    # the transmat will be empty, so the seed argument is a way to pass that in
+    # otherwise, assume it is the first infector vertex
+    seed<-x$inf[1]
+  }
   tdist<-rep(Inf,n)
   previous<-rep(0,n)
   gsteps<-rep(Inf,n) 
-  gsteps[x$inf[1]] <-0
-  tdist[x$inf[1]] <-0
+  gsteps[seed] <-0
+  tdist[seed] <-0
   # assume root is first element
   # need to walk through tree to calculate depth
-  verts<-x$inf[1]
+  verts<-seed
   steps<-0
   while(length(verts)>0){
     # pull v off the list of vertices to check
@@ -264,9 +270,15 @@ as.tPath.transmat<-function(x,n,...){
     # update the list of vertices to check  (ASSUMING NO LOOPS PRESENT!)
     verts<-c(verts,vKids)
   }
-  tdist[x$sus]<-x$at
-  previous[x$sus]<-x$inf
-  out<-list(tdist=tdist,previous=previous,gsteps=gsteps,start=min(x$at),end=max(x$at),directed='fwd',type='EpiModel.transmat')
+  start<-NA
+  end<-NA
+  if(nrow(x)>0){
+    tdist[x$sus]<-x$at
+    previous[x$sus]<-x$inf
+    start<-min(x$at)
+    end<-max(x$at)
+  }
+  out<-list(tdist=tdist,previous=previous,gsteps=gsteps,start=start,end=end,directed='fwd',type='EpiModel.transmat')
   class(out)<-c('tPath',class(out))
   return(out)
 }
@@ -289,7 +301,7 @@ epiPath<-function(nD,v, inf.prob){
                        module.order = c("infection.FUN", "get_prev.FUN"),
                        skip.check = TRUE, save.nwstats = FALSE, save.network = FALSE,save.transmat = TRUE)
   episim<-netsim(nD,param,init,control)
-  tp<-as.tPath.transmat(get_transmat(episim),n=network.size(nD))
+  tp<-as.tPath.transmat(get_transmat(episim),n=network.size(nD),seed=v)
   return(tp)
 }
 ```
@@ -472,6 +484,13 @@ plot the cumulative reach curves for a bunch of paths in the same network
 
 Looking at the cumulative reached curves suggests that one way to answer the "how big of a time window do I need to get representative dynammics" question might be to look at when the (aggregate ensample) curves starts to flatten out because the tPaths have reached close to the entire network.  
 
+###
+
+In the case that the edges of a network are always active, the algorithm should reduce to the shortest path problem, does it?
+
+
+
+
 
 ### distribution / mean of of branch depths (how many gsteps to each vertex)
 
@@ -593,28 +612,82 @@ vBothFound<-which(fwdPath1$previous>0 &epiPath1_0.1$previous>0)
 What happens if we plot a (static) network using the computed (symetrized) tdist between vertices instead of the geodesic distance
 
 
-## betweeness measures
+## centrality  measures
 
-Easy to compute a tdist matrix of paths from each vertex to every other.  However, computing a full betweeness would require also knowing the number of paths passing through each vertex?
+Easy to compute a tdist matrix of paths from each vertex to every other. Computing a full betweeness would require also knowing the number of paths passing through each vertex. Can compute this by tabulating the number of times each vertex appears as 'previous', however this is not consistant with the standard defintions of betweeness centrality which require know the number of paths of length equal to the shortest path. 
+
+The static definition of betweenness centrality for vertex n is computed as the sum for all vertices (not including n) the number of shortest paths from s to t that n is on, divided by the the number of shortest paths from s to t.  I assume that 'number of shortest paths' means number of paths that are the same length as the shortest path?  This normalization to account for equal alternate paths can't becomputed by this implementation of the algorithm because it uses depth first search and does not tabulate the alternate equally short journeys.   
+
+We can compute something like stress centrality but just counting the number of earliest paths that each vertex lies on, but I doubt that this is an useful measure, since ideally we'd do some sort of summation across all of the indirect paths, not just shortest. 
 
 ```{r}
-dynamicBetweeness<-function(nd){
+dynStressCent<-function(nd,graph.step.time=0){
   # compute the earliest fwd path from each vertx
   paths<-lapply(1:network.size(nd),function(v){
-    tPath(nd,v)
+    tPath(nd,v,graph.step.time = graph.step.time)
     })
-  # compute matrix of earliest paths (measured in tdist)
-  tdists<-lapply(paths,'[[','tdist')
-  tdists<-do.call(rbind,tdists)
-  # compute matrix of counts of number of earliest paths going through each vertex
-  pathcounts<-lapply(paths,'[[','previous')
-  # count how many times the paths from v to the reached vertices pass through each other vertex
-  pathcounts<-lapply(pathcounts,tabule,nbins=16)
-  path
-  
-  return(gdist)
+
+  # compute the number of times each vertex appears as a 'previous'
+  # meaning that an earliest fwd path passed throug it
+  pathcounts<-unlist(lapply(paths,'[[','previous'))
+  # count how many times each vertex appears as previous
+  pathcounts<-tabulate(pathcounts,nbins=network.size(nd))
+  return(pathcounts)
 }
 ```
+
+Compute for a network, and compare with mean of static betweeness, and with betweeness calcualted in the time projected network
+
+```{r}
+dynBet<-dynStressCent(short.stergm.sim)
+meanBet<-colMeans(tSnaStats(short.stergm.sim,'betweenness')[1:24,])
+proj<-timeProjectedNetwork(short.stergm.sim)
+meanProjBet<-aggregate(data.frame(stresscent(proj),network.vertex.names(proj)),list( network.vertex.names(proj)),mean)[,2]
+plot(dynBet,meanProjBet,main='dynamic stress centrality vs \nmean stress cent of each vertex in time projected net')
+text(dynBet,meanProjBet,network.vertex.names(short.stergm.sim),cex=0.5, col='blue',pos=4)
+plot(dynBet,meanBet,main='dynamic stress centrality vs\n mean of momentary stress cent at each time point')
+text(dynBet,meanBet,network.vertex.names(short.stergm.sim),cex=0.5, col='blue',pos=4)
+```
+
+
+however, should be possible to calculate a some closeness centrality, using the temporal distances returned, we could call it 'soonness' .  This would be a relative measure of how early in the network's evolution a vertex is able to reach other vertices.  
+
+```{r}
+soonnessCent<-function(nd,graph.step.time=0){
+  # compute the earliest fwd path from each vertx
+  paths<-lapply(1:network.size(nd),function(v){
+    tPath(nd,v,graph.step.time = graph.step.time)
+    })
+  # get the temporal dist to each and
+  # replace all the infs with the maximum observed duration of the network
+  bounds<-tsna:::get_bounds(nd)
+  repVal<-bounds[2]-bounds[1]
+  soonness<-sapply(1:length(paths),function(v){
+    tdist<-paths[[v]]$tdist
+    # remove the v'th entry from the list
+    tdist<-tdist[-v]
+    # replace Infs with full duration for unreachable vertices
+    tdist[tdist==Inf]<-repVal
+    # devide the maximal possible value (if no vertices are reachable)
+    # by the sum all the times that it can reach other vertices
+    ((network.size(nd)-1)*repVal)/sum(tdist)
+    })
+  return(soonness)
+}
+```
+
+gives a value of 1 for vertices that can never reach anyone, up to Inf (divide by zero) for vertices that can reach everyone in the first step.  Can prevent the divide by zero by using graph.step.time > 0 ?
+
+
+```{r}
+t1<-network.extract(short.stergm.sim,at=1)
+dynStt1<- dynStressCent(t1,graph.step.time = 0.1)
+strt1<- stresscent(as.sociomatrix(t1),gmode = 'graph')
+plot(dynStt1,strt1)
+```
+
+
+
 
 ## batch comparison of epi sim trees
 
@@ -623,15 +696,26 @@ make grid of epi size vs path size plots  for base, middle, monog, and inf.prob 
 Function to do a bunch of replications aross several networks and epi conditions
 
 ```{r}
-batchEpi<-function(networks,net.names,inf.probs, seed.count, times){
+batchEpi<-function(networks,net.names,inf.probs, seed.count, times, sameSeeds=TRUE){
   nNets<-length(networks)
   reps <-nNets*length(inf.probs)*seed.count*times
   # create vectors of all the parameters
   networks<-rep(networks,each=length(inf.probs)*seed.count*times)
-  net.names<-rep(net.names,each=length(inf.probs)*seed.count*times)
+  sample.names<-rep(net.names,each=length(inf.probs)*seed.count*times)
   inf.probs<-sample(inf.probs,reps,replace = TRUE)
-  # draw a seed vertex for each network
-  seeds<-sapply(networks,function(net){sample(1:network.size(net),1)})
+  if (sameSeeds){
+    # draw the same seeds for each network, so we can compare inf.probs from same seed
+    seedForNet<-lapply(1:nNets,function(n){
+      seedSample<-sample(1:network.size(networks[[n]]),seed.count)
+      return(seedSample)
+    })
+    seeds<-sapply(net.names,function(nm){
+      sample(seedForNet[[which(net.names==nm)]],1)
+    })
+  } else {
+    # draw a random seed vertex for each network
+    seeds<-sapply(networks,function(net){sample(1:network.size(net),1)})
+  }
   # make cluster for parallelizng
   cl<-makeCluster(detectCores()-1)
   # export relevent enviroment variables to cluster
@@ -641,7 +725,7 @@ batchEpi<-function(networks,net.names,inf.probs, seed.count, times){
     epiPath(nD=networks[[n]],v = seeds[n], inf.prob=inf.probs[n])
   })
   # append net names and inf probs lists to make lookup easier
-  trees$'net.names'<-net.names
+  trees$'net.names'<-sample.names
   trees$'inf.probs'<-inf.probs
   stopCluster(cl)
   return(trees)
@@ -657,7 +741,7 @@ if (detectCores()>8){
 treeRuns<-batchEpi(list(base,middle,monog),
                    c('base','middle','monog'),
                    c(1,0.8, 0.5, 0.2),
-                   10, # 5 different seeds
+                   25, # 25 different seeds
                    5)  # 5 replications per seed
 
 # write out the data to file 
@@ -676,10 +760,13 @@ treeStats<-data.frame(treeRuns$net.names,
            treeRuns$inf.probs,
            size=sapply(1:runs,function(r){
              sum(treeRuns[[r]]$tdist!=Inf)
+           }),
+           seed=sapply(1:runs,function(r){
+             s<-which(treeRuns[[r]]$tdist==0)
+             #hack, incase old code which didn't record seed for isolates
+             if(length(s)==0) {s<-0}
+             s
            })
-           #seed=sapply(1:runs,function(r){
-          #   which(treeRuns[[r]]$tdist==0)
-          # })
 )
 library(plyr)
 

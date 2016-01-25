@@ -138,13 +138,19 @@ This is pretty well connected, so the individual time slices hold together well.
 
 ## Fun with 3D!!
 
-Use carter's `rgl` 3d implementation to reproduce Moody's 3d layouts (have to actually run this to see it in R's 3D GL viewer!)
+Use carter's `rgl` 3d implementation to reproduce Moody's 3d layouts (we used have to actually run this to see it in R's 3D GL viewer, but now it can be embedded in the document!)
 
 ### 3D 'spatial' layout 
 
-```{r,results='hide',fig.keep='none'}
+```{r}
 library(sna)
-gplot3d(contactProjectedChanges)
+library(rglwidget)
+library(rgl)
+open3d(antialias=1,windowRect=c(0,0,500,500))
+gplot3d(contactProjectedChanges,edge.col='#55555555')
+rglscene<-scene3d()
+rgl.close()
+rglwidget(rglscene)
 ```
 (If RGL installed, will bring up a new 3d plot window. zoom in with mouse wheel, click and drag to rotate)
 
@@ -243,7 +249,7 @@ What about if we compare the number of steps in the lengths of the paths they fi
 
 ```{r}
 tdistGHops<-t(sapply(1:16,function(v){
-  tPath(moodyContactSim,v=v)$geodist
+  tPath(moodyContactSim,v=v)$gsteps
 }))
 
 

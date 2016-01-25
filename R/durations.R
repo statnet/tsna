@@ -194,13 +194,14 @@ tiedDuration<-function(nd, mode=c('duration','counts'),active.default=TRUE,neigh
 
 
 # how much model clock time does it take on average for a single edge to change?
-# divide the duration by count the number of non-censored toggles in the network
-# TODO: martina points out we need a correction for network size, to make in change per capita?
+# divide the active vertex duration by ca ount the number of non-censored toggles in the network
 meanTimeToChange<-function(nD){
   tel<-as.data.frame.networkDynamic(nD)
   bounds<-get_bounds(nD)
+  # total number of changes is the number of on toggles (non-onset censored)
+  #                               + number of off toggles (non-terminus censored)
   changeCount<-sum(!tel$onset.censored)+sum(!tel$terminus.censored)
-  return((bounds[2]-bounds[1])/changeCount  )
+  return((bounds[2]-bounds[1])*network.size(nD)/changeCount  )
 }
 
 
