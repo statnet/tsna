@@ -49,6 +49,7 @@ library(tsna)
 library(EpiModel)
 library(networkDynamicData)
 library(ndtv)
+library(parallel)
 ```
 
 load example data object and remove existing infection attribute
@@ -709,7 +710,7 @@ batchEpi<-function(networks,net.names,inf.probs, seed.count, times, sameSeeds=TR
       seedSample<-sample(1:network.size(networks[[n]]),seed.count)
       return(seedSample)
     })
-    seeds<-sapply(net.names,function(nm){
+    seeds<-sapply(sample.names,function(nm){
       sample(seedForNet[[which(net.names==nm)]],1)
     })
   } else {
@@ -764,7 +765,7 @@ treeStats<-data.frame(treeRuns$net.names,
            seed=sapply(1:runs,function(r){
              s<-which(treeRuns[[r]]$tdist==0)
              #hack, incase old code which didn't record seed for isolates
-             if(length(s)==0) {s<-0}
+             #if(length(s)==0) {s<-0}
              s
            })
 )
