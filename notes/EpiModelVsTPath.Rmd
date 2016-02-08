@@ -1,7 +1,7 @@
 ---
 title: "EpiSim vs tPath speed"
 author: "skyebend"
-date: "October 29, 2015"
+date: "October, 2015"
 output: html_document
 ---
 
