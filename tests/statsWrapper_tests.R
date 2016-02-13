@@ -133,7 +133,7 @@ test_that('tSnaStats output as expected',{
   tErgmStats(moodyContactSim,'edges',time.interval=200)
   
   # error for non supported function
-  expect_error(tErgmStats(moodyContactSim,'foo'),regexp = 'The term foo does not exist for this type of ERGM')
+  expect_error(tErgmStats(moodyContactSim,'foo'),regexp = 'initialization function .+ not found.')
   
 })
 
