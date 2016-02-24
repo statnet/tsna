@@ -1,12 +1,12 @@
 ---
-title: "fwdPathPaper"
-author: "skyebend"
+title: "Virus-Eye Views of a Network"
+author: "Skye Bender-deMoll"
 date: "December 11, 2015"
 output: 
   html_document:
     toc: true
 ---
-# Potential Applications of Earliest Arriving Forward Paths for Evaluating Transmission Potential in Dynamic Networks
+#Virus-Eye Views: Applications of Earliest Arriving Forward Paths for Evaluating Transmission Potential in Dynamic Networks
 ## Abstract
 
 
@@ -24,16 +24,16 @@ library(rgl)
 
 ## Transmission in networks background
 
-Reasearchers in a wide range of fields have studied transmission processes in networks for several decades.  Key contributions have been published addressing problems in transit logistics, network routing, livestock disease transmission, diffusion of innovations, percolation networks, "viral" social media, and epidemiology.  
+Reasearchers in a wide range of fields have studied transmission processes in dynamic networks for several decades.  Key contributions have been published addressing problems in transit logistics (Cooke and Halsey, 1966), network routing, livestock disease transmission (Dube, et al, 2008, Bajardi, et. al. 2011), diffusion of innovations, percolation networks, "viral" social media, and epidemiology.  
 
-Characterising static networks with useful descriptive statistics is quite challenging, and adding a temporal dimension greatly increases the complexity of the problem. Relatively few generalizeable descriptive statistics for dynamic networks have been published.  Those that exist frequently operate by dividing the longitudinal network up into a series time bins, aggregating ties within those bins into static networks, and calculating a network statistic on each bin.  This often a useful approach, and one that can return graph statistics as a time series (cite papers, tsna), but number of issues arise.  Determining an appropriate bin duration can be difficult.  Although the density-inflating effects of short-duration aggregations may not be as sever as aggregating over the entire observation period, it still will collapse tie sequence effects and add a bias to the network measures.  
+Characterising static networks with useful descriptive statistics is already quite challenging, and the added temporal dimension greatly increases the complexity of the problem. Relatively few generalizeable descriptive statistics for dynamic networks have been published.  Those that exist frequently operate by dividing the longitudinal network up into a series time bins, aggregating together ties within those bins into static networks, and calculating a network statistic on each bin.  This is often a useful approach, and one that can return graph statistics as a time series (cite papers, tsna), but number of issues arise.  Determining a bin duration appropriate for an analysis can be difficult (Sulo, et. al. 2010). Longer duration bins may be required for the graph to be sufficently connected to measure higher order network properties, yet as more time is aggregated the loss if the tie ordering information begins to inflate the assesed connectivity.   Although the density-inflating effects of short-duration aggregations may not be as severe as the distortions caused by collapsing over the entire observation period, it still will collapse tie sequence effects and add a bias to the network measures.  
 
-The goal of this paper is to outline and demonstrate several algorithmic approaches to characterising the transmission potential in longitudinal networks by computing sets possible temporally permissable traversals of the network. There is a growing literature which uses simulated epidemics across longitudinal networks.  Epidemic models require specifying their own set of parameters and the specific details of individual transmission processes may vary widly across phenomena, perhaps depending on quantities that are difficult or unethical (in some epidemiology cases) to measure directly.  Our hypothesis is that computing properties of the of "substrate" of dynamic network ties which facilitate and bound potential transmission will allow inferences about the size and speed of potential epidemic spread. 
+The goal of this paper is to outline and demonstrate several algorithmic approaches to characterising the transmission potential in longitudinal networks, primarily by computing sets of possible temporally permissable traversals of the network. There is a growing literature which uses simulated epidemics across longitudinal networks (Dube, et. al. 2008).  Epidemic models require specifying their own set of parameters and the specific details of individual transmission processes may vary widly across phenomena, perhaps depending on quantities that are difficult or unethical (in some epidemiology cases) to measure experimentaly.  Our hypothesis is that computing properties of the of "substrate" of dynamic network ties which facilitate  transmission will allow inferences about bounds on the size and speed of potential epidemic spread. 
 
 
 ## Definitions of dynamic networks and temporal paths
 
-We are considering here a class networks where the existance of edges are presumed to constrain possible transmissions between vertices.  The assumption is that the network has either been fully observed (simulated, pre-scheduled) before the transmission process takes place, or the transmission process is independent of the edge dynamics (unable to influence formation or dissolution of ties).  So we might include the network fromed by the routing of cargo through an previously scheduled transit network, but not a network of phone calls where people may decide whom to call based on the information they recieve in a previous call. 
+We are considering here a class networks where the existance of edges are presumed to constrain possible transmissions between vertices.  The assumption is that the network has either been fully observed (simulated, pre-scheduled) before the transmission process takes place, or the transmission process is independent of the edge dynamics (unable to influence formation or dissolution of ties).  So we might include the network fromed by the routing of cargo through an previously scheduled transit network, but not a network of phone calls where people may decide whom to call based on the information they recieve in a previous call.  Not citation networks either?  
 
 For the purposes of this paper we consider a dynamic network to be a collection of vertices and incident undirected edges (or directed arcs) in which each element has an associated set of *activity spells* that determine when the elements are  availible for transmission.  An activity spell has *onset* and *terminus* time values defining a right-open interval. Each element may have multiple spells associated with it (meaning that an edge may toggle on and off multiple times) but the spells must be non-overlaping.  A dynamic network also has a (sometimes implicit) *observation window* defining the interval of time (generally inclusive of all the finite edge and vertex spells) over which the network was known to be observed (or simulated).  
 
@@ -84,7 +84,7 @@ Determining if a given path between two vertices is a permissable temporal path 
 
 ### Examples of forward temporal paths
 
-Many authors have provided basic examples illustrating the differences betweeen vertices reachable accoring to a static or time-aggregated view of a network in contrast to an allowable temporal path, which we won't reproduce here. But it is worth working through several path examples in a trivial network.  In the network diagram below, the labels on the edges indicate their activity spells.
+Many authors have provided basic examples illustrating the differences betweeen vertices reachable accoring to a static or time-aggregated view of a network in contrast to an allowable temporal path, which we won't reproduce here (CITE). But it is worth working through several path examples in a trivial network.  In the network diagram below, the labels on the edges indicate their activity spells.
 
 ```{r,echo=FALSE}
 timeLabels<-function(tl){
@@ -101,17 +101,43 @@ add.edges.active(trivial,tail=2,head=3,onset=3,terminus=4)
 add.edges.active(trivial,tail=3,head=4,onset=0,terminus=1)
 add.edges.active(trivial,tail=2,head=5,onset=1,terminus=3)
 activate.edges(trivial,e = 4,onset=5,terminus=7)
-plot.network(trivial,edge.label=timeLabels(get.edge.activity(trivial)),
+coord<-plot.network(trivial,edge.label=timeLabels(get.edge.activity(trivial)),
              vertex.col='white',edge.label.col='blue',
-             label=LETTERS[1:5],vertex.cex=3,label.pos=5,edge.lwd=2)
+             label=LETTERS[1:5],vertex.cex=3,label.pos=5,edge.lwd=2,
+             main='A trivial network with edge activity spells labeled in blue')
 ```
 
-For a network this simple it is possible to tabulate the possible temporal paths paths from vertex A. Of course, vertex B is reachable from A from time 0 until time 2.  Vertex C is reachable from A from time 3 until time 4 -- allowing for waiting at B for one time unit.  Vertex D is never reachable on a temporal path from A, because the C--D edge dissolves before the B--C edge forms.  Vertex E is reachable from A from time 1 until 3, and again from time 5 until 7.  If we did not allow waiting on vertices, E could only be reached from A from time 1 until 2, and C would not be reachable. Also, if we started our path search from A after time 2 then none of the other vertices are reachable from A. 
+For a network this simple it is possible to describe all of the possible temporal paths paths from vertex A. 
 
-
-A common alternate conceptualization of a discrete time temporal network is to consider a *time projected* network (cite moody and earlier) representation. We imagine this as a static network constructed as an ordered sequence of the networks corresponding to each wave, with each vertex connected to its realization in the subsequent time network by a directed *identity arc*.  A temporal path in a time projected network can reach forward in time only along the identity arcs and spread across the network via the regular network ties.  The image below shows a projection of the seven timesteps of the trivial network and highlights in red some possible forward temporal paths originating from vertex A at the first timestep. 
-NOTE: this plot would be static image if not on web.
 ```{r,echo=FALSE}
+plotPaths(trivial,tPath(trivial,v=1),path.col = '#0000FF55',
+          vertex.col='#FFFFFF00',edge.label.col='blue',
+           label=LETTERS[1:5],vertex.cex=3,label.pos=5,
+       main='trivial network with temporal paths from vertex A highlighted',coord=coord,edge.label.cex=1)
+```
+
+Of course, vertex B is reachable from A from time 0 until time 2.  Vertex C is reachable from A from time 3 until time 4 -- allowing for waiting at B for one time unit.  Vertex D is never reachable on a temporal path from A, because the C--D edge dissolves before the B--C edge forms.  Vertex E is reachable from A from time 1 until 3, and again from time 5 until 7.  If we did not allow waiting on vertices, E could only be reached from A from time 1 until 2, and C would not be reachable. Also, if we started our path search from A after time 2 then none of the other vertices are reachable from A. 
+
+```{r,echo=FALSE}
+require(ape)
+require(EpiModel)
+as.phylo.tPath<-function(x,...){
+# construct a timed edgelist from tpath
+  tel<-cbind(x$previous,1:length(x$previous),x$tdist)
+  # drop the unreached rows and seed row
+  tel<-tel[!is.infinite(x$tdist) & x$gsteps != 0,]
+  # sort in temporal order
+  tel<-tel[order(tel[,3]),]
+  colnames(tel)<-c('inf','sus','at')
+  
+  as.phylo.transmat(as.data.frame(tel))
+}
+#plot(as.phylo(tPath(trivial,v=1)))
+```
+
+A common alternate conceptualization when considering temporal paths in a discrete time temporal network is to use a *time projected* network (cite moody and earlier) representation. We imagine this as a static network constructed as an aggregate of the ordered sequence of the networks corresponding to each wave, with each vertex connected to its realization in the subsequent time network by a directed *identity arc*.  A temporal path in a time projected network can reach forward in time only along the identity arcs and spread across the network via the regular network ties.  The image below shows a projection of the seven timesteps of the trivial network and highlights in red some possible forward temporal paths originating from vertex A at the first timestep. 
+NOTE: this plot would be static image if not on web.
+```{r,echo=FALSE,message=FALSE}
 library(rglwidget)
 trivialProj<-timeProjectedNetwork(trivial,start=0,end=7,time.increment = 1)
 aggCoords<-network.layout.kamadakawai(trivial,layout.par = list())
@@ -150,14 +176,19 @@ rglwidget(rglscene)
 
 ```
 
-This image also illustrates that there are often multiple possible forward temporal paths between pairs of vertices. In the image the link from A to B at time 0 is hilighted, and the second link is not.  If this network was representing a continous time process, the journey could also have crossed at time 1.5, or any intermediate time, and this possibility is not well indicated in the representation.  For this reason, the time projection representation does not generalize well to continous-time networks where observations have not been made in discrete waves and edges may have varying durations and onset times. 
+A disadvantage of this representation is that if this network was describing a continous time process, the journey could also have crossed at time 1.5, or any intermediate time while the edge was active. This possibility appears to be prohibited in this model.  For this reason, the time projection does not generalize easly to continous-time networks where observations have not been made in discrete waves and edges may have varying durations and onset times permitting an infinate number of possible traversal times. 
 
-### Various temporal path types
-
-Some existing literature on paths assumes both a discrete time representation of networks, and that the edge between two vertices can only be active for a single discrete time step. Often neglecting to specifiy what the 'optimal' path is optimizing.  If we allow the edges of dynamic networks to have multiple activiation spells, or to be active for multiple units of time we may also distinguish among various types of possible temporal paths with different restrictions on timing.  For example, if we are describing transportation logistics schedules it is possible to use the global overview of the network to plan optimal journeys across the network.  What is the quantity that the planner (or algorithm) is attempting to optimise (or minimize)?  Are we looking for the earliest possible time we could arrive at a destination?  The shortest possible time in transit?  The latest possible departure time that still arrives within our bounds? The fewest number "hops" along the route (i.e. least number of plane changes)? When dynamic networks applied for epidemic propagation problems we can generally make an assumption that the element being propagated is passive with respect to its transmission events - it is not able to plan its route.  In these cases we are likely interested in the most probable paths. If the underlying network is structured so that alternate routes and / or alternate timing of routes are possible, it is likely that each of these criteria could result in a different path being selected between the same pair of vertices.  
+This image also illustrates possibility of multiple forward temporal paths existing between pairs of vertices. In the image the link from A to B at time 0 is hilighted, and the second link at time 1 is not. Both of these are allowable journyes because we permit the edges of dynamic networks to have more than one activiation spell and to be active for multiple units of time. But even if we required that an edge between two vertices could only be active for a single discrete time step we still must allow for the possibility of jouneys involving different sets of vertices arriving at different times. In order to effectively specify a definitions of 'shortest' temporal paths, we will need to introduce more specific terminology for restrictions on path types.    
 
 
-To illustrate some of the possible path types, we can define a dynamic network consisting of the following edge spells to contrast five path types.
+
+### Types of 'shortest' temporal paths
+
+The appropriate metric for measuring path length can vary widely across problems.  For example, if we are representing transportation logistics schedules as a temporal network it is possible to use the global overview of the network to plan optimal journeys across the network.  But we still need to define the quantity that the planner (or algorithm) is attempting to optimise (or minimize)?  Are we looking for the earliest possible time we could arrive at a destination?  The shortest possible time in transit?  The latest possible departure time that still arrives within our bounds? The fewest number "hops" along the route (i.e. least number of plane changes)?  The least duration of waiting at intermediate vertices? 
+
+
+To illustrate some of the possible path types, we can define a dynamic network consisting of the following edge spells to contrast five path basic types described by Moody (CITE). 
+
 ```{r,echo=FALSE}
 pathCompare<-network.initialize(7)
 network.vertex.names(pathCompare)<-LETTERS[1:7]
@@ -191,9 +222,9 @@ legend(-0.3,1,legend = c('earliest leaving (ACG @ 6)',
        cex=0.8)
 ```
 
-For the examples above, we are only varying the activity timing of the edges, and all of the paths are two geodesic steps in length. This need not be the case for real networks where it is quite possible to have instances where there are shorter (fewer steps) paths that arrive later.  It is important not to conflate the earliest path with the shortest path, or even the earliest shortest path. 
+The *earliest leaving forward path* would be journey that leaves the source vertex earliest. The *earliest arriving forward path* is the journey that first reaches the target vertex.  The *quickest forward path* would be the journey with the least total duration.  The *latest leaving forward path* remains on the source vertex as long as possible before departing.  The *latest arriving forward path*      We must include the "forward" qualifier, as each of these paths would also have a "backwards" counterpart.  For each path, we assume that same criteria is applied when selecting the route and departure time from each intermediate vertex. 
 
-The example below contrasts multiple-step paths from A to C. 
+For the examples above, all of the paths are two geodesic steps in length, and we are only varying the activity timing of the edges. Real networks of sufficent scale will have paths varying in both temporal and geodesic dimensions so  it is quite possible to have instances where there are shorter (fewer steps) paths that arrive later.  It is important not to conflate the earliest path with the shortest path, as the units of measurement are different.  Even the earliest shortest path is a distict concept probably requring a different algorithm to calculate.  The example below contrasts multiple-step paths from A to C to illustrate this. 
 
 ```{r,echo=FALSE}
 indirectNet<-network.initialize(7)
@@ -215,27 +246,26 @@ plot(indirectNet,edge.label=get.edge.activity(indirectNet),
 A-B-F-C (blue) is the earliest path, arriving at t=3 after three graph hops and three time steps.  A-G-C (blue) is the shortest path (three hops, two timesteps), but that route can't arrive at C until t=6.  A-D-E-C is the quickest, traverseable in a single time step at t=4, but requring three hops. It is also the latest departing path and the latest arriving path, the only path that doesn't require waiting at any vertices and has the widest departure window from A.   This example illustrates the differences between *gdist* (number of graph hops, geodesic distance) and *tdist* (temporal distance, time elapsed from path start).
 
 
+When dynamic networks applied for epidemic propagation problems we can generally make an assumption that the element being propagated is passive with respect to its transmission events - it is not able to plan its route.  In these cases we are likely interested in the most probable paths of random walks. We might assume that transmission probability will be related to the total number and length of the possible journies.  For the discrete case, an exhaustive enumeration of the paths may be possible tho computationally expensive.  The continous case would seem to require some sort of analytic technique to sum.
 
-If a network is a spanning tree, and each edge is permitted only a single spell having momentary activiation, all of the deffintions collapse together?  Prove?  
 
 
 ### Earliest forward path
 
-The earliest arriving forward temporal path from vertex i to vertex j can be thought of as the soonest possible time a message sent from i to j could possibly arrive. Because it depends on the sequence of edge timing, the earliest forward path is not usually equal to the shortest path geodesic in a static network and may not be the same as the shortest temporal path. If an earliest arriving path exists, we know there must be at least one valid forward path, so we can use it to compute temporal reachability. And, as we will see below, we can calculate the earliest path with relative efficiency using algorithms similar to those used to calculate the shortest geodesic path (Bui Xuan, et al. 2002).  
+The earliest forward temporal path from vertex `i` to vertex `j` can be thought of as the soonest possible time a message sent from `i` to `j` could possibly arrive, with the assumption that it also makes the earliest possible traversal to each of its intermediate verticees.  Bui Xuan, et. al. (2002) refer to this concept as the *foremost* path. If an earliest arriving path exists, we know there must be at least one valid forward path, so we can use it to compute temporal reachability. We  will see below, we can calculate the earliest path with relative efficiency using algorithms similar to those used to calculate the shortest geodesic path (Bui Xuan, et al. 2002).  
 
-The key feature is that much like "shortest geodesic", "earliest arrival" is quantity that can be minimised with respect the the starting time point of the path.  In other words, if we are searching through the network in temporal order and have found an earliest path from i to j at t0, no *earlier* path between them can be created at a later time t > t0.  It is crucial to remember that it is often possible to discover *shorter* paths (fewer graph hops) between i and j at later times, it is just that such a path by definition would still occur later. 
+The key feature is that much like "shortest geodesic", "earliest arrival" is quantity that can be minimised with respect the the starting time point of the path.  In other words, if we are searching through the network in temporal order and have found an earliest path from `i` to `j` at t = t0, no *earlier* path between them can be created at a later time t > t0.  It is crucial to remember that it is often possible to discover *shorter* paths (fewer graph hops) between `i` and `j` at later times, it is just that such a path by definition would still occur later. 
 
-Although we have not derrived a formal proof here, it seems that this would follow the same logic as the proof of Dijkstra's algorithm, substituting the difference between the onset times of sucessive edges for graph hops as the distance metric.    Cite proof
+Although we have not derrived a formal proof here, it seems that this would follow the same logic as the proof of Dijkstra's algorithm, substituting the difference between the onset times of sucessive edges for graph hops as the distance metric, and always choosing the current soonest vertex to check.  Bui Xuan, et al. (2002) do provide a proof, although they use a slightly different algorithm.   
 
+The earliest arriving forward temporal path is convinient in that it appears to be well-defined for large class of network representations.  It can be computed for networks using both discrete and continuous time models, for edges defined by momentary activation or explicit intervals of duration, and for networks that have either single or multiple edge spell activations betwen a vertex dyads.
 
-The earliest arriving forward temporal path is convinient in that it appears to be well-defined for large class of network representations.  It can be computed for networks using both discrete and continuous time models, for edges that momentary activation or explicit intervals of duration, and for networks that have either single or multiple edge spell activations betwen a vertex dyads.
-
-Reversing the signs and the direction of optimization (starting and the end of the network and working backwards) it is possible to use a closely related algorithm to derive the *latest departing* backwards paths. This gives us the set of vertices v could be reached by and the latest times the journies could depart those vertices. Assume we don't have an efficient way to find the *latest arriving path*, since it is a longest path (aka Traveling Salesman" problem. (CITE)
+Reversing the signs and the direction of optimization (starting and the end of the network and working backwards) it is possible to use a closely related algorithm to derive the *latest departing* backwards paths. This gives us the set of vertices `v` could be reached by and the latest times the journies could depart those vertices. Assume we don't have an efficient way to find the *latest arriving path*, since it is a longest path (aka Traveling Salesman" problem. (CITE)
 
 
 ## Computing earliest forward paths
 
-The `networkDynamic` package for `R` (Butts, et. al. 2012)  provides a realization of the dynamic network data model described above, in which each edge has an associated set of spells defining its activity.  This makes it possible to construct an adaptation of the well known Dijkstra shortest path algortihm for weighted networks to compute the earliest forward paths.  Essentially the edge weights, and hence the  distance to be minimized,  are replaced with the amount of time elapsed from the starting point of the path (temporal distance), rather than the number of hops in the graph traversal (path distance). 
+The `networkDynamic` package for `R` (Butts, et. al. 2012)  provides an implementation of the dynamic network data model described above, in which each edge has an associated set of spells defining its activity.  This makes it possible to construct an adaptation of the well known "Dijkstra" shortest path algortihm for weighted networks to compute the earliest forward paths.  Essentially the edge weights, and hence the  distance to be minimized,  are replaced with the amount of time elapsed from the starting point of the path (temporal distance), rather than the number of hops in the graph traversal (path distance). 
 
 The for discrete networks, the algorithm can be thought of as computing a shortest path in the 'time projected' network (Moody 2008)--except that we are not limited to discrete time and the duration of the 'self-edges' need not be uniform.
 
@@ -250,17 +280,17 @@ The for discrete networks, the algorithm can be thought of as computing a shorte
 # define a vector of unchecked vertices
 
 # continue looping while any vertices remain unchecked
-   # chose a vertex 'u' to be the unchecked vertex having the smallest temporal distance found so far
+   # chose a vertex 'u' to check, having the smallest temporal distance found so far 
    # remove the vertex 'u' from the list of unchecked vertices 
    # if the temporal distance associated with 'u' would place it outside the observation window bounds
       # then no more vertices are reachable from 'v' within time range, so end the search
    # check neighbors of 'u' by getting a vector e of connected edges
-   # for each edge in 'e in the vector of 'u's edges
-      # choose w as id of u's neighbor on the edge
+   # for each edge in 'e' in the vector of 'u's edges
+      # choose 'w' as id of u's neighbor on the edge
       # find the index of the earliest active spell of the edge 'e' intersecting with 'u's currently computed distances and 'end'
         # (if we are using graph.step.time > 0, may need to search for a later spells here)
         # if no active spells are found 
-          # vertex 'w' is never reachable in the future / within time bound, so mark its distances as Inf 
+          # vertex 'w' is never reachable in the future from 'u' within time bound, so mark its distances as Inf 
         # if an active spell is found
           # define distance u_w as the later of 0 or the difference between the 
           # currently computed 'u' time and the onset of the spell for edge 'e'
@@ -273,25 +303,25 @@ The for discrete networks, the algorithm can be thought of as computing a shorte
 # un-reachable vertices will be marked with Inf
 ```
 
-This algorithm, implemented in the `tPath` function of the `tsna` package (Bender-deMoll and Morris, 2015) has the advantage of being quite fast for temporally sparse networks because it is able to directly access the activiation spells for each edge, and it does not need to 'visit' any of the intermediate time points.  It can be modified to account for transmssion delays (`graph.step.time`) , and with early termination criteria if the goal is only to find the earliest pair-wise path from i to j (instead of the paths from i to all reachable vertices). 
+This algorithm, implemented in the `tPath` function of the `tsna` package (Bender-deMoll and Morris, 2015) is quite fast for temporally sparse networks because it is able to directly access the activiation spells for each edge, and it does not need to 'visit' any of the intermediate time points as an epidemic sim would.  It can be modified to account for transmssion delays (`graph.step.time`) , and with early termination criteria if the goal is only to find the earliest pair-wise path from `i` to `j` (instead of the paths from `i` to all reachable vertices). 
 
-Note that in the case that there are two exactly equvilant earliest arriving forward paths, this algorithm will pick one of the two aribitrairly depending on the specific data structures and details of the implementation. The information on alternate paths is not recorded as it could be in a Breadth First Search algorithm.
+Note that in the case that there are two earliest arriving forward paths with exactly the same temporal distances, this algorithm will pick one of the two aribitrairly depending on the specific data structures and details of the implementation. The information on alternate paths is not recorded as it could be in a Breadth First Search algorithm.
 
-Because of the posibility of a shorter (fewer hop) path occuring at a later time, this algorithm cannot be used to find the more general case of a shortest (geodesic) time respecting paths.  
+Because of the posibility of a shorter (fewer hop) path occuring at a later time, this algorithm cannot be used to find the more general case of a shortest (geodesic) time respecting paths, although such paths can be found by related methods (Bui Xuan, et al. 2002).  
 
 This algorithm does not function in the presense of any negatively valued times, so if the starting point for the observation window is earlier than zero, all of the spell values must be shifted by a constant offset to be greater than zero before starting the computation
 
-In the situation where all of the edges have identical activation spells (i.e. edge dynamics could be ignored and represented as static) the algorithm will not directly reduce to a standard shortest path problem because there is no temporal distance between sucessive edges. An effective work around is to define a temporal cost to each edge transmission using `graph.step.time`.
+In the situation where all of the edges have identical activation spells (i.e. edge dynamics could be ignored and represented as static) the algorithm will reduce to a standard shortest path problem only if a temporal distance between sucessive edges is defined. An effective work around is to define a temporal cost to each edge transmission using a `graph.step.time` of 1.
 
 
 
 ## Transmission trees and forward reachable sets
 
-A *forward reachable set* for `v` at `t` is the complete set of vertices that can be reached along forward temporal paths from a vertex `v` starting at time `t`. There must exist an earliest arriving path if a forward path exists, so we can efficiently compute the forward reachable set using the earliest arriving path. 
+A *forward reachable set* for `v` at `t` is the complete set of vertices that can be reached along forward temporal paths from a vertex `v` starting at time `t`. There must exist an earliest arriving path if a forward path exists (Bui Xuan, et al. 2002), so we can efficiently compute the forward reachable set using the earliest arriving path. 
 
-A forward reachable set can have an associated *tPath*, which is a record of a sequence in which vertices in a forward (or backwards) reachable set are reached along (usually multiple) journeys from a single source vertex, along with the timing of of each graph hop.  A tPath defines a temporally permissiable spanning tree for the network, given a seed vertex and start time. 
+A forward reachable set can have an associated *tPath*, which is a record of a sequence in which vertices in a forward (or backwards) reachable set are reached along (usually multiple) journeys from a single source vertex, along with the timing of of each graph hop.  A tPath defines a temporally permissiable spanning tree for the network, given a seed vertex and start time.  A tPath could be considered as an extracted portion of the original  temporal network such that there is only one possible path (gaurnteed by the tree structure) from the source to each of the (reachable) target vertices in the network. Since there is only one path and possible transmission time in a tPath, all of the temporal path types will be equivilent. 
 
-To illustrate the concept of a tPath we will look at some examples of possible paths in a small simulated discrete time network. We can get an idea of the momentary connectivity and spread of the forward paths by looking at a series of snapshots of the network with the vertices that the path from vertex 11 has reached hilighted in red.
+To illustrate the concept of a tPath we will look at some examples of possible paths in a small simulated discrete time network named toy_epi_sim (Bender-deMoll 2013). This 100-vertex network was constructed using a tergm simulation (Kirvitsky and Handcock 2015) parameterized so that it created a dynamic network with an average of 50 edges active at each timestep, and each edge averaging 10 timesteps in duration.  We can get an idea of the momentary connectivity and spread of the forward paths in this network by looking at a series of snapshots of the network with the vertices that the path from vertex 11 has reached hilighted.
 
 ```{r,echo=FALSE,message=FALSE}
 data("toy_epi_sim")
@@ -302,17 +332,30 @@ activate.vertex.attribute(toy_epi_sim, 'pathColor','red',onset=tesPath11$tdist,
                           terminus=Inf)
 ```
 
-TODO: if the paper is presented on the web, this could be an animation instead of filmstrip
 ```{r,echo=FALSE,message=FALSE}
 oop<-par(mar=c(4,1,1,1),no.readonly = TRUE)
 filmstrip(toy_epi_sim,vertex.col = 'pathColor',vertex.cex=2,displaylabels=FALSE,
           slice.par=list(start=1,end=25,interval=3, aggregate.dur=1,rule='latest'),
-          vertex.border='darkgray',edge.lwd=2)
+          vertex.border='darkgray',edge.lwd=2,
+          #main='snapshots of forward temporal path expanding from v11 of the toy_epi_sim net'
+          )
 par(oop)
 ```
 
 
-However, this representation doesn't make the sequence and spread of the path clear. To get a clearer sense of the generations, we can show the path alone as a tree.
+The small multiple view allows us to see that the path began to expand rapidly when it was able to reach the large component of the network -- somewhere around time 18.  If we have access to an animated view, this even clearer.
+
+```{r,echo=FALSE,message=FALSE}
+compute.animation(toy_epi_sim,
+                  slice.par=list(start=1,end=25,interval=1, aggregate.dur=1,rule='latest'))
+render.d3movie(toy_epi_sim,
+               vertex.border='darkgray',edge.lwd=2,
+               vertex.col='pathColor',
+               output.mode = 'htmlWidget',
+               main='expanding forward temporal path from v11 of the toy_epi_sim network')
+```
+
+But this representation alone doesn't make the sequence of infections evident at a glance. To get a clearer conceptual sense of the growth of the path, we can visualize the tPath as a tree reaching forward in time, with each vertex branching to link to the vertices it contacts. 
 
 ```{r,echo=FALSE,message=FALSE}
 # remove isolated vertices
@@ -324,7 +367,7 @@ coords<-layout.normalize(coords,keep.aspect.ratio = FALSE)
 plot(tesPath11Net,coord=coords,jitter=FALSE,
      vertex.col='white',displaylabels=TRUE,label.col='red',
      label.cex=0.5,label.pos=5,vertex.cex=1.1,
-     main='forward temporal path from vertex 11 of the toy_epi_sim network')
+     main='forward temporal path from v11 of the toy_epi_sim net')
 par(oop)
 #plot(tesPath11,
 #     vertex.col='white',displaylabels=TRUE,label.col='red',
@@ -333,20 +376,33 @@ par(oop)
 
 ```
 
-This however, mostly discards the timing information -- we know the sequence, but we can't see when the vertices were reached, so we miss a crucial feature
+This view mostly discards the timing information -- we can see sequence of infections, but we can't determine when the vertices were reached -- so we are unable to pick out the time when the path encountred the component.
 
-Plotting tree of the parent-child relationships for each vertex on the tree where the coordinates of each vertex are the number of graph hops (gdist) on one axis, and temporal distance from start on the other. 
+A hybrid "transmission timeline" view plots a linked tree of the parent-child relationships, but positions each vertex acording to the number of graph hops (gdist, generations) on the y-axis, and temporal distance from start on the the x-axis  This places the seed node (vertex 11) near the origin in the lower left, with subsequent vertices appearing rightwards and above.  We can see that around time 18, a dense diagonal shooting up as the path encountered the component.  And we can see that the bridge was created by the formation of the tie between vertices 58 and 22. 
 
 ```{r, echo=FALSE}
-transmissionTimeline(tesPath11,jitter=TRUE,label.cex = 0.6)
+transmissionTimeline(tesPath11,jitter=TRUE,label.cex = 0.6,
+                     main='transmission timeline of fwd temporal path from v11')
 ```
 
-This view of course has its own drawbacks.  Depending on the network structure, it is possible for many of the vertices and edges in the tree to overlap. 
+This view has its own drawbacks.  Depending on the network structure, it is possible for many of the vertices and edges in the tree to overlap, and infections that occur after long delays are hard to follow visually.
 
-Data for constructing tPaths for real world transmission processes may be availible in public health contexts. For example containing serious infectious disease, contact tracing interviews are often employed to track back from the set of known infected individuals to the possible infection source to locate additional exposed persons and determine some of the disease spreading properties (i.e. "Basic reproduction number") even when the overall population contact network cannot be reconstructed.   
+It also important to remember that the forward path being visualized is only one possible type, and only explored from a single vertex.  Paths starting from other vertices (v69 for example) may only reach one or two others, while paths starting within a connected component may achieve a spreading burst more rapidly (v77).
 
+```{r,echo=FALSE}
+par(mfcol=c(1,2))
+transmissionTimeline(tPath(toy_epi_sim,v=69,graph.step.time = 1),jitter=TRUE,label.cex = 0.001,
+                     main='fwd tPath from v69')
+transmissionTimeline(tPath(toy_epi_sim,v=77,graph.step.time = 1),jitter=TRUE,label.cex = 0.001,
+                     main='fwd tPath from v77')
+par(mfcol=c(1,1))
+```
 
-For example, we can consider epidemic data derived from a measles outbreak in the town of Hagelloch, Germany in 1861. 188 individuals were infected over the course of the epidemic.  The underlying contact network is not observed, although it could be somewhat infered via household and classroom membership and proximity. 
+Due the the variablity accross vertices, if we wanted to characterize an entire network we would need to compute the collection of tPaths from all vertices -- or at least a significant sample of them. 
+
+Interestingly, data for constructing tPaths for real world transmission processes may already be availible in public health contexts. When working to contain serious infectious diseases, contact tracing interviews are often employed to track back from the set of known infected individuals to the possible infection source to locate additional exposed persons and determine some of the disease spreading properties (i.e. "Basic reproduction number") even when the overall population contact network cannot be reconstructed.   
+
+For example, we can consider epidemic data derived from a measles outbreak in the town of Hagelloch, Germany in 1861 (Groendyke and Welch 2015, Neal and Roberts (2004)). 188 individuals were infected over the course of the epidemic.  The underlying contact network is not observed, although it could be somewhat infered via household and classroom membership and proximity.  Since this is a real epidemic, we must assume that there are delays between individual's exposure and their becoming contagious or developing symptoms  We can clearly see bursts in the epidemic, but it may be difficult to determine if they are caused by the infection finding paths to cross between densely connected communities or by the incubation period.  
 
 ```{r, echo=FALSE}
 
@@ -360,6 +416,7 @@ cumulativeReachPlot<-function(tp,new=TRUE,...){
   }
 }
 ```
+
 
 ```{r, echo=FALSE}
 multiCRplot<-function(nd,nseeds){
@@ -382,7 +439,7 @@ multiCRplot<-function(nd,nseeds){
 ```
 
 
-```{r,echo=FALSE}
+```{r,echo=FALSE,message=FALSE}
 library(epinet)
 data(Hagelloch)
 initialParent<-which(is.na(HagellochTimes[,'Parent']))
@@ -419,12 +476,29 @@ hagPath$previous[initialParent]<-0
 
 class(hagPath)<-'tPath'
 #plot(hagPath)
-transmissionTimeline(hagPath,jitter=TRUE,label.cex=0.6,main='transmission timeline for 1861 Hagelloch measles outbreak')
+transmissionTimeline(hagPath,jitter=TRUE,label.cex=0.0001,
+                     main='transmission timeline for 1861 Hagelloch measles outbreak')
+```
+
+The burstiness would of course also be clearly visable if we were to just plot the cumulative number of cases.  Or, to put in in a more generalizeable form, the cumulative 'reach' of the forward path expressed as a fraction of the total number of vertices (although in this case we don't know the number of un-infected individuals in the community).  
+
+```{r,echo=FALSE}
 cumulativeReachPlot(hagPath,main='"reach" (infected cases) for 1861 Hagelloch measles outbreak')
+```
+
+In this case we don't know if the epidemic halted because it reached the boundries of the community or because preventive interventions (or everyone being to sick to walk) began to modify the contract structure of the community.   Either way, we see the rate of new infections taper off at the end. This raises issues for calulating rates, as we will see below. 
+
+Although there are more nuanced methods for arriving a statistically valid estimate of a reproduction number, a crude approach is to simply compute the mean number of children for each vertex in the tPath.
+
+```{r}
+
 ```
 
 
 ## Computing properties of the network using earliest forward path
+
+TODO:  model as a branching process?
+TODO: reproduction number as the mean degree in the tPath
 
 The shortest path geodesic distance measure serves as the basis of a large number of network measures (cite Brandes).  It seems useful to generalize some of the measures to temporal networks using the earliest forward path.   (cite moody)
 
@@ -470,7 +544,7 @@ hist(as.vector(gdistmat),
 
 ### dynamic centrality measures
 
-We can calculate an temporal extension of a betweeness measure using the earliest forward paths rather than the geodesics on static graphs  (Cite Moody)  Cite Brandes (2008).  This computes the number of shortest earliest forward paths that each vertex lies on.  The standard definition of betweeness would then divide this by the number of shortest paths between each vertex pair in order to weight the shortest paths by the inverse of their redundency (Cite Butts sna)
+We can calculate an temporal extension of a betweeness measure using the earliest forward paths rather than the geodesics on static graphs  (Habiba, et. al. 2007) (Cite Moody)  Cite Brandes (2008).  This computes the number of shortest earliest forward paths that each vertex lies on.  The standard definition of betweeness would then divide this by the number of shortest paths between each vertex pair in order to weight the shortest paths by the inverse of their redundency (Cite Butts sna).  However, the method we are using to calculate the earleist paths doesn't collect information on potential alternate paths of the same length, so we are currently limited to calculating the 'stress centrality' form of betweeness. 
 
 ```{r, echo=FALSE}
 dynStressCent<-function(nd){
@@ -489,9 +563,8 @@ dynStressCent<-function(nd){
 ```
 
 
-Since it is possible to define a betweeness score for vertices, it seems likely that it could be similarly defined for edges, which would lead to the possibility of temporal edge-betweenness clustering where the 'transmiting' spells of the highet betweeness edges are sequentially deleted and the scores are recalulated until the graph is partitioned.  'tho I'm not sure there is an immediate extension to a temporal modularity score. 
+ASIDE: Since it is possible to define a betweeness score for vertices, it seems likely that it could be similarly defined for edges, which would lead to the possibility of temporal edge-betweenness clustering where the 'transmiting' spells of the highet betweeness edges are sequentially deleted and the scores are recalulated until the graph is partitioned.  'tho I'm not sure there is an immediate extension to a temporal modularity score. 
 
-possible to infer network properties using methods analagous to link tracing or Respondent Drivin Sampling design? 
 
 CONTRAST SOONNESS centrality, tReach, and tiedDuration  with simulated epidemic sizes
 
@@ -537,7 +610,7 @@ http://students.washington.edu/lxwang/summary%20plots.2.html
   
 ### Path saturation, finite population size effects
 
-Assuming that the network is not a growth process (with new verticies being added over time) and is fairly homogenous in rates the size of a network works to bound the maximal growth of the forward components following the logistic curves that describe epidemic growth.  As the number of vertices reached grows over time, the "front" of vertices able contact unreached vertices increases, but after a significant fraction of the population has be reached, it becomes increasingly unlikely that the few remaining vertices will happen to be found.  
+Assuming that the network is not a growth process (with new verticies being added over time) and is fairly homogenous in rates the size of a network works to bound the maximal growth of the forward components following the logistic curves that describe epidemic growth.  As the number of vertices reached grows over time, the "front" of vertices able contact unreached vertices increases, but after a significant fraction of the population has be contacted, it becomes increasingly unlikely that the few remaining vertices will happen to be found, and the spread slows down.   
 
 Several interesting features stand out in these traces. There is wide variation (and often interesting parallelism) in the trajactories from individual vertices.  A few paths may start from isolated vertices and never reach anyone else.  For this example network, which contains a largish component for much of its evolution, there is often a big "stairstep" when the path manages to reach that component and is able to quickly jump across it (we also saw this in the Hagelloch plot). None of the traces is able to reach 100% of the network, because the network contains four isolates.  Although a few paths have likely not reached the full forward reachable set by the end of the observation window, all of the paths show a decrease in rate as they approach saturation at the maximum possible size. 
 
@@ -781,7 +854,9 @@ measuring the size of an epidemic, generation time,  fraction reached at t, vs t
 
 For discrete time network models, we can use discrete time epidemiologial transmission simulations as an alternate means to compute the forward reachable set.  For this paper, we adapted Samuel Jenness (2015) modules for simulating epidemics on observed networks using the EpiModel package (Jenness, et al 2015) to compute SI infection trees as tPaths while permitting us to vary the infection propability rates and run batches of simulations from multiple seeds in a single network realization.   
 
-When comparing the earliest path results with a discrete time infection model, it is important to be explicit about the assumptions of the duration required for a transmission to occur (or be observed).  By default, the path calculations in `tsna` and in analytical approaches to computing reachable sets usually assume transmission can occur instantly across edges that are active at the same time.  A discrete time epidemic model usually requires that propagation can only occur one edge per time unit -- initial infection and re-transmission cannot occur in the same timestep.  This distinction is crucial when a forward reachable path encounters an existing component or densly connected region in the network.  If the graph.step.time parameter is assumed to be zero, the entire component can be reached in a single instant, greatly accelerating the path's reach.  This may be quite appropriate if the phenomena being modeled is one where the rate of transmission is dramatically faster than the rate of network change (electricity distribution networks for example) but will mean that discovery times and reachable set may not match up with an epi-style transmission sim.  
+When comparing the earliest path results with a discrete time infection model, it is important to be explicit about the assumptions of the duration required for a transmission to occur (or be observed).  By default, the path calculations in `tsna` and in analytical approaches to computing reachable sets usually assume transmission can occur instantly across edges that are active at the same time.  A discrete time epidemic model usually requires that propagation can only occur one edge per time unit -- initial infection and re-transmission cannot occur in the same timestep.  Habiba, et. al. 2007 also reference this concept, making the distinction between a *time respecting* path (all time labels on edges are non-decresing) and *strictly time respecting* path (all time labels are increasing).
+
+This distinction is crucial when a forward reachable path encounters an existing component or densly connected region in the network.  If the graph.step.time parameter is assumed to be zero, the entire component can be reached in a single instant, greatly accelerating the path's reach.  This may be quite appropriate if the phenomena being modeled is one where the rate of transmission is dramatically faster than the rate of network change (electricity distribution networks for example) but will mean that discovery times and reachable set may not match up with an epi-style transmission sim.  
 
 The boundry conditions are also important, they need to stop at the same timestep to give the same results.
 
@@ -1093,21 +1168,48 @@ Real-world datasets for sex contact networks are difficult to collect collected 
 
 ## Bibliography
 
+Bajardi P, Barrat A, Natale F, Savini L, Colizza V (2011) "Dynamical Patterns of Cattle Trade Movements". *PLoS ONE* 6(5): e19869 http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0019869
+
+Skye Bender-deMoll (2013). ndtv: Network Dynamic Temporal Visualizations. R package version 0.9 (2015).
+  http://statnet.org http://CRAN.R-project.org/package=ndtv
+
 Skye Bender-deMoll and Martina Morris (2012). *tsna: Tools for Temporal Social Network Analysis*. R package version 0.2.
   http://statnet.org http://CRAN.R-project.org/package=tsna
   
 B. Bui Xuan, Afonso Ferreira, Aubin Jarry. *Computing shortest, fastest, and foremost journeys in dynamic networks*. RR-4589, 2002. https://hal.inria.fr/inria-00071996/document
 
-Brandes, U. (2008). "On Variants of Shortest-Path Betweenness Centrality and their Generic Computation."" Social Networks, 30, 136–145.  https://kops.uni-konstanz.de/bitstream/handle/123456789/5940/variants.pdf
+Brandes, U. (2008). "On Variants of Shortest-Path Betweenness Centrality and their Generic Computation." *Social Networks*, 30, 136–145.  https://kops.uni-konstanz.de/bitstream/handle/123456789/5940/variants.pdf
   
 Carter T. Butts, Ayn Leslie-Cook, Pavel N. Krivitsky and Skye Bender-deMoll (2015). *networkDynamic: Dynamic Extensions for Network Objects*. R package version 0.9. http://statnet.org   http://CRAN.R-project.org/package=networkDynamic
+
+K.L. Cooke, E. Halsey, "The shortest route through a network with time-dependent internodal transit times", *J. Math. Anal. Appl.* (1966) 493.
+
+C. Dube, C. Ribble, D. Kelton and B. McNab. (2008) "Comparing network analysis measures to determine potential epidemic size of highly contagious exotic diseases in fragmented monthly networks of dairy cattle movements in Ontario, Canada." *Transboundary and Emerging Diseases* 55 (2008) 382–392
+http://www.ncbi.nlm.nih.gov/pubmed/18840200
+
+Chris Groendyke and David Welch (2015). epinet: Epidemic/Network-Related Tools. R package version
+  2.1.6. http://CRAN.R-project.org/package=epinet
+
+Habiba, C. Tantipanananadh, and T. Y. Berger-Wolf. (2007) "Betweenness centrality in dynamic networks". Technical Report 2007-19, DIMACS, 2007
+http://compbio.cs.uic.edu/~habiba/HabibaTantipathananandhBerger-Wolf-BetweennessMeasure.pdf
+
+Krivitsky P and Handcock M (2015). *tergm: Fit, Simulate and Diagnose Models for Network Evolution
+Based on Exponential-Family Random Graph Models* The Statnet Project (
+http://www.statnet.org). R package version 3.4-14107.1-2015.10.18-17.37.57
+http://CRAN.R-project.org/package=tergm
 
 Moody, James. (2002) "The Importance of Relationship Timing for Diffusion." *Social Forces* 81:25-56
 
 Moody, James (2008) "Static Representations of Dynamic Networks" Duke Population Research Institute On-line Working Paper Series. http://papers.ccpr.ucla.edu/papers/PWP-DUKE-2009-009/PWP-DUKE-2009-009.pdf
 
+Neal, P. and Roberts, G. (2004). Statistical inference and model selection for the 1861 Hagelloch measles epidemic. Biostatistics 5 (2), 249.
+
 Samuel Jenness (2015) *Modeling Epidemics over Observed Networks* R workbook http://statnet.github.io/gal/empnet.html
 
 Samuel Jenness, Steven M. Goodreau and Martina Morris (2015). *EpiModel: Mathematical Modeling of Infectious Disease*. R package
   version 1.2.2. http://epimodel.org/
+  
+Rajmonda Sulo, Tanya Berger-wolf, Robert Grossman (2010) "Meaningful selection of temporal resolution for dynamic networks" *MLG '10: Proceedings of the Eighth Workshop on Mining and Learning with Graphs* p.127-136 http://compbio.cs.uic.edu/~chayant/papers/p127-sulo.pdf
+
+
 
