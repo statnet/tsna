@@ -447,7 +447,7 @@ On average, how long does the path wait on each vertex before jumping to a new o
 
 ```{r}
 generationTime<-function(tp){
-  include<-which(tp$tdist>0 & tp$tdist<Inf)
+  include<-which(tp$previous>0 & tp$tdist<Inf)
   # time that each vertex was reached minus the time its parent was reached
   times<-tp$tdist[include]-tp$tdist[tp$previous[include]]
   return(times)
@@ -944,4 +944,5 @@ class(hagPath)<-'tPath'
 plot(hagPath)
 transmissionTimeline(hagPath,main='transmission timeline for 1861 Hagelloch measles outbreak')
 ```
+
 
