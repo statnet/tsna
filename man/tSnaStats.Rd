@@ -8,7 +8,7 @@ Apply the sna package's static graph- and vertex-level network descriptive stati
 Samples collapsed static networks at regular intervals along a network dynamic object, applies the named static \code{\link[sna]{sna}} descriptive statistic function to each network, and returns the result as a time series. Additional arguments to the function can be included via \code{...} . Set the sna function's directedness and self-loops flags appropriately by default. 
 }
 \usage{
-tSnaStats(nd, snafun, start, end, time.interval = 1, ...)
+tSnaStats(nd, snafun, start, end, time.interval = 1, aggregate.dur=0, rule='latest', ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -27,6 +27,12 @@ optional numeric time value at which evaluation should end (default is last obse
   \item{time.interval}{
 optional numeric value giving time interval between evaluations (default is 1)
 }
+ \item{aggregate.dur}{
+optional numeric value giving the duration of time bin to aggregate over for each evaluation (default 0). See \code{\link{collapse.network}}
+ }
+ \item{rule}{
+ character vector describing rule to be used if multiple attribute values are encountred when using non-zero \code{aggregate.dur}. Default is \code{latest}. See \code{\link{collapse.network}} for details
+ }
   \item{\dots}{
 additional arguments to be passed on to the sna function. See docs for each function for possible arguments.
 }

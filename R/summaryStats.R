@@ -1,5 +1,5 @@
 # function to apply ergm's summary formula at multiple time points
-tErgmStats<-function(nd, formula,start, end, time.interval=1){
+tErgmStats<-function(nd, formula, start, end, time.interval=1, aggregate.dur, rule){
   
   if(!is.networkDynamic(nd)){
     stop("the first argument to tErgmStats must be a object of class 'networkDynamic'")
@@ -37,6 +37,12 @@ tErgmStats<-function(nd, formula,start, end, time.interval=1){
     if (!grepl('^~',formula)){
       formula<-paste('~',formula,sep='')
     }
+    if(missing(aggregate.dur)){
+      aggregate.dur<-0
+    }
+    if (missing(rule)){
+      rule<-'latest'  # so that we won't have warnings about attribute processing
+    }  
     
     # rquires that ergm is loaded
     # if(requireNamespace('ergm',quietly=TRUE)){
@@ -44,7 +50,14 @@ tErgmStats<-function(nd, formula,start, end, time.interval=1){
     # TODO: remove ergm depends and reactivate requireNamspace code
 #    if(require('ergm',quietly=TRUE)){
       stats<-lapply(times,function(t){
-        net<-network.collapse(nd,at=t)
+        # check if we are collapsing at point or interval
+        if(aggregate.dur==0){
+          # collapse at a point
+          net<-network.collapse(nd,at=t)
+        } else {
+          # collapse over an interval  (slower)
+          net<-network.collapse(nd,onset=t,length=aggregate.dur)
+        }
         ergm::summary.statistics.formula(as.formula(paste('net',formula)))
       })
       
@@ -57,7 +70,7 @@ tErgmStats<-function(nd, formula,start, end, time.interval=1){
 }
 
 # function to provide a wrapper for calling sna measures
-tSnaStats<-function(nd, snafun,start, end, time.interval=1,...){
+tSnaStats<-function(nd, snafun,start, end, time.interval=1, aggregate.dur=0, rule='latest',...){
   
   if(!is.networkDynamic(nd)){
     stop("the first argument to tSnaStats must be a object of class 'networkDynamic'")
@@ -124,7 +137,13 @@ tSnaStats<-function(nd, snafun,start, end, time.interval=1,...){
   if(requireNamespace('sna',quietly=TRUE)){
     stats<-lapply(times,function(t){
       # extract the network for the time
-      net<-network.collapse(nd,at=t)
+      if(aggregate.dur==0){
+        # extract at a time point (slightly faster)
+        net<-network.collapse(nd,at=t)
+      } else {
+        # extract over an interval
+        net<-network.collapse(nd,onset=t,length=aggregate.dur)
+      }
       # sna functions can't handle zero-order networks
       if(network.size(net)==0){
         return(NA)

@@ -39,7 +39,15 @@ test_that('tSnaStats output as expected',{
   # test passing in function args (this would give error if FUN not passed in)
   tSnaStats(moodyContactSim,'centralization',FUN='degree',time.interval = 100)
   
+  # test aggregate dur
+  dyads<-network.dyadcount(moodyContactSim)
+  expect_equal(as.numeric(tSnaStats(moodyContactSim,'gden',start=0,end=400,time.interval = 100,aggregate.dur=100)),c(1/dyads,0,2/dyads,0,2/dyads))
+  # this one should miss all the edges
+  expect_equal(as.numeric(tSnaStats(moodyContactSim,'gden',start=0,end=400,time.interval = 100,aggregate.dur=0)), c(0,0,0,0,0))
+  
 })
+
+
 
 supported_sna_funs <-c('components',
                        'triad.census',
@@ -134,6 +142,10 @@ test_that('tSnaStats output as expected',{
   
   # error for non supported function
   expect_error(tErgmStats(moodyContactSim,'foo'),regexp = 'initialization function .+ not found.')
+  
+  # test aggregate dur
+  expect_equal(as.numeric(tErgmStats(moodyContactSim,'edges',time.interval = 100)),c(1,0,2,0,0,0,2,1))
+  expect_equal(as.numeric(tErgmStats(moodyContactSim,'edges',time.interval = 100,aggregate.dur=100)),c(1,2,2,0,2,4,8,4))
   
 })
 
