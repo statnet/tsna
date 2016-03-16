@@ -28,10 +28,10 @@ optional numeric time value at which evaluation should end (default is last obse
 optional numeric value giving time interval between evaluations (default is 1)
 }
  \item{aggregate.dur}{
-optional numeric value giving the duration of time bin to aggregate over for each evaluation (default 0). See \code{\link{collapse.network}}
+optional numeric value giving the duration of time bin to aggregate over for each evaluation (default 0). See \code{\link[networkDynamic]{collapse.network}}
  }
  \item{rule}{
- character vector describing rule to be used if multiple attribute values are encountred when using non-zero \code{aggregate.dur}. Default is \code{latest}. See \code{\link{collapse.network}} for details
+ character vector describing rule to be used if multiple attribute values are encountred when using non-zero \code{aggregate.dur}. Default is \code{latest}. See \code{\link[networkDynamic]{collapse.network}} for details
  }
 }
 \details{
