@@ -1,5 +1,6 @@
 ChangeLog for networkDynamic package
 v 0.2
+  - Added aggregate.dur parameters to the tErgmStats and tSnaStats wrapper functions so they can be used with networks having momentary ties
   - moved ergm package from Depends to Suggests now that ergm permits loading via requireNamespace
 v 0.1
   -  initial release of alpha version of the package
