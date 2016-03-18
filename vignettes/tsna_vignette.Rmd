@@ -28,7 +28,7 @@ knitr::opts_chunk$set(cache=FALSE)
 Skye Bender deMoll (skyebend@uw.edu) and the statnet team (http://statnet.org). Major contributions from James Moody, Martina Morris, Carter Butts, Steve Goodreau, Samuel Jenness, Li Wang and Kirk Li. 
 This work was supported by grant R01HD68395 from the National Institute of Health.
 
-**DRAFT** `r date()`
+Documentation compiled `r date()`
 
 -----
 

@@ -1,6 +1,6 @@
 Package: tsna
 Version: 0.2
-Date: 2016-03-15
+Date: 2016-03-18
 Title: Tools for Temporal Social Network Analysis
 Type: Package
 Authors@R: c(

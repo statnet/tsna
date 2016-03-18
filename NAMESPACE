@@ -1,5 +1,5 @@
 #useDynLib(tsna)
-importFrom(stats,aggregate)
+importFrom(stats,aggregate,runif)
 importFrom(stats,aggregate.data.frame)
 importFrom(grDevices,rainbow)
 importFrom(stats, rexp)
