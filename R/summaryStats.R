@@ -56,7 +56,7 @@ tErgmStats<-function(nd, formula, start, end, time.interval=1, aggregate.dur, ru
           net<-network.collapse(nd,at=t)
         } else {
           # collapse over an interval  (slower)
-          net<-network.collapse(nd,onset=t,length=aggregate.dur)
+          net<-network.collapse(nd,onset=t,length=aggregate.dur,rule=rule)
         }
         ergm::summary.statistics.formula(as.formula(paste('net',formula)))
       })
@@ -142,7 +142,7 @@ tSnaStats<-function(nd, snafun,start, end, time.interval=1, aggregate.dur=0, rul
         net<-network.collapse(nd,at=t)
       } else {
         # extract over an interval
-        net<-network.collapse(nd,onset=t,length=aggregate.dur)
+        net<-network.collapse(nd,onset=t,length=aggregate.dur, rule=rule)
       }
       # sna functions can't handle zero-order networks
       if(network.size(net)==0){
