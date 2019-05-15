@@ -35,7 +35,7 @@ optional numeric value giving the duration of time bin to aggregate over for eac
  }
 }
 \details{
- Constructs a set of times to evaluate based on \code{start},\code{end} and \code{time.interval}. Extracts a static network at each time point and uses it to construct a formula with \code{f}. The formula is passed to ergm's \code{\link[ergm]{summary.statistics.formula}} function to calculate the net value of the change statistics for each term in the formula.  The values of the statistics are grouped into a time-series object (class \code{\link{ts}}). The ts object can be thought of as a matrix such that each column is a formula term and each row is the time point at which the statistics were evaluated. See \code{\link[ergm]{ergm-terms}} for a list of available term statistics.  The \code{aggregate.dur} can be used to specifiy the duration of the aggregation bin, especially useful when working with continuous time networks.  Usually the \code{time.interval} would be set to the same value to ensure non-overlapping bins. 
+ Constructs a set of times to evaluate based on \code{start},\code{end} and \code{time.interval}. Extracts a static network at each time point and uses it to construct a formula with \code{f}. The formula is passed to ergm's \code{\link[ergm:summary_formula]{summary_formula}} function to calculate the net value of the change statistics for each term in the formula.  The values of the statistics are grouped into a time-series object (class \code{\link{ts}}). The ts object can be thought of as a matrix such that each column is a formula term and each row is the time point at which the statistics were evaluated. See \code{\link[ergm]{ergm-terms}} for a list of available term statistics.  The \code{aggregate.dur} can be used to specifiy the duration of the aggregation bin, especially useful when working with continuous time networks.  Usually the \code{time.interval} would be set to the same value to ensure non-overlapping bins. 
  
 Be aware that if the network's vertex activity dynamics imply cross-sectional networks of different sizes, the interpretation of the statistic at each time point may not be the same.  
 }
@@ -50,7 +50,7 @@ skyebend@uw.edu
 
 
 \seealso{
-See also \code{\link[ergm]{summary.statistics.formula}} and \code{\link[ergm]{ergm-terms}}. For more information about time-series objects, see \code{\link{ts}} and \code{\link{plot.ts}} for plotting quickly plotting timelines for multiple statistics.  The \code{summary.statistics.networkDynamic} function in the \code{tergm} package offers very similar functionality.
+See also \code{\link[ergm]{summary_formula}} and \code{\link[ergm]{ergm-terms}}. For more information about time-series objects, see \code{\link{ts}} and \code{\link{plot.ts}} for plotting quickly plotting timelines for multiple statistics.  The \code{summary_formula.networkDynamic} function in the \code{tergm} package offers very similar functionality.
 }
 \examples{
  \dontrun{
