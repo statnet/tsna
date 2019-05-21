@@ -58,7 +58,7 @@ tErgmStats<-function(nd, formula, start, end, time.interval=1, aggregate.dur, ru
           # collapse over an interval  (slower)
           net<-network.collapse(nd,onset=t,length=aggregate.dur,rule=rule)
         }
-        summary_formula(as.formula(paste('net',formula)))
+        ergm::summary_formula(as.formula(paste('net',formula)))
       })
       
 #    } else {
