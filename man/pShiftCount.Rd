@@ -74,7 +74,7 @@ For \code{output='final'} (the default), the output is a matrix with one row con
 }
 \references{
 Gibson, D.R. (2003) 'Participation Shifts: Order and Differentiation in Group Conversation'  
-Social Forces  81 (4): 1335-1380 \url{http://sf.oxfordjournals.org/content/81/4/1335.short}
+Social Forces  81 (4): 1335-1380 \code{https://doi.org/10.1353/sof.2003.0055}
 
 Carter T. Butts (2008). A Relational Event Framework for Social Action. Sociological Methodology, 38(1), 155--200.
 
