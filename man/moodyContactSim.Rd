@@ -25,7 +25,7 @@ The object has a \code{net.obs.period} attribute describing the observation mode
 }
 \source{
 Figure 5 of James Moody (2008) "Static Representations of Dynamic Networks" Duke Population Research Institute
-On-line Working Paper Series. \code{http://papers.ccpr.ucla.edu/papers/PWP-DUKE-2009-009/PWP-DUKE-2009-009.pdf}
+On-line Working Paper Series. \url{http://www.soc.duke.edu/~jmoody77/StatDyn_5.pdf}
 }
 
 \examples{
