@@ -761,7 +761,7 @@ Vincenzo Nicosia, John Tang, Cecilia Mascolo, Mirco Musolesi, Giovanni Russo, an
 
 
 Skye Bender-deMoll (2014). networkDynamicData: dynamic network datasets. R package version 0.1.0.
-  http://CRAN.R-project.org/package=networkDynamicData
+  https://CRAN.R-project.org/package=networkDynamicData
 
 B. Bui Xuan, Afonso Ferreira, Aubin Jarry. "Computing shortest, fastest, and foremost journeys
 in dynamic networks". RR-4589, 2002. https://hal.inria.fr/inria-00071996/document
@@ -771,17 +771,17 @@ Carter T. Butts, Ayn Leslie-Cook, Pavel N. Krivitsky and Skye Bender-deMoll (201
 Carter T. Butts (2008). A Relational Event Framework for Social Action. Sociological Methodology, 38(1), 155-200.
 
 Carter T. Butts (2014). sna: Tools for Social Network Analysis. R package version 2.3-2.
-  http://CRAN.R-project.org/package=sna
+  https://CRAN.R-project.org/package=sna
 
 Gibson, D.R. (2003) 'Participation Shifts: Order and Differentiation in Group Conversation' Social Forces 81 (4): 1335-1380 http://sf.oxfordjournals.org/content/81/4/1335.short
 
 
-Handcock M, Hunter D, Butts C, Goodreau S, Krivitsky P and Morris M (2015). _ergm: Fit, Simulate and Diagnose Exponential-Family Models for Networks_. The Statnet Project (<URL: http://www.statnet.org>). R package version 3.4.0, <URL: http://CRAN.R-project.org/package=ergm>.
+Handcock M, Hunter D, Butts C, Goodreau S, Krivitsky P and Morris M (2015). _ergm: Fit, Simulate and Diagnose Exponential-Family Models for Networks_. The Statnet Project (<URL: http://www.statnet.org>). R package version 3.4.0, <URL: https://CRAN.R-project.org/package=ergm>.
 
   
 Moody, James. (2002) "The Importance of Relationship Timing for Diffusion." *Social  Forces* 81:25-56
 
-Moody, James (2008) "Static Representations of Dynamic Networks" Duke Population Research Institute On-line Working Paper Series. http://papers.ccpr.ucla.edu/papers/PWP-DUKE-2009-009/PWP-DUKE-2009-009.pdf
+Moody, James (2008) "Static Representations of Dynamic Networks" Duke Population Research Institute On-line Working Paper Series. http://www.soc.duke.edu/~jmoody77/StatDyn_5.pdf
 
 
 
