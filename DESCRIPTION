@@ -1,6 +1,6 @@
 Package: tsna
-Version: 0.3.1
-Date: 2020-01-19
+Version: 0.3.2
+Date: 2021-04-21
 Title: Tools for Temporal Social Network Analysis
 Type: Package
 Authors@R: c(
@@ -10,7 +10,7 @@ Authors@R: c(
            )
 Depends: network (>= 1.13), networkDynamic (>= 0.9), R (>= 3.0)
 Imports: statnet.common
-Suggests: networkDynamicData, testthat, sna,  knitr, relevent, ergm (>= 3.10)
+Suggests: networkDynamicData, testthat, sna, knitr, rmarkdown, relevent, ergm (>= 3.10)
 Description: Temporal SNA tools for continuous- and discrete-time longitudinal networks having vertex, edge, and attribute dynamics stored in the 'networkDynamic' format. This work was supported by grant R01HD68395 from the National Institute of Health.
 License: GPL-3
 LazyLoad: yes
