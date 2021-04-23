@@ -1,4 +1,6 @@
 ChangeLog for networkDynamic package
+v 0.3.3
+  - CRAN-requested update to fix NOTEs about url redirects
 v 0.3.2
   - CRAN-requested updated to Suggests list to support knitr refactoring
 v 0.3.1
