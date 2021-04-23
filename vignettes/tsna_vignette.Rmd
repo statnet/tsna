@@ -25,7 +25,7 @@ knitr::opts_chunk$set(cache=FALSE)
 *package version `r packageDescription('tsna')$Version`  built `r packageDescription('tsna')$Date`*
 
 
-Skye Bender deMoll (skyebend@uw.edu) and the statnet team (http://statnet.org). Major contributions from James Moody, Martina Morris, Carter Butts, Steve Goodreau, Samuel Jenness, Li Wang and Kirk Li. 
+Skye Bender deMoll (skyebend@uw.edu) and the statnet team (https://statnet.org). Major contributions from James Moody, Martina Morris, Carter Butts, Steve Goodreau, Samuel Jenness, Li Wang and Kirk Li. 
 This work was supported by grant R01HD68395 from the National Institute of Health.
 
 Documentation compiled `r date()`
@@ -757,7 +757,7 @@ citation('tsna')
 
 ## Bibliography
 
-Vincenzo Nicosia, John Tang, Cecilia Mascolo, Mirco Musolesi, Giovanni Russo, and Vito Latora (2013) Graph Metrics for Temporal Networks. http://arxiv.org/pdf/1306.0493v1.pdf
+Vincenzo Nicosia, John Tang, Cecilia Mascolo, Mirco Musolesi, Giovanni Russo, and Vito Latora (2013) Graph Metrics for Temporal Networks. https://arxiv.org/pdf/1306.0493v1.pdf
 
 
 Skye Bender-deMoll (2014). networkDynamicData: dynamic network datasets. R package version 0.1.0.
@@ -766,17 +766,17 @@ Skye Bender-deMoll (2014). networkDynamicData: dynamic network datasets. R packa
 B. Bui Xuan, Afonso Ferreira, Aubin Jarry. "Computing shortest, fastest, and foremost journeys
 in dynamic networks". RR-4589, 2002. https://hal.inria.fr/inria-00071996/document
 
-Carter T. Butts, Ayn Leslie-Cook, Pavel N. Krivitsky and Skye Bender-deMoll (2015). networkDynamic: Dynamic Extensions for Network Objects. R package version 0.8. http://statnet.org
+Carter T. Butts, Ayn Leslie-Cook, Pavel N. Krivitsky and Skye Bender-deMoll (2015). networkDynamic: Dynamic Extensions for Network Objects. R package version 0.8. https://statnet.org
   
 Carter T. Butts (2008). A Relational Event Framework for Social Action. Sociological Methodology, 38(1), 155-200.
 
 Carter T. Butts (2014). sna: Tools for Social Network Analysis. R package version 2.3-2.
   https://CRAN.R-project.org/package=sna
 
-Gibson, D.R. (2003) 'Participation Shifts: Order and Differentiation in Group Conversation' Social Forces 81 (4): 1335-1380 http://sf.oxfordjournals.org/content/81/4/1335.short
+Gibson, D.R. (2003) 'Participation Shifts: Order and Differentiation in Group Conversation' Social Forces 81 (4): 1335-1380 https://academic.oup.com/sf/article-abstract/81/4/1335/2234586
 
 
-Handcock M, Hunter D, Butts C, Goodreau S, Krivitsky P and Morris M (2015). _ergm: Fit, Simulate and Diagnose Exponential-Family Models for Networks_. The Statnet Project (<URL: http://www.statnet.org>). R package version 3.4.0, <URL: https://CRAN.R-project.org/package=ergm>.
+Handcock M, Hunter D, Butts C, Goodreau S, Krivitsky P and Morris M (2015). _ergm: Fit, Simulate and Diagnose Exponential-Family Models for Networks_. The Statnet Project (<URL: https://statnet.org>). R package version 3.4.0, <URL: https://CRAN.R-project.org/package=ergm>.
 
   
 Moody, James. (2002) "The Importance of Relationship Timing for Diffusion." *Social  Forces* 81:25-56
