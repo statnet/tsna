@@ -3,7 +3,7 @@
 **FIXME: These need to be set up correctly.**
 [![Build Status](https://travis-ci.org/statnet/tsna.svg?branch=master)](https://travis-ci.org/statnet/tsna)
 [![Build Status](https://ci.appveyor.com/api/projects/status/8lxl3cm48ktlo9j3?svg=true)](https://ci.appveyor.com/project/statnet/tsna)
-[![rstudio mirror downloads](http://cranlogs.r-pkg.org/badges/tsna?color=2ED968)](http://cranlogs.r-pkg.org/badges/tsna)
+[![rstudio mirror downloads](https://cranlogs.r-pkg.org/badges/tsna?color=2ED968)](https://cranlogs.r-pkg.org/badges/tsna)
 [![cran version](https://www.r-pkg.org/badges/version/tsna)](https://cran.r-project.org/package=tsna)
 
 
