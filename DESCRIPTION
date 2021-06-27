@@ -14,5 +14,6 @@ Suggests: networkDynamicData, testthat, sna, knitr, rmarkdown, relevent, ergm (>
 Description: Temporal SNA tools for continuous- and discrete-time longitudinal networks having vertex, edge, and attribute dynamics stored in the 'networkDynamic' format. This work was supported by grant R01HD68395 from the National Institute of Health.
 License: GPL-3
 LazyLoad: yes
-URL: https://github.com/statnet/tsna
+URL: http://statnet.org/
+BugReports: https://github.com/statnet/tsna/issues
 VignetteBuilder: knitr
