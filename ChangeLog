@@ -1,4 +1,5 @@
 ChangeLog for networkDynamic package
+v 0.3.4 update to test to work with upcoming testthat upgrade
 v 0.3.3
   - CRAN-requested update to fix NOTEs about url redirects
 v 0.3.2
