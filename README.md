@@ -56,4 +56,10 @@ To facilitate open development of the package while giving the core developers a
 
 The intention is that all developments in `statnet/tsna-private` will eventually make their way into `statnet/tsna` and onto CRAN.
 
+
+## Code of Conduct
+
 Developers and Contributing Users to the Statnet Project should read https://statnet.github.io/private/ for information about the relationship between the public and the private repository and the workflows involved.
+
+Please note that the tsna project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
+
