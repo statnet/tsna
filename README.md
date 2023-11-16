@@ -3,7 +3,7 @@
 [![rstudio mirror downloads](https://cranlogs.r-pkg.org/badges/tsna?color=2ED968)](https://cranlogs.r-pkg.org/)
 [![cran version](https://www.r-pkg.org/badges/version/ergm)](https://cran.r-project.org/package=tsna)
 [![Coverage status](https://codecov.io/gh/statnet/ergm/branch/master/graph/badge.svg)](https://codecov.io/github/statnet/tsna?branch=master)
-[![R build status](https://github.com/statnet/ergm/workflows/R-CMD-check/badge.svg)](https://github.com/statnet/tsna/actions)
+[![R build status](https://github.com/statnet/tsna/workflows/R-CMD-check/badge.svg)](https://github.com/statnet/tsna/actions)
 
 This package provides tools for exploring and describing longitudinal network data.  It works with temporal network data that is stored as a `networkDynamic` object -- essentially a list in the `network` format in which elements also have an attached activity attribute, a matrix of spells indicating when vertex or edge is active. See the [networkDynamic](https://cran.r-project.org/web/packages/networkDynamic/index.html) package for more information on translating longitudinal network data from other formats (timed edge lists, lists of toggles, sets of matrices, etc).
 
