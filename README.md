@@ -42,20 +42,23 @@ The `tsna` package contains functions for calculating a range of descriptive sta
   - `plotPaths`
   - `timeProjectedNetwork`
 
-The package vignette (`browseVignettes(package='tsna')`) gives additional examples and illustrations of key concepts.  
-
-The `tsna` package is part of the [statnet](https://statnet.org/) software suite for network analysis written in **R**, and it is designed to work seamlessly with the other [packages](https://statnet.org/packages/) in this suite.  Examples of how `tsna` tools might be used in a network data analysis workflow can be found in our [Workshop materials](https://statnet.org/workshops/), in particular the [Temporal network tools](https://statnet.org/workshop-ndtv/) and [tergm](https://statnet.org/workshop-tergm/) workshops.
+The `tsna` package is part of the [statnet](https://statnet.org/) software suite for network analysis written in **R**, and it is designed to work seamlessly with the other [packages](https://statnet.org/packages/) in this suite.  
 
 The development of this software was supported by grant R01HD68395 from the National Institute of Health.
 
-## Public and Private repositories
+## Docs and examples
 
-To facilitate open development of the package while giving the core developers an opportunity to publish on their developments before opening them up for general use, this project comprises two repositories:
-* A public repository `statnet/tsna`
-* A private repository `statnet/tsna-private`
+The [package vignette](https://cran.r-project.org/web/packages/tsna/vignettes/tsna_vignette.html) (`browseVignettes(package='tsna')`) provides examples and illustrations of key concepts.  
 
-The intention is that all developments in `statnet/tsna-private` will eventually make their way into `statnet/tsna` and onto CRAN.
+Examples of how `tsna` tools might be used in a network data analysis workflow can be found in our [Workshop materials](https://statnet.org/workshops/), in particular the [Temporal network tools](https://statnet.org/workshop-ndtv/) and [tergm](https://statnet.org/workshop-tergm/) workshops.
 
+
+## License and attribution
+
+This software is distributed under the GPL-3 license. It is free, open source, and has the attribution requirements (GPL Section 7) at http://statnet.org/attribution
+
+To cite package ‘tsna’ in publications please use:
+Bender-deMoll S, Morris M (2021). _tsna: Tools for Temporal Social Network Analysis_. R package version  0.3.5, <https://CRAN.R-project.org/package=tsna>.
 
 ## Code of Conduct
 
