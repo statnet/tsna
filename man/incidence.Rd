@@ -6,7 +6,7 @@
 Counts or fractions of edge transitions in a networkDynamic object
 }
 \description{
-The functions \code{tEdgeFormation} and \code{tEdgeDissolution} evaluate a network object at multiple time points and return counts (or fractions) of the number of edges forming (edge onset at time point) and dissolving (edge terminus at time point). The counts are returned as numeric vector which is a time-series object (class \code{\link{ts}}). 
+The functions \code{tEdgeFormation} and \code{tEdgeDissolution} evaluate a network object at multiple time points and return counts (or fractions) of the number of edges forming (edge onset at time point) and dissolving (edge terminus at time point). The counts are returned as numeric vector which is a time-series object (class \code{\link[networkDynamic]{ts}}). 
 
 }
 \usage{
@@ -20,7 +20,7 @@ tEdgeDissolution(nd, start, end, time.interval = 1,
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{nd}{
- a \code{\link{networkDynamic}} object
+ a \code{\link[networkDynamic]{networkDynamic}} object
 }
   \item{start}{
 optional numeric time value at which evaluation should start (default is first observed time)

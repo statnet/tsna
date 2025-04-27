@@ -13,7 +13,7 @@ tDegree(nd, start, end, time.interval = 1, cmode = c("freeman", "indegree", "out
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{nd}{
-the \code{\link{networkDynamic}} object to be evaluated
+the \code{\link[networkDynamic]{networkDynamic}} object to be evaluated
 }
   \item{start}{
 optional numeric time value at which evaluation should start (default is first observed time)
