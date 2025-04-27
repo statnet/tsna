@@ -44,17 +44,17 @@ option describing the unit of analysis that the durations or counts should be ag
  numeric vector of vertex ids to consider. 
 }
   \item{start}{
-optional numeric value to be used to censor onset times. (not yet supported for vertices, must use \code{\link{net.obs.period}} instead.)
+optional numeric value to be used to censor onset times. (not yet supported for vertices, must use \code{\link[networkDynamic]{net.obs.period}} instead.)
 }
   \item{end}{
-optional numeric value to be used to censor terminus times. (not yet supported for vertices, must use \code{\link{net.obs.period}} instead.)
+optional numeric value to be used to censor terminus times. (not yet supported for vertices, must use \code{\link[networkDynamic]{net.obs.period}} instead.)
 }
   \item{active.default}{
 logial, should edges or vertices with no timing information be considered always active by default?
 }
 }
 \details{
- The function sums the durations of edge or vertex events or,in order to provide a useful metric for networks having zero-duration events, simply counts them.  It is implemented by wrapping a call to \code{\link{as.data.frame.networkDynamic}} or \code{\link{get.vertex.activity}}. In many cases the output of the function will be fed to another statistical summary function like \code{summary} or \code{hist}. The level of aggregation can be selected by setting the subject to either \code{spells}, \code{edges}, or \code{dyads}.
+ The function sums the durations of edge or vertex events or,in order to provide a useful metric for networks having zero-duration events, simply counts them.  It is implemented by wrapping a call to \code{\link[networkDynamic]{as.data.frame.networkDynamic}} or \code{\link[networkDynamic]{get.vertex.activity}}. In many cases the output of the function will be fed to another statistical summary function like \code{summary} or \code{hist}. The level of aggregation can be selected by setting the subject to either \code{spells}, \code{edges}, or \code{dyads}.
  
 Note that the 'observed' durations may not match the 'true' (statistically estimated) durations for a network due to the censoring of edges/vertices.
 }
@@ -71,7 +71,7 @@ This is an early implementation of the function and its name and arguments are s
 
 
 \seealso{
-See also \code{\link{as.data.frame.networkDynamic}}
+See also \code{\link[networkDynamic]{as.data.frame.networkDynamic}}
 }
 \examples{
 

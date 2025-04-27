@@ -47,20 +47,20 @@ vector of valid colors (possibly transparent) to be used for each path. Default 
   \item{\dots}{additional arguments to be passed to \code{\link[network]{plot.network}} and \code{\link{plot.tPath}}.
 }
 \item{coord}{optional numeric matrix of coordinates for positioning vertices. See \code{\link{plot.network}}}
-\item{edge.col}{color for drawing edges (paths). See \code{\link{plot.network}}}
-\item{edge.label.col}{color for edge labels. Default to same color as edges. See \code{\link{plot.network}}} 
-\item{edge.lwd}{numeric expansion factor for edge line widths. See \code{\link{plot.network}}}
-\item{edge.label.cex }{numeric expansion factor for edge labels. See \code{\link{plot.network}}} 
-\item{displaylabels}{logical, should vertex labels be included on the plot? See \code{\link{plot.network}}} 
-\item{displayisolates}{logical, should isolated vertices be included in the plot? See \code{\link{plot.network}}} 
-\item{jitter}{adds random noise to positions (disabled by default) See \code{\link{plot.network}}}
-\item{vertex.lwd}{Vertex border line with. See \code{\link{plot.network}}} 
-\item{vertex.cex}{Vertex expansion factor. Default is to scale up the origin vertex for the path, and not draw the other vertices. See \code{\link{plot.network}}} 
-\item{vertex.col}{Color for vertices. Default is to leave them un-colored. See \code{\link{plot.network}}}
+\item{edge.col}{color for drawing edges (paths). See \code{\link[network]{plot.network}}}
+\item{edge.label.col}{color for edge labels. Default to same color as edges. See \code{\link[network]{plot.network}}} 
+\item{edge.lwd}{numeric expansion factor for edge line widths. See \code{\link[network]{plot.network}}}
+\item{edge.label.cex }{numeric expansion factor for edge labels. See \code{\link[network]{plot.network}}} 
+\item{displaylabels}{logical, should vertex labels be included on the plot? See \code{\link[network]{plot.network}}} 
+\item{displayisolates}{logical, should isolated vertices be included in the plot? See \code{\link[network]{plot.network}}} 
+\item{jitter}{adds random noise to positions (disabled by default) See \code{\link[network]{plot.network}}}
+\item{vertex.lwd}{Vertex border line with. See \code{\link[network]{plot.network}}} 
+\item{vertex.cex}{Vertex expansion factor. Default is to scale up the origin vertex for the path, and not draw the other vertices. See \code{\link[network]{plot.network}}} 
+\item{vertex.col}{Color for vertices. Default is to leave them un-colored. See \code{\link[network]{plot.network}}}
 
 }
 \details{
-\code{plotPaths} plots the \code{networkDynamic} object using the normal \code{plot.network} function and \code{...} arguments.  Then calls \code{\link{plot.tPath}} for each \code{\link{tPath}} object in \code{paths} to over-plot the edges of path onto the network plot using the corresponding \code{path.col} color.  Use of semi-transparent colors can help (somewhat) improve readability when paths overlap on the same edges.  
+\code{plotPaths} plots the \code{networkDynamic} object using the normal \code{plot.network} function and \code{...} arguments.  Then calls \code{\link[network]{plot.tPath}} for each \code{\link{tPath}} object in \code{paths} to over-plot the edges of path onto the network plot using the corresponding \code{path.col} color.  Use of semi-transparent colors can help (somewhat) improve readability when paths overlap on the same edges.  
 
 \code{plot.tPath} plots the path information encoded in a single \code{\link{tPath}} object.  It first creates a network using \code{\link{as.network.tPath}} and then calls \code{\link[network]{plot.network}}  with suitable defaults for drawing (or over-drawing) the path (doesn't display isolated vertices, draws times as edge labels, draws a color around the source vertex, etc. )
 }

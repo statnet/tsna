@@ -15,7 +15,7 @@ tiedDuration(nd, mode = c("duration", "counts"),
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{nd}{
- a \code{\link{networkDynamic}} object describing the network for which durations should be calculated
+ a \code{\link[networkDynamic]{networkDynamic}} object describing the network for which durations should be calculated
 }
   \item{mode}{
    either \code{"duration"} or \code{"count"} indicating if the sum of edge durations or the count of the number of edge events should be returned

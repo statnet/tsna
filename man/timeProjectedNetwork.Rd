@@ -15,7 +15,7 @@ timeProjectedNetwork(nd, start = NULL, end = NULL,
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{nd}{
- the \code{\link{networkDynamic}} object for which the time projected network should be constructed
+ the \code{\link[networkDynamic]{networkDynamic}} object for which the time projected network should be constructed
 }
   \item{start}{
 optional numeric start time to be use as lower bound for binning interval (default is what is observed in network)
@@ -33,22 +33,22 @@ A numeric vector containing the onset times of the networks to be extracted. Thi
 A numeric vector containing the terminus times of the networks to be extracted. This must be accompanied by \code{onsets} of the same length.
 }
   \item{\dots}{
-Additional arguments to \code{\link{network.collapse}} (such as \code{rule},\code{active.default}
+Additional arguments to \code{\link[networkDynamic]{network.collapse}} (such as \code{rule},\code{active.default}
 }
 }
 \details{
-Uses \code{\link{network.collapse}} to bin the \code{nd} network into a list of static networks, aggregates them into a new network with size equal to original network size X number of slices.  To assist with plotting, an edge attribute \code{edge.type} is added to all of the edges, having the value \code{'within_slice'} for edges existing the the original network and \code{'identity_arc'} for edges linking the vertices in time.  Vertex attributes (possibly collapsed TEAs) are copied from the original network to the projected network.  Because of the assumed directionality of time, the output network will always be directed, with the identity arcs pointing forward in time.  If the input network is undirected, two corresponding directed edges (one in each direction) will be added in the projected network. Edge attributes (possibly collapsed TEAs) will be copied from the original network to the corresponding  within-slice edges in the projected network.   
+Uses \code{\link[networkDynamic]{network.collapse}} to bin the \code{nd} network into a list of static networks, aggregates them into a new network with size equal to original network size X number of slices.  To assist with plotting, an edge attribute \code{edge.type} is added to all of the edges, having the value \code{'within_slice'} for edges existing the the original network and \code{'identity_arc'} for edges linking the vertices in time.  Vertex attributes (possibly collapsed TEAs) are copied from the original network to the projected network.  Because of the assumed directionality of time, the output network will always be directed, with the identity arcs pointing forward in time.  If the input network is undirected, two corresponding directed edges (one in each direction) will be added in the projected network. Edge attributes (possibly collapsed TEAs) will be copied from the original network to the corresponding  within-slice edges in the projected network.   
 
 Vertex activity is currently ignored in the projected network (\code{retain.all.vertices} is set to TRUE internally to force all time slice networks to have the same size).
 
-As with all discrete representations of dynamic processes, the time projected graph is an approximation and may over- or under-represent some transmission potential depending on the choice of bin size. Binning is performed by \code{\link{get.networks}}, so will use its defaults if not specified.
+As with all discrete representations of dynamic processes, the time projected graph is an approximation and may over- or under-represent some transmission potential depending on the choice of bin size. Binning is performed by \code{\link[networkDynamic]{get.networks}}, so will use its defaults if not specified.
 
 }
 
 
 
 \value{
-a \code{\link{network}} object that encodes a discrete time representation of the temporal evolution of the input \code{\link{networkDynamic}} object. 
+a \code{\link[networkDynamic]{network}} object that encodes a discrete time representation of the temporal evolution of the input \code{\link[networkDynamic]{networkDynamic}} object. 
 }
 \references{ 
 James Moody (2015) Static Representations of Dynamic Networks (DRAFT)
@@ -64,7 +64,7 @@ Skye Bender-deMoll (skyebend@uw.edu), James Moody
 
 
 \seealso{
-\code{\link{network.collapse}}
+\code{\link[networkDynamic]{network.collapse}}
 }
 \examples{
 data(moodyContactSim)

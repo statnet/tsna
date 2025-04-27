@@ -22,7 +22,7 @@ tEdgeDensity(nd,mode=c('duration','event'),
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{nd}{
- a \code{\link{networkDynamic}} object to evaluate density on
+ a \code{\link[networkDynamic]{networkDynamic}} object to evaluate density on
   }
   \item{mode}{
   option indicating if \code{'duration'} of edge spells should be considered or only the \code{'event'} count (for networks in which events have zero-durations)
