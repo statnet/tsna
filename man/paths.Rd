@@ -104,13 +104,12 @@ Unpublished discussions with James Moody and Martina Morris and the statnet team
 
 Useful background information (for a slightly different algorithm) can be found in:
 B. Bui Xuan, Afonso Ferreira, Aubin Jarry. "Computing shortest, fastest, and foremost journeys
-in dynamic networks." RR-4589, 2002. https://hal.inria.fr/inria-00071996/document
+in dynamic networks." RR-4589, 2002. https://inria.hal.science/inria-00071996/document
 
 B. Bui Xuan, Afonso Ferreira, Aubin Jarry. Evolving graphs and least cost journeys in dynamic
 networks. WiOpt'03: Modeling and Optimization in Mobile, Ad Hoc and Wireless Networks,
 Mar 2003, Sophia Antipolis, France. 10 p., 2003
-https://hal.inria.fr/inria-00466676/document
-
+https://inria.hal.science/inria-00466676/document
 }
 \author{
 Skye Bender-deMoll

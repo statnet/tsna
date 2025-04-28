@@ -48,7 +48,7 @@ As with all discrete representations of dynamic processes, the time projected gr
 
 
 \value{
-a \code{\link[networkDynamic]{network}} object that encodes a discrete time representation of the temporal evolution of the input \code{\link[networkDynamic]{networkDynamic}} object. 
+a \code{\link[network]{network}} object that encodes a discrete time representation of the temporal evolution of the input \code{\link[networkDynamic]{networkDynamic}} object. 
 }
 \references{ 
 James Moody (2015) Static Representations of Dynamic Networks (DRAFT)
