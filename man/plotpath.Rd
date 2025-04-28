@@ -60,7 +60,7 @@ vector of valid colors (possibly transparent) to be used for each path. Default 
 
 }
 \details{
-\code{plotPaths} plots the \code{networkDynamic} object using the normal \code{plot.network} function and \code{...} arguments.  Then calls \code{\link[network]{plot.tPath}} for each \code{\link{tPath}} object in \code{paths} to over-plot the edges of path onto the network plot using the corresponding \code{path.col} color.  Use of semi-transparent colors can help (somewhat) improve readability when paths overlap on the same edges.  
+\code{plotPaths} plots the \code{networkDynamic} object using the normal \code{plot.network} function and \code{...} arguments.  Then calls \code{\link{plot.tPath}} for each \code{\link{tPath}} object in \code{paths} to over-plot the edges of path onto the network plot using the corresponding \code{path.col} color.  Use of semi-transparent colors can help (somewhat) improve readability when paths overlap on the same edges.  
 
 \code{plot.tPath} plots the path information encoded in a single \code{\link{tPath}} object.  It first creates a network using \code{\link{as.network.tPath}} and then calls \code{\link[network]{plot.network}}  with suitable defaults for drawing (or over-drawing) the path (doesn't display isolated vertices, draws times as edge labels, draws a color around the source vertex, etc. )
 }

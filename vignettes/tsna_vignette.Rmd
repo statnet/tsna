@@ -757,14 +757,14 @@ citation('tsna')
 
 ## Bibliography
 
-Vincenzo Nicosia, John Tang, Cecilia Mascolo, Mirco Musolesi, Giovanni Russo, and Vito Latora (2013) Graph Metrics for Temporal Networks. https://arxiv.org/pdf/1306.0493v1.pdf
+Vincenzo Nicosia, John Tang, Cecilia Mascolo, Mirco Musolesi, Giovanni Russo, and Vito Latora (2013) Graph Metrics for Temporal Networks. http://arxiv.org/pdf/1306.0493v1.pdf
 
 
 Skye Bender-deMoll (2014). networkDynamicData: dynamic network datasets. R package version 0.1.0.
   https://CRAN.R-project.org/package=networkDynamicData
 
 B. Bui Xuan, Afonso Ferreira, Aubin Jarry. "Computing shortest, fastest, and foremost journeys
-in dynamic networks". RR-4589, 2002. https://hal.inria.fr/inria-00071996/document
+in dynamic networks". RR-4589, 2002. https://inria.hal.science/inria-00071996/document
 
 Carter T. Butts, Ayn Leslie-Cook, Pavel N. Krivitsky and Skye Bender-deMoll (2015). networkDynamic: Dynamic Extensions for Network Objects. R package version 0.8. https://statnet.org
   

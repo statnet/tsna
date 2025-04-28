@@ -69,6 +69,6 @@ These functions can be used to compute distributions of (observed) activity dura
 
 
 \source{
-This package is part of the statnet suite of packages \url{http://statnet.org}.  For citation information see \code{citation('tsna')}.
+This package is part of the statnet suite of packages \url{https://statnet.org}.  For citation information see \code{citation('tsna')}.
 }
 
