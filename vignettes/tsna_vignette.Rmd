@@ -757,7 +757,7 @@ citation('tsna')
 
 ## Bibliography
 
-Vincenzo Nicosia, John Tang, Cecilia Mascolo, Mirco Musolesi, Giovanni Russo, and Vito Latora (2013) Graph Metrics for Temporal Networks. http://arxiv.org/pdf/1306.0493v1.pdf
+Vincenzo Nicosia, John Tang, Cecilia Mascolo, Mirco Musolesi, Giovanni Russo, and Vito Latora (2013) Graph Metrics for Temporal Networks. http://arxiv.org/pdf/1306.0493v1
 
 
 Skye Bender-deMoll (2014). networkDynamicData: dynamic network datasets. R package version 0.1.0.
