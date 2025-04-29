@@ -46,7 +46,7 @@ vector of valid colors (possibly transparent) to be used for each path. Default 
  \item{x}{object (assumed to be \code{\link{tPath}}) to be plotted on top of a static aggregate network plot}
   \item{\dots}{additional arguments to be passed to \code{\link[network]{plot.network}} and \code{\link{plot.tPath}}.
 }
-\item{coord}{optional numeric matrix of coordinates for positioning vertices. See \code{\link{plot.network}}}
+\item{coord}{optional numeric matrix of coordinates for positioning vertices. See \code{\link[network]{plot.network}}}
 \item{edge.col}{color for drawing edges (paths). See \code{\link[network]{plot.network}}}
 \item{edge.label.col}{color for edge labels. Default to same color as edges. See \code{\link[network]{plot.network}}} 
 \item{edge.lwd}{numeric expansion factor for edge line widths. See \code{\link[network]{plot.network}}}
