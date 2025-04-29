@@ -1,4 +1,5 @@
 ChangeLog for networkDynamic package
+v 0.3.6 update doc links and urls as requested by cran
 v 0.3.5 update doc links as requested by cran
 v 0.3.4 update to test to work with upcoming testthat upgrade
 v 0.3.3
